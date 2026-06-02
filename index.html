@@ -300,6 +300,45 @@ header{
 footer{ text-align:center; padding:18px 0 28px; }
 footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft); margin:0; transform:rotate(-1.5deg); }
 
+/* ---------- Counters (tally) ---------- */
+.count-title{
+  font-family:var(--font-hand); font-size:1.5rem; color:var(--ink-soft);
+  text-align:center; margin:22px 0 2px; transform:rotate(-1deg);
+}
+.counters{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:4px 0 4px; }
+.counter{
+  position:relative; background:var(--paper);
+  border:3px solid var(--line); border-radius:var(--r-card);
+  padding:13px 12px 15px; text-align:center;
+  box-shadow:5px 6px 0 var(--shadow), inset 0 0 0 1px rgba(255,255,255,.25);
+}
+.counter:nth-child(1){ transform:rotate(-0.5deg); }
+.counter:nth-child(2){ transform:rotate(0.5deg); }
+.counter::after{
+  content:""; position:absolute; left:-3px; top:14px; bottom:14px; width:6px;
+  background:var(--accent); border:2px solid var(--line); border-radius:6px;
+}
+.c-top{ display:flex; align-items:center; justify-content:center; gap:6px; margin-bottom:8px; }
+.c-emoji{ font-size:1.15rem; }
+.c-name{ font-family:var(--font-display); font-weight:800; font-size:1.05rem; letter-spacing:-.01em; }
+.c-controls{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.count{
+  font-family:var(--font-display); font-weight:900; font-size:2.3rem; line-height:1;
+  font-variant-numeric:tabular-nums; min-width:1.6ch; display:inline-block; color:var(--ink);
+}
+.count.pop{ animation:pop .45s var(--bounce); }
+.cbtn{
+  appearance:none; cursor:pointer; width:44px; height:44px; flex:0 0 44px;
+  border:2.5px solid var(--line); border-radius:12px;
+  background:var(--accent); color:var(--paper);
+  font-size:1.5rem; font-weight:800; line-height:1;
+  box-shadow:3px 3px 0 var(--shadow); display:grid; place-items:center;
+  transition:transform .1s var(--ease-out), box-shadow .1s var(--ease-out), opacity .15s;
+}
+.cbtn:active{ transform:translate(3px,3px); box-shadow:0 0 0 var(--shadow); }
+.cbtn.minus{ background:var(--paper); color:var(--ink); }
+.cbtn.minus[disabled]{ opacity:.35; pointer-events:none; }
+
 /* ---------- Responsive ---------- */
 @media (max-width:600px){
   :root{ --col-template:60px repeat(7, 1fr); --bar-h:28px; }
@@ -345,6 +384,8 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
       <button class="navbtn" id="nextWeek" aria-label="Semana siguiente">›</button>
     </div>
     <div id="cards"></div>
+    <p class="count-title">conteo de hoy</p>
+    <div id="counters" class="counters"></div>
     <footer><p>tap para llenar · tap para vaciar</p></footer>
   </section>
 
@@ -369,8 +410,14 @@ const LS_KEY = 'roge_checks_v1';
 
 const TABLITAS = [
   { id:'dientitos',   title:'Dientitos',   subActivities:['Mañana','Tarde','Noche'],            accent:'var(--teal)' },
-  { id:'salud',       title:'Salud',       subActivities:['Yoga','Skincare','Caminar'],          accent:'var(--orange)' },
+  { id:'salud',       title:'Salud',       subActivities:['Yoga','Skincare','Caminar','Claritin','Magnesio'], accent:'var(--orange)' },
   { id:'casa_limpia', title:'Casa Limpia', subActivities:['Cocina','Cuarto','Baño','Oficina'],   accent:'var(--lavender)' },
+];
+
+// Counter-type trackers (tally per day): + / - buttons, totals in Insights.
+const COUNTERS = [
+  { id:'stogies',  label:'Stogies',  emoji:'🚬', accent:'var(--gold)' },
+  { id:'porritos', label:'Porritos', emoji:'🌿', accent:'var(--teal)' },
 ];
 
 const DAY_HEADERS = ['J','V','S','D','L','Ma','Mi']; // Thu → Wed
@@ -407,7 +454,8 @@ const state = {
   mode: 'local',         // 'supabase' | 'local'
   weekOffset: 0,
   tab: 'tracker',
-  prevStreaks: {},       // for pop animation
+  prevStreaks: {},       // for streak pop animation
+  prevCounts: {},        // for counter pop animation
 };
 const key = (t,s,d) => t + '|' + s + '|' + d;
 
@@ -628,6 +676,89 @@ function refreshStreak(tablitaId){
 }
 
 /* =====================================================================
+   COUNTERS  (tally per day)
+   Stored in the same checks table under tablita='conteo'. Each tap = one
+   row with a unique sub_activity ("stogies#<token>") so the day's count is
+   just the number of matching rows — no schema change, fallback works the
+   same. Increment inserts a row; decrement deletes the most recent one.
+   ===================================================================== */
+const COUNTER_TABLITA = 'conteo';
+function counterKeys(itemId, d){
+  const pre = COUNTER_TABLITA + '|' + itemId + '#';
+  const suf = '|' + d;
+  const out = [];
+  for(const k of state.checks){ if(k.startsWith(pre) && k.endsWith(suf)) out.push(k); }
+  return out;
+}
+const counterCount = (itemId, d) => counterKeys(itemId, d).length;
+
+async function counterInc(itemId){
+  const d = iso(startOfToday());
+  const sub = itemId + '#' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+  const k = key(COUNTER_TABLITA, sub, d);
+  state.checks.add(k); saveLocal(); paintCounter(itemId);
+  if(state.tab === 'insights') renderInsights();
+  if(state.mode !== 'supabase') return;
+  try{ await sbInsert(COUNTER_TABLITA, sub, d); }
+  catch(e){
+    state.checks.delete(k); saveLocal(); paintCounter(itemId);
+    state.mode = 'local'; updateModePill(); showToast('Sin conexión — guardado local');
+  }
+}
+async function counterDec(itemId){
+  const d = iso(startOfToday());
+  const keys = counterKeys(itemId, d);
+  if(keys.length === 0) return;
+  const k = keys[keys.length - 1];
+  const sub = k.split('|')[1];
+  state.checks.delete(k); saveLocal(); paintCounter(itemId);
+  if(state.tab === 'insights') renderInsights();
+  if(state.mode !== 'supabase') return;
+  try{ await sbDelete(COUNTER_TABLITA, sub, d); }
+  catch(e){
+    state.checks.add(k); saveLocal(); paintCounter(itemId);
+    state.mode = 'local'; updateModePill(); showToast('Sin conexión — guardado local');
+  }
+}
+
+function renderCounters(){
+  const wrap = document.getElementById('counters');
+  wrap.innerHTML = '';
+  COUNTERS.forEach(c => {
+    const d = iso(startOfToday());
+    const n = counterCount(c.id, d);
+    state.prevCounts[c.id] = n;
+    const box = document.createElement('div');
+    box.className = 'counter';
+    box.style.setProperty('--accent', c.accent);
+    box.innerHTML = `
+      <div class="c-top"><span class="c-emoji">${c.emoji}</span><span class="c-name">${c.label}</span></div>
+      <div class="c-controls">
+        <button class="cbtn minus" aria-label="Restar ${c.label}" ${n===0?'disabled':''}>−</button>
+        <span class="count" id="count-${c.id}">${n}</span>
+        <button class="cbtn plus" aria-label="Sumar ${c.label}">+</button>
+      </div>`;
+    box.querySelector('.plus').addEventListener('click', ()=> counterInc(c.id));
+    box.querySelector('.minus').addEventListener('click', ()=> counterDec(c.id));
+    wrap.appendChild(box);
+  });
+}
+
+function paintCounter(itemId){
+  const n = counterCount(itemId, iso(startOfToday()));
+  const el = document.getElementById('count-' + itemId);
+  if(!el) return;
+  el.textContent = n;
+  if(n > (state.prevCounts[itemId] || 0)){
+    el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
+  }
+  state.prevCounts[itemId] = n;
+  // toggle the minus button disabled state
+  const minus = el.parentElement.querySelector('.minus');
+  if(minus) minus.toggleAttribute('disabled', n === 0);
+}
+
+/* =====================================================================
    RENDER — INSIGHTS  (current displayed week)
    ===================================================================== */
 function renderInsights(){
@@ -658,6 +789,21 @@ function renderInsights(){
       </div>`;
     wrap.appendChild(c);
   });
+
+  // Counter totals for the displayed week
+  const cc = document.createElement('div');
+  cc.className = 'ins-card';
+  cc.style.setProperty('--accent', 'var(--gold)');
+  const boxes = COUNTERS.map(c => {
+    let total = 0;
+    dates.forEach(d => total += counterCount(c.id, d));
+    return `<div class="streak-box"><div class="big">${total}</div><div class="cap">${c.emoji} ${c.label}</div></div>`;
+  }).join('');
+  cc.innerHTML = `
+    <div class="ihead"><span class="swatch"></span><h3>Conteo</h3></div>
+    <div class="streaks-row">${boxes}</div>
+    <div class="top" style="margin-top:12px"><span class="k" style="font-size:.78rem">total de la semana</span></div>`;
+  wrap.appendChild(cc);
 
   // animate bars in next frame
   requestAnimationFrame(()=> requestAnimationFrame(()=>{
@@ -707,7 +853,7 @@ function bindUI(){
   document.getElementById('todayBtn').addEventListener('click', ()=>{ if(state.weekOffset!==0){ state.weekOffset=0; renderWeekNav(); renderCards(); if(state.tab==='insights') renderInsights(); } });
 
   // keep "today" accurate if the app is left open past midnight
-  window.addEventListener('focus', ()=>{ renderWeekNav(); renderCards(); if(state.tab==='insights') renderInsights(); });
+  window.addEventListener('focus', ()=>{ renderWeekNav(); renderCards(); renderCounters(); if(state.tab==='insights') renderInsights(); });
 }
 
 /* =====================================================================
@@ -718,6 +864,7 @@ async function boot(){
   await initData();
   renderWeekNav();
   renderCards();
+  renderCounters();
   document.getElementById('loader').classList.add('hide');
 }
 boot();
