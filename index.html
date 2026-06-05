@@ -314,6 +314,9 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
 }
 .counter:nth-child(1){ transform:rotate(-0.5deg); }
 .counter:nth-child(2){ transform:rotate(0.5deg); }
+.counter:nth-child(3){ transform:rotate(-0.4deg); }
+/* a lone last counter (odd count) spans the full width instead of a half */
+.counter:last-child:nth-child(odd){ grid-column:1 / -1; }
 .counter::after{
   content:""; position:absolute; left:-3px; top:14px; bottom:14px; width:6px;
   background:var(--accent); border:2px solid var(--line); border-radius:6px;
@@ -418,6 +421,7 @@ const TABLITAS = [
 const COUNTERS = [
   { id:'stogies',  label:'Stogies',  emoji:'🚬', accent:'var(--gold)' },
   { id:'porritos', label:'Porritos', emoji:'🌿', accent:'var(--teal)' },
+  { id:'llantos',  label:'Llantos',  emoji:'😢', accent:'var(--lavender)' },
 ];
 
 const DAY_HEADERS = ['J','V','S','D','L','Ma','Mi']; // Thu → Wed
