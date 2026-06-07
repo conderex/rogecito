@@ -316,9 +316,9 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
   padding:13px 12px 15px; text-align:center;
   box-shadow:5px 6px 0 var(--shadow), inset 0 0 0 1px rgba(255,255,255,.25);
 }
-.counter:nth-child(1){ transform:rotate(-0.5deg); }
-.counter:nth-child(2){ transform:rotate(0.5deg); }
-.counter:nth-child(3){ transform:rotate(-0.4deg); }
+/* playful tilt that scales to any number of counters */
+.counter:nth-child(odd){ transform:rotate(-0.5deg); }
+.counter:nth-child(even){ transform:rotate(0.5deg); }
 /* a lone last counter (odd count) spans the full width instead of a half */
 .counter:last-child:nth-child(odd){ grid-column:1 / -1; }
 .counter::after{
@@ -412,12 +412,17 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
 @keyframes popin{ from{ transform:scale(.9); opacity:.4; } to{ transform:scale(1); opacity:1; } }
 .modal h3{ font-family:var(--font-display); font-weight:800; font-size:1.25rem; margin:0 0 12px; letter-spacing:-.01em; }
 .modal-msg{ font-size:.98rem; line-height:1.45; margin:2px 0 16px; color:var(--ink); }
+.modal-fields{ display:flex; gap:9px; margin-bottom:12px; }
 .modal-input{
-  width:100%; box-sizing:border-box; font-family:var(--font-body); font-size:1.05rem;
+  flex:1; width:100%; box-sizing:border-box; font-family:var(--font-body); font-size:1.05rem;
   padding:11px 12px; border:2.5px solid var(--line); border-radius:11px;
-  background:#fff8ea; color:var(--ink); margin-bottom:12px;
+  background:#fff8ea; color:var(--ink);
 }
-.modal-input:focus{ outline:none; border-color:var(--accent); }
+.modal-emoji{
+  flex:0 0 58px; width:58px; box-sizing:border-box; text-align:center; font-size:1.4rem;
+  padding:11px 4px; border:2.5px solid var(--line); border-radius:11px; background:#fff8ea; color:var(--ink);
+}
+.modal-input:focus, .modal-emoji:focus{ outline:none; border-color:var(--accent); }
 .swatches{ display:flex; gap:9px; margin:2px 0 16px; }
 .sw{
   appearance:none; cursor:pointer; width:38px; height:38px; border-radius:50%;
@@ -483,7 +488,7 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
       <button class="navbtn" id="nextWeek" aria-label="Semana siguiente">›</button>
     </div>
     <div id="cards"></div>
-    <p class="count-title">conteo de hoy</p>
+    <p class="count-title" id="countTitle">conteo de hoy</p>
     <div id="counters" class="counters"></div>
     <footer><p>tap para llenar · tap para vaciar</p></footer>
   </section>
@@ -508,6 +513,7 @@ const REST_BASE = SUPABASE_URL + '/rest/v1/';
 const REST = REST_BASE + 'checks';
 const LS_KEY = 'roge_checks_v1';
 const LS_CONFIG = 'roge_config_v1';
+const LS_COUNTERS = 'roge_counters_v1';
 
 const TABLITAS_DEFAULT = [
   { id:'dientitos',   title:'Dientitos',   accent:'var(--teal)',     sort_order:0, archived:false, subActivities:[
@@ -521,10 +527,11 @@ const TABLITAS_DEFAULT = [
 const PALETTE = ['var(--teal)','var(--orange)','var(--lavender)','var(--gold)','var(--pink)'];
 
 // Counter-type trackers (tally per day): + / - buttons, totals in Insights.
-const COUNTERS = [
-  { id:'stogies',  label:'Stogies',  emoji:'🚬', accent:'var(--gold)' },
-  { id:'porritos', label:'Porritos', emoji:'🌿', accent:'var(--teal)' },
-  { id:'llantos',  label:'Llantos',  emoji:'😢', accent:'var(--lavender)' },
+// Editable & DB-backed; this is the offline/first-run fallback.
+const COUNTERS_DEFAULT = [
+  { id:'stogies',  label:'Stogies',  emoji:'🚬', accent:'var(--gold)',     sort_order:0, archived:false },
+  { id:'porritos', label:'Porritos', emoji:'🌿', accent:'var(--teal)',     sort_order:1, archived:false },
+  { id:'llantos',  label:'Llantos',  emoji:'😢', accent:'var(--lavender)', sort_order:2, archived:false },
 ];
 
 const DAY_HEADERS = ['J','V','S','D','L','Ma','Mi']; // Thu → Wed
@@ -567,6 +574,7 @@ function weekIsLocked(offset){ return weekDates(offset).every(d => isLocked(iso(
 const state = {
   checks: new Set(),     // "tablita|sub_activity|YYYY-MM-DD"
   config: [],            // tablitas + their subActivities (from Supabase)
+  counters: [],          // counter-type trackers (from Supabase)
   mode: 'local',         // 'supabase' | 'local' (controls whether editing is allowed)
   editing: false,        // table-editor mode
   weekOffset: 0,
@@ -597,6 +605,18 @@ function loadConfigLocal(){
 function saveConfigLocal(){
   try{ localStorage.setItem(LS_CONFIG, JSON.stringify(state.config)); }catch(e){}
 }
+function loadCountersLocal(){
+  try{
+    const raw = JSON.parse(localStorage.getItem(LS_COUNTERS) || 'null');
+    state.counters = (Array.isArray(raw) && raw.length) ? raw : clone(COUNTERS_DEFAULT);
+  }catch(e){ state.counters = clone(COUNTERS_DEFAULT); }
+}
+function saveCountersLocal(){
+  try{ localStorage.setItem(LS_COUNTERS, JSON.stringify(state.counters)); }catch(e){}
+}
+function activeCounters(){
+  return state.counters.filter(c => !c.archived).slice().sort(byOrder);
+}
 const clone = (x) => JSON.parse(JSON.stringify(x));
 const authHeaders = () => ({ apikey:SUPABASE_ANON, Authorization:'Bearer '+SUPABASE_ANON });
 
@@ -619,6 +639,11 @@ async function sbFetchConfig(){
   const tabs = await tRes.json();
   const subs = await sRes.json();
   return tabs.map(t => ({ ...t, subActivities: subs.filter(s => s.tablita_id === t.id) }));
+}
+async function sbFetchCounters(){
+  const res = await fetch(REST_BASE + 'counters?select=*', { headers:authHeaders() });
+  if(!res.ok) throw new Error('counters HTTP');
+  return res.json();
 }
 // Generic config writers (table = 'tablitas' | 'sub_activities')
 async function sbPost(table, body){
@@ -669,14 +694,16 @@ async function sbDelete(t,s,d){
 async function initData(){
   loadLocal();        // warm caches so the UI has something even if offline
   loadConfigLocal();
+  loadCountersLocal();
   try{
-    const [checks, config] = await Promise.all([ sbFetchAll(), sbFetchConfig() ]);
+    const [checks, config, counters] = await Promise.all([ sbFetchAll(), sbFetchConfig(), sbFetchCounters() ]);
     state.checks = checks;
     state.config = config;
+    state.counters = counters;
     state.mode = 'supabase';
-    saveLocal(); saveConfigLocal();
+    saveLocal(); saveConfigLocal(); saveCountersLocal();
   }catch(e){
-    state.mode = 'local'; // editing tables stays disabled until we're back online
+    state.mode = 'local'; // editing stays disabled until we're back online
   }
   updateModePill();
 }
@@ -904,7 +931,9 @@ async function counterDec(itemId){
 function renderCounters(){
   const wrap = document.getElementById('counters');
   wrap.innerHTML = '';
-  COUNTERS.forEach(c => {
+  const list = activeCounters();
+  document.getElementById('countTitle').style.display = list.length ? '' : 'none';
+  list.forEach(c => {
     const d = iso(startOfToday());
     const n = counterCount(c.id, d);
     state.prevCounts[c.id] = n;
@@ -912,11 +941,11 @@ function renderCounters(){
     box.className = 'counter';
     box.style.setProperty('--accent', c.accent);
     box.innerHTML = `
-      <div class="c-top"><span class="c-emoji">${c.emoji}</span><span class="c-name">${c.label}</span></div>
+      <div class="c-top"><span class="c-emoji">${esc(c.emoji)}</span><span class="c-name">${esc(c.label)}</span></div>
       <div class="c-controls">
-        <button class="cbtn minus" aria-label="Restar ${c.label}" ${n===0?'disabled':''}>−</button>
+        <button class="cbtn minus" aria-label="Restar ${esc(c.label)}" ${n===0?'disabled':''}>−</button>
         <span class="count" id="count-${c.id}">${n}</span>
-        <button class="cbtn plus" aria-label="Sumar ${c.label}">+</button>
+        <button class="cbtn plus" aria-label="Sumar ${esc(c.label)}">+</button>
       </div>`;
     box.querySelector('.plus').addEventListener('click', ()=> counterInc(c.id));
     box.querySelector('.minus').addEventListener('click', ()=> counterDec(c.id));
@@ -971,19 +1000,22 @@ function renderInsights(){
   });
 
   // Counter totals for the displayed week
-  const cc = document.createElement('div');
-  cc.className = 'ins-card';
-  cc.style.setProperty('--accent', 'var(--gold)');
-  const boxes = COUNTERS.map(c => {
-    let total = 0;
-    dates.forEach(d => total += counterCount(c.id, d));
-    return `<div class="streak-box"><div class="big">${total}</div><div class="cap">${c.emoji} ${c.label}</div></div>`;
-  }).join('');
-  cc.innerHTML = `
-    <div class="ihead"><span class="swatch"></span><h3>Conteo</h3></div>
-    <div class="streaks-row">${boxes}</div>
-    <div class="top" style="margin-top:12px"><span class="k" style="font-size:.78rem">total de la semana</span></div>`;
-  wrap.appendChild(cc);
+  const cntList = activeCounters();
+  if(cntList.length){
+    const cc = document.createElement('div');
+    cc.className = 'ins-card';
+    cc.style.setProperty('--accent', 'var(--gold)');
+    const boxes = cntList.map(c => {
+      let total = 0;
+      dates.forEach(d => total += counterCount(c.id, d));
+      return `<div class="streak-box"><div class="big">${total}</div><div class="cap">${esc(c.emoji)} ${esc(c.label)}</div></div>`;
+    }).join('');
+    cc.innerHTML = `
+      <div class="ihead"><span class="swatch"></span><h3>Conteo</h3></div>
+      <div class="streaks-row">${boxes}</div>
+      <div class="top" style="margin-top:12px"><span class="k" style="font-size:.78rem">total de la semana</span></div>`;
+    wrap.appendChild(cc);
+  }
 
   // animate bars in next frame
   requestAnimationFrame(()=> requestAnimationFrame(()=>{
@@ -1127,14 +1159,45 @@ function renderEditor(){
 
   cards.appendChild(tbtn('+ Nueva tabla', 'addbtn big', ()=> addTablita()));
 
-  const arch = state.config.filter(t => t.archived);
-  if(arch.length){
-    cards.appendChild(el('p','count-title','tablas archivadas'));
-    arch.forEach(t => {
+  // ---- Counters ----
+  cards.appendChild(el('p','count-title','contadores'));
+  const ccard = document.createElement('div');
+  ccard.className = 'card edit-card';
+  const clist = el('div','edit-rows');
+  const cnts = state.counters.filter(c=>!c.archived).slice().sort(byOrder);
+  cnts.forEach((c, ci) => {
+    const row = el('div','edit-row');
+    row.appendChild(el('span','er-label', c.emoji + '  ' + c.label));
+    const rc = el('div','er-ctrls');
+    rc.appendChild(ebtn('↑','Subir', ci===0, ()=> moveCounter(c.id,-1)));
+    rc.appendChild(ebtn('↓','Bajar', ci===cnts.length-1, ()=> moveCounter(c.id,1)));
+    rc.appendChild(ebtn('✎','Editar', false, ()=> editCounter(c)));
+    rc.appendChild(ebtn('🗑','Archivar', false, ()=> archiveCounter(c)));
+    row.appendChild(rc);
+    clist.appendChild(row);
+  });
+  clist.appendChild(tbtn('+ Nuevo contador', 'addbtn', ()=> addCounter()));
+  ccard.appendChild(clist);
+  cards.appendChild(ccard);
+
+  // ---- Archived ----
+  const archT = state.config.filter(t => t.archived);
+  const archC = state.counters.filter(c => c.archived);
+  if(archT.length || archC.length){
+    cards.appendChild(el('p','count-title','archivadas'));
+    archT.forEach(t => {
       const row = el('div','edit-row archived');
-      row.appendChild(el('span','er-label', t.title));
+      row.appendChild(el('span','er-label', '📋  ' + t.title));
       const rc = el('div','er-ctrls');
       rc.appendChild(tbtn('Restaurar', null, ()=> restoreTablita(t)));
+      row.appendChild(rc);
+      cards.appendChild(row);
+    });
+    archC.forEach(c => {
+      const row = el('div','edit-row archived');
+      row.appendChild(el('span','er-label', (c.emoji||'•') + '  ' + c.label));
+      const rc = el('div','er-ctrls');
+      rc.appendChild(tbtn('Restaurar', null, ()=> restoreCounter(c)));
       row.appendChild(rc);
       cards.appendChild(row);
     });
@@ -1146,8 +1209,9 @@ async function withConfigWrite(fn){
   if(state.mode !== 'supabase'){ showToast('La edición necesita conexión'); return; }
   try{
     await fn();
-    state.config = await sbFetchConfig();
-    saveConfigLocal();
+    const [config, counters] = await Promise.all([ sbFetchConfig(), sbFetchCounters() ]);
+    state.config = config; state.counters = counters;
+    saveConfigLocal(); saveCountersLocal();
     renderEditor();
   }catch(e){ showToast('No se pudo guardar — revisa tu conexión'); }
 }
@@ -1192,6 +1256,35 @@ async function archiveSub(s){
 }
 async function restoreSub(s){ await withConfigWrite(()=> sbPatch('sub_activities', s.id, { archived:false })); }
 
+async function addCounter(){
+  const r = await promptModal({ heading:'Nuevo contador', name:'', showColor:true, accent:PALETTE[3], showEmoji:true, emoji:'' });
+  if(!r) return;
+  await withConfigWrite(()=> sbPost('counters', {
+    id: genId('ct'), label:r.name, emoji:r.emoji, accent:r.accent,
+    sort_order: nextOrder(state.counters), archived:false,
+  }));
+}
+async function editCounter(c){
+  const r = await promptModal({ heading:'Editar contador', name:c.label, showColor:true, accent:c.accent, showEmoji:true, emoji:c.emoji });
+  if(!r) return;
+  await withConfigWrite(()=> sbPatch('counters', c.id, { label:r.name, emoji:r.emoji, accent:r.accent }));
+}
+async function archiveCounter(c){
+  if(!await confirmModal(`¿Archivar “${c.label}”? Se ocultará, pero no se pierde el historial.`)) return;
+  await withConfigWrite(()=> sbPatch('counters', c.id, { archived:true }));
+}
+async function restoreCounter(c){ await withConfigWrite(()=> sbPatch('counters', c.id, { archived:false })); }
+async function moveCounter(id, dir){
+  const arr = state.counters.filter(c=>!c.archived).slice().sort(byOrder);
+  const i = arr.findIndex(c=>c.id===id), j = i + dir;
+  if(j < 0 || j >= arr.length) return;
+  const a = arr[i], b = arr[j];
+  await withConfigWrite(async ()=>{
+    await sbPatch('counters', a.id, { sort_order:b.sort_order });
+    await sbPatch('counters', b.id, { sort_order:a.sort_order });
+  });
+}
+
 async function moveTablita(id, dir){
   const arr = state.config.filter(t=>!t.archived).slice().sort(byOrder);
   const i = arr.findIndex(t=>t.id===id), j = i + dir;
@@ -1217,7 +1310,7 @@ async function moveSub(tid, sid, dir){
 /* =====================================================================
    MODALS  (text input + optional color picker, and confirm)
    ===================================================================== */
-function promptModal({ heading, name='', showColor=false, accent=PALETTE[0] }){
+function promptModal({ heading, name='', showColor=false, accent=PALETTE[0], showEmoji=false, emoji='' }){
   return new Promise(resolve => {
     let chosen = accent;
     const ov = document.createElement('div');
@@ -1225,7 +1318,10 @@ function promptModal({ heading, name='', showColor=false, accent=PALETTE[0] }){
     ov.innerHTML = `
       <div class="modal" style="--accent:${chosen}">
         <h3>${esc(heading)}</h3>
-        <input class="modal-input" type="text" value="${esc(name)}" placeholder="Nombre" maxlength="40">
+        <div class="modal-fields">
+          ${showEmoji ? `<input class="modal-emoji" type="text" value="${esc(emoji)}" placeholder="🙂" maxlength="2" aria-label="emoji">` : ''}
+          <input class="modal-input" type="text" value="${esc(name)}" placeholder="Nombre" maxlength="40">
+        </div>
         ${showColor ? `<div class="swatches">${PALETTE.map(p=>`<button class="sw${p===chosen?' on':''}" data-c="${p}" style="background:${p}" aria-label="color"></button>`).join('')}</div>` : ''}
         <div class="modal-actions">
           <button class="mbtn cancel">Cancelar</button>
@@ -1234,6 +1330,7 @@ function promptModal({ heading, name='', showColor=false, accent=PALETTE[0] }){
       </div>`;
     document.body.appendChild(ov);
     const input = ov.querySelector('.modal-input');
+    const emojiInput = ov.querySelector('.modal-emoji');
     const modal = ov.querySelector('.modal');
     setTimeout(()=> input.focus(), 60);
     if(showColor){
@@ -1245,7 +1342,11 @@ function promptModal({ heading, name='', showColor=false, accent=PALETTE[0] }){
       }));
     }
     const close = (val) => { ov.remove(); resolve(val); };
-    const save = () => { const v = input.value.trim(); if(!v){ input.focus(); return; } close({ name:v, accent:chosen }); };
+    const save = () => {
+      const v = input.value.trim(); if(!v){ input.focus(); return; }
+      const em = emojiInput ? (emojiInput.value.trim() || '•') : undefined;
+      close({ name:v, accent:chosen, emoji:em });
+    };
     ov.querySelector('.cancel').addEventListener('click', ()=> close(null));
     ov.querySelector('.save').addEventListener('click', save);
     ov.addEventListener('click', e => { if(e.target === ov) close(null); });
