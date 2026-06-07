@@ -347,17 +347,16 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
 .cbtn.minus[disabled]{ opacity:.35; pointer-events:none; }
 
 /* ---------- Edit mode ---------- */
-.trackerbar{ display:flex; justify-content:flex-end; margin:8px 2px 0; }
-.editbtn{
-  appearance:none; cursor:pointer; min-height:40px; padding:0 16px;
-  border:2.5px solid var(--line); border-radius:12px;
-  background:var(--paper); color:var(--ink);
-  font-family:var(--font-body); font-weight:700; font-size:.9rem;
-  box-shadow:3px 3px 0 var(--shadow);
+.editicon{
+  appearance:none; cursor:pointer; align-self:center; padding:0;
+  width:34px; height:34px; flex:0 0 34px; display:grid; place-items:center;
+  border:2px solid var(--line); border-radius:10px;
+  background:var(--paper); color:var(--ink); font-size:1rem; line-height:1;
+  box-shadow:2px 2px 0 var(--shadow);
   transition:transform .1s var(--ease-out), box-shadow .1s var(--ease-out), background .2s;
 }
-.editbtn:active{ transform:translate(3px,3px); box-shadow:0 0 0 var(--shadow); }
-.panel.editing .editbtn{ background:var(--gold); }
+.editicon:active{ transform:translate(2px,2px); box-shadow:0 0 0 var(--shadow); }
+.editicon.on{ background:var(--gold); }
 /* hide daily-tracking chrome while editing structure */
 .panel.editing > .weeknav,
 .panel.editing > .count-title,
@@ -471,6 +470,7 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
       <h1>Activación</h1>
       <span class="sub">conductual</span>
       <span class="modepill" id="modepill"><span class="led"></span><span id="modepilltxt">sync</span></span>
+      <button id="editToggle" class="editicon" aria-label="Editar tablas y contadores" title="Editar">✎</button>
     </div>
     <div class="tabs">
       <button class="tab active" data-tab="tracker">Tracker</button>
@@ -480,7 +480,6 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
 
   <!-- TRACKER -->
   <section class="panel active" id="panel-tracker">
-    <div class="trackerbar"><button id="editToggle" class="editbtn">✎ Editar</button></div>
     <div class="weeknav">
       <button class="navbtn" id="prevWeek" aria-label="Semana anterior">‹</button>
       <div class="label" id="weekLabel">—<small id="weekRange"></small></div>
@@ -1052,6 +1051,7 @@ function switchTab(name){
   document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
   document.getElementById('panel-tracker').classList.toggle('active', name==='tracker');
   document.getElementById('panel-insights').classList.toggle('active', name==='insights');
+  document.getElementById('editToggle').style.display = name==='tracker' ? '' : 'none';
   if(name==='insights') renderInsights();
 }
 
@@ -1091,7 +1091,10 @@ function toggleEdit(){
     return;
   }
   state.editing = !state.editing;
-  document.getElementById('editToggle').textContent = state.editing ? '✓ Listo' : '✎ Editar';
+  const btn = document.getElementById('editToggle');
+  btn.textContent = state.editing ? '✓' : '✎';
+  btn.title = state.editing ? 'Listo' : 'Editar';
+  btn.classList.toggle('on', state.editing);
   document.getElementById('panel-tracker').classList.toggle('editing', state.editing);
   renderTrackerArea();
 }
