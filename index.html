@@ -284,6 +284,19 @@ header{
 
 .ins-intro{ font-family:var(--font-hand); font-size:1.45rem; color:var(--ink-soft); text-align:center; margin:4px 0 -4px; transform:rotate(-1deg); }
 
+/* ---------- Insights line charts ---------- */
+.chart-wrap{ width:100%; margin-top:6px; }
+svg.linechart{ width:100%; height:auto; display:block; overflow:visible; }
+svg.linechart .grid{ stroke:var(--line); stroke-width:1; opacity:.3; stroke-dasharray:2 4; }
+svg.linechart .ylab, svg.linechart .xlab{
+  font-family:var(--font-body); font-size:8px; fill:var(--ink-soft); font-variant-numeric:tabular-nums;
+}
+svg.linechart .sline{ filter:drop-shadow(1px 1.5px 0 var(--shadow)); }
+svg.linechart .sdot{ filter:drop-shadow(0 1px 0 var(--shadow)); }
+.legend{ display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:12px; }
+.lg-item{ display:inline-flex; align-items:center; gap:6px; font-size:.78rem; font-weight:600; color:var(--ink); }
+.lg-dot{ width:11px; height:11px; border-radius:50%; border:2px solid var(--line); flex:0 0 auto; }
+
 /* ---------- Toast ---------- */
 .toast{
   position:fixed; left:50%; bottom:calc(22px + env(safe-area-inset-bottom));
@@ -579,6 +592,41 @@ function weekDates(offset){
 function lockBeforeISO(){ return iso(addDays(weekStart(startOfToday()), -7)); }
 function isLocked(dISO){ return dISO < lockBeforeISO(); }
 function weekIsLocked(offset){ return weekDates(offset).every(d => isLocked(iso(d))); }
+
+// ---- Month helpers for Insights (all-history; ignores weekOffset) ----
+function daysInMonth(y, m){ return new Date(y, m + 1, 0).getDate(); } // m: 0-based
+
+// Earliest 'YYYY-MM' present in state.checks, or null if there's no data.
+function earliestCheckMonth(){
+  let min = null;
+  for(const k of state.checks){
+    const ym = k.slice(-10, -3);          // key ends in YYYY-MM-DD -> YYYY-MM
+    if(min === null || ym < min) min = ym;
+  }
+  return min;
+}
+// [{ym,y,m,label}] from earliest data month to the current month (cap last 12).
+function monthBuckets(){
+  const min = earliestCheckMonth();
+  const today = startOfToday();
+  const curY = today.getFullYear(), curM = today.getMonth();
+  let y, m;
+  if(min){ y = +min.slice(0,4); m = +min.slice(5,7) - 1; }
+  else { y = curY; m = curM; }
+  const out = [];
+  while(y < curY || (y === curY && m <= curM)){
+    out.push({ ym: y + '-' + String(m+1).padStart(2,'0'), y, m });
+    m++; if(m > 11){ m = 0; y++; }
+  }
+  const capped = out.slice(-12);
+  let prevY = null;
+  for(const b of capped){
+    b.label = (b.y !== prevY) ? (MONTHS[b.m] + " '" + String(b.y).slice(2)) : MONTHS[b.m];
+    prevY = b.y;
+  }
+  return capped;
+}
+
 
 /* =====================================================================
    STATE
@@ -982,53 +1030,150 @@ function paintCounter(itemId){
 /* =====================================================================
    RENDER — INSIGHTS  (current displayed week)
    ===================================================================== */
-function renderInsights(){
-  const dates = weekDates(state.weekOffset).map(iso);
-  const wrap = document.getElementById('insights');
-  wrap.innerHTML = '';
-
+// Per-tablita monthly completion %, prorated for the current (in-progress) month.
+// Numerator counts only checks whose subId is in the tablita's CURRENT active set,
+// keeping numerator/denominator consistent and bounded <=100%.
+function tablitaMonthlySeries(months){
+  const today = startOfToday();
+  const curYM = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0');
+  const elapsed = Math.max(1, today.getDate());
   const tabs = activeTablitas();
-  const streaks = {}; // remember longest per tablita for the bar chart below
+  const subSets = {}, counts = {};
+  tabs.forEach(t => { subSets[t.id] = new Set(t.subActivities.map(s=>s.id)); counts[t.id] = new Map(); });
 
-  tabs.forEach(tab => {
-    const possible = tab.subActivities.length * 7;
-    let filled = 0;
-    tab.subActivities.forEach(sub => dates.forEach(d => { if(state.checks.has(key(tab.id,sub.id,d))) filled++; }));
-    const pct = possible ? Math.round((filled/possible)*100) : 0;
-    const { current, longest } = computeStreaks(tab.id);
-    streaks[tab.id] = { title: tab.title, accent: tab.accent, longest };
+  for(const k of state.checks){
+    const i1 = k.indexOf('|');
+    const tId = k.slice(0, i1);
+    if(!subSets[tId]) continue;                 // not an active tablita (or 'conteo')
+    const i2 = k.indexOf('|', i1 + 1);
+    const sId = k.slice(i1 + 1, i2);
+    if(!subSets[tId].has(sId)) continue;        // archived/removed sub -> skip
+    const ym = k.slice(-10, -3);
+    counts[tId].set(ym, (counts[tId].get(ym) || 0) + 1);
+  }
 
-    const c = document.createElement('div');
-    c.className = 'ins-card';
-    c.style.setProperty('--accent', tab.accent);
-    c.innerHTML = `
-      <div class="ihead">
-        <span class="swatch"></span><h3>${esc(tab.title)}</h3>
-        <span class="streak ihead-streak"><span class="flame">🔥</span><span class="num">${current}</span></span>
-      </div>
-      <div class="metric">
-        <div class="top"><span class="k">Completado esta semana</span><span class="v">${pct}%</span></div>
-        <div class="track"><span data-w="${pct}"></span></div>
-        <div class="top" style="margin-top:6px"><span class="k" style="font-size:.78rem">${filled} de ${possible} casillas</span></div>
-      </div>`;
-    wrap.appendChild(c);
+  return tabs.map(t => {
+    const nSubs = subSets[t.id].size;
+    const values = months.map(b => {
+      if(!nSubs) return 0;
+      const days = (b.ym === curYM) ? elapsed : daysInMonth(b.y, b.m);
+      const filled = counts[t.id].get(b.ym) || 0;
+      return Math.min(100, Math.round((filled / (nSubs * days)) * 100));
+    });
+    return { label: t.title, accent: t.accent, values };
+  });
+}
+
+// Per-counter raw tallies per month.
+function counterMonthlySeries(months){
+  const cnts = activeCounters();
+  const byId = {};
+  cnts.forEach(c => byId[c.id] = new Map());
+  const pre = COUNTER_TABLITA + '|';
+  for(const k of state.checks){
+    if(!k.startsWith(pre)) continue;
+    const hashPos = k.indexOf('#', pre.length);
+    if(hashPos < 0) continue;
+    const itemId = k.slice(pre.length, hashPos);
+    const mp = byId[itemId];
+    if(!mp) continue;                            // archived counter -> skip
+    const ym = k.slice(-10, -3);
+    mp.set(ym, (mp.get(ym) || 0) + 1);
+  }
+  return cnts.map(c => ({
+    label: c.emoji + ' ' + c.label, accent: c.accent,
+    values: months.map(b => byId[c.id].get(b.ym) || 0),
+  }));
+}
+
+// Clean ceiling for a count axis (1/2/5 × 10^n).
+function niceMax(maxVal){
+  if(maxVal <= 0) return 5;
+  const pow = Math.pow(10, Math.floor(Math.log10(maxVal)));
+  const n = maxVal / pow;
+  const step = n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10;
+  return step * pow;
+}
+
+// Reusable cute SVG line chart. series = [{label,accent,values:[...]}].
+function lineChart({ months, series, yMax, yFormat }){
+  const W = 320, H = 180, padL = 30, padR = 12, padT = 12, padB = 26;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const fmt = yFormat || (v => String(v));
+  const n = months.length;
+  const xAt = i => n <= 1 ? padL + plotW/2 : padL + (i/(n-1))*plotW;
+  const yAt = v => padT + plotH - (Math.max(0, Math.min(yMax, v))/yMax)*plotH;
+
+  let grid = '';
+  [0, yMax/2, yMax].forEach(t => {
+    const y = yAt(t);
+    grid += `<line class="grid" x1="${padL}" y1="${y.toFixed(1)}" x2="${W-padR}" y2="${y.toFixed(1)}"/>`;
+    grid += `<text class="ylab" x="${padL-5}" y="${(y+3).toFixed(1)}" text-anchor="end">${esc(fmt(t))}</text>`;
   });
 
-  // One compact bar chart for everyone's longest streak (racha máxima)
+  const everyX = n > 8 ? 2 : 1;
+  let xlabs = '';
+  months.forEach((b, i) => {
+    if(i % everyX !== 0 && i !== n-1) return;
+    xlabs += `<text class="xlab" x="${xAt(i).toFixed(1)}" y="${H-8}" text-anchor="middle">${esc(b.label)}</text>`;
+  });
+
+  let lines = '';
+  series.forEach(s => {
+    const pts = s.values.map((v,i)=> `${xAt(i).toFixed(1)},${yAt(v).toFixed(1)}`);
+    if(n > 1){
+      lines += `<polyline class="sline" data-line points="${pts.join(' ')}" fill="none" stroke="${s.accent}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+    }
+    s.values.forEach((v,i)=>{
+      lines += `<circle class="sdot" cx="${xAt(i).toFixed(1)}" cy="${yAt(v).toFixed(1)}" r="3" fill="${s.accent}" stroke="var(--paper)" stroke-width="1.5"/>`;
+    });
+  });
+
+  return `<svg class="linechart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img">${grid}${lines}${xlabs}</svg>`;
+}
+
+function legend(series){
+  return `<div class="legend">${series.map(s =>
+    `<span class="lg-item"><span class="lg-dot" style="background:${s.accent}"></span>${esc(s.label)}</span>`
+  ).join('')}</div>`;
+}
+
+function renderInsights(){
+  const wrap = document.getElementById('insights');
+  wrap.innerHTML = '';
+  const tabs = activeTablitas();
+  const cnts = activeCounters();
+  const months = monthBuckets();
+
+  const intro = el('p','ins-intro','tu viaje, mes a mes ✨');
+  wrap.appendChild(intro);
+
+  // (A) Completion % per month — one line per category
   if(tabs.length){
-    const ids = Object.keys(streaks);
-    const maxVal = Math.max(1, ...ids.map(id => streaks[id].longest));
-    const rows = ids.map(id => {
-      const s = streaks[id];
-      const w = Math.round((s.longest / maxVal) * 100);
+    const series = tablitaMonthlySeries(months);
+    const card = el('div','ins-card');
+    card.style.setProperty('--accent', 'var(--teal)');
+    card.innerHTML = `
+      <div class="ihead"><span class="swatch"></span><h3>Constancia por mes</h3></div>
+      <div class="chart-wrap">${lineChart({ months, series, yMax:100, yFormat:v=>Math.round(v)+'%' })}</div>
+      ${legend(series)}
+      <div class="top" style="margin-top:10px"><span class="k" style="font-size:.78rem">% de casillas completadas · mes actual al día de hoy</span></div>`;
+    wrap.appendChild(card);
+  }
+
+  // (B) Rachas máximas bar chart
+  if(tabs.length){
+    const rowsData = tabs.map(t => ({ title:t.title, accent:t.accent, longest:computeStreaks(t.id).longest }));
+    const maxVal = Math.max(1, ...rowsData.map(r => r.longest));
+    const rows = rowsData.map(r => {
+      const w = Math.round((r.longest / maxVal) * 100);
       return `<div class="barrow">
-        <span class="blabel">${esc(s.title)}</span>
-        <div class="btrack"><span class="bfill" data-w="${w}" style="--accent:${s.accent}"></span></div>
-        <span class="bval">${s.longest}</span>
+        <span class="blabel">${esc(r.title)}</span>
+        <div class="btrack"><span class="bfill" data-w="${w}" style="--accent:${r.accent}"></span></div>
+        <span class="bval">${r.longest}</span>
       </div>`;
     }).join('');
-    const mc = document.createElement('div');
-    mc.className = 'ins-card';
+    const mc = el('div','ins-card');
     mc.style.setProperty('--accent', 'var(--orange)');
     mc.innerHTML = `
       <div class="ihead"><span class="swatch fire-swatch">🔥</span><h3>Rachas máximas</h3></div>
@@ -1037,27 +1182,33 @@ function renderInsights(){
     wrap.appendChild(mc);
   }
 
-  // Counter totals for the displayed week
-  const cntList = activeCounters();
-  if(cntList.length){
-    const cc = document.createElement('div');
-    cc.className = 'ins-card';
-    cc.style.setProperty('--accent', 'var(--gold)');
-    const boxes = cntList.map(c => {
-      let total = 0;
-      dates.forEach(d => total += counterCount(c.id, d));
-      return `<div class="streak-box"><div class="big">${total}</div><div class="cap">${esc(c.emoji)} ${esc(c.label)}</div></div>`;
-    }).join('');
-    cc.innerHTML = `
-      <div class="ihead"><span class="swatch"></span><h3>Conteo</h3></div>
-      <div class="streaks-row">${boxes}</div>
-      <div class="top" style="margin-top:12px"><span class="k" style="font-size:.78rem">total de la semana</span></div>`;
-    wrap.appendChild(cc);
+  // (C) Counter tallies per month — one line per counter
+  if(cnts.length){
+    const series = counterMonthlySeries(months);
+    const rawMax = Math.max(0, ...series.flatMap(s => s.values));
+    const card = el('div','ins-card');
+    card.style.setProperty('--accent', 'var(--gold)');
+    card.innerHTML = `
+      <div class="ihead"><span class="swatch fire-swatch">📊</span><h3>Conteos por mes</h3></div>
+      <div class="chart-wrap">${lineChart({ months, series, yMax:niceMax(rawMax), yFormat:v=>String(Math.round(v)) })}</div>
+      ${legend(series)}
+      <div class="top" style="margin-top:10px"><span class="k" style="font-size:.78rem">total de cada conteo por mes</span></div>`;
+    wrap.appendChild(card);
   }
 
-  // animate bars in next frame
+  // animate bars + draw the chart lines in, next frame
   requestAnimationFrame(()=> requestAnimationFrame(()=>{
     wrap.querySelectorAll('[data-w]').forEach(s => s.style.width = s.dataset.w + '%');
+    wrap.querySelectorAll('[data-line]').forEach(p => {
+      try{
+        const len = p.getTotalLength();
+        p.style.strokeDasharray = len;
+        p.style.strokeDashoffset = len;
+        void p.getBoundingClientRect();
+        p.style.transition = 'stroke-dashoffset 1s var(--ease-out)';
+        p.style.strokeDashoffset = '0';
+      }catch(e){}
+    });
   }));
 }
 
