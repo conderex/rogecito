@@ -231,6 +231,10 @@ header{
 @keyframes glint{ to{ transform:translateX(320%);} }
 .cell.unfilling .fill{ transition:transform .2s ease-out; }
 .cell:active .bar{ filter:brightness(.97); }
+/* Locked cells: visible but frozen (older than two weeks) */
+.cell.locked{ cursor:not-allowed; }
+.cell.locked .bar{ opacity:.5; border-style:dashed; box-shadow:none; }
+.cell.locked:active .bar{ filter:none; }
 
 /* ---------- Insights ---------- */
 .ins-card{
@@ -450,6 +454,14 @@ function weekDates(offset){
   return Array.from({length:7}, (_,i)=> addDays(start, i));
 }
 
+// A day is locked (read-only) once it falls before the start of LAST week,
+// i.e. only the current week and the previous week stay editable. This keeps
+// roughly two weeks of history changeable and freezes anything older so the
+// user can't alter past records by accident.
+function lockBeforeISO(){ return iso(addDays(weekStart(startOfToday()), -7)); }
+function isLocked(dISO){ return dISO < lockBeforeISO(); }
+function weekIsLocked(offset){ return weekDates(offset).every(d => isLocked(iso(d))); }
+
 /* =====================================================================
    STATE
    ===================================================================== */
@@ -520,6 +532,7 @@ async function initData(){
    TOGGLE  (optimistic UI, revert + toast on error)
    ===================================================================== */
 async function toggle(t, s, d, cellEl){
+  if(isLocked(d)) return; // frozen history — guard against accidental edits
   const k = key(t,s,d);
   const wasChecked = state.checks.has(k);
 
@@ -602,7 +615,7 @@ function renderWeekNav(){
   else label = (state.weekOffset<0 ? Math.abs(state.weekOffset)+' semanas atrás' : state.weekOffset+' semanas adelante');
 
   document.getElementById('weekLabel').firstChild.textContent = label;
-  document.getElementById('weekRange').textContent = range;
+  document.getElementById('weekRange').textContent = weekIsLocked(state.weekOffset) ? range + ' · 🔒 solo lectura' : range;
   const tb = document.getElementById('todayBtn');
   tb.toggleAttribute('disabled', state.weekOffset === 0);
 }
@@ -650,8 +663,13 @@ function renderCards(){
         cell.className = 'cell';
         cell.setAttribute('aria-label', `${tab.title} · ${sub} · ${d}`);
         if(state.checks.has(key(tab.id, sub, d))) cell.classList.add('checked');
+        const locked = isLocked(d);
+        if(locked){ cell.classList.add('locked'); cell.setAttribute('aria-disabled','true'); }
         cell.innerHTML = '<span class="bar"><span class="fill"></span></span>';
-        cell.addEventListener('click', ()=> toggle(tab.id, sub, d, cell));
+        cell.addEventListener('click', ()=> {
+          if(locked){ showToast('🔒 Bloqueado · más de dos semanas'); return; }
+          toggle(tab.id, sub, d, cell);
+        });
         grid.appendChild(cell);
       });
     });
