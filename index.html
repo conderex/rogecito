@@ -269,17 +269,8 @@ header{
 .streak-box .big{ font-family:var(--font-display); font-weight:900; font-size:1.7rem; line-height:1; }
 .streak-box .cap{ font-size:.68rem; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-soft); font-weight:600; margin-top:5px; }
 
-/* Bonfire streak indicator: logs always, fire only when a streak is alive */
-.bonfire{ margin-left:auto; display:inline-flex; align-items:center; gap:5px; }
-.bf-svg{ width:34px; height:34px; display:block; overflow:visible; }
-.bf-logs rect{ fill:#b07e46; stroke:var(--line); stroke-width:2.5; }
-.bf-logs rect:last-of-type{ fill:#8f6334; }
-.bf-flames{ opacity:0; transform:scale(.25); transform-origin:24px 30px; transition:opacity .45s var(--ease-out), transform .45s var(--bounce); }
-.bonfire.lit .bf-flames{ opacity:1; transform:scale(1); animation:flicker 1.7s ease-in-out infinite; }
-.bf-fire-out{ fill:var(--orange); stroke:var(--line); stroke-width:2; }
-.bf-fire-in{ fill:var(--gold); }
-@keyframes flicker{ 0%,100%{ transform:scale(1); } 45%{ transform:scale(1.06,1.13); } 70%{ transform:scale(.97,1.04); } }
-.bdays{ font-family:var(--font-display); font-weight:900; font-size:1.15rem; line-height:1; color:var(--orange); font-variant-numeric:tabular-nums; }
+/* Insights streak badge matches the Tracker badge; push it to the right */
+.ihead-streak{ margin-left:auto; }
 
 /* Compact "rachas máximas" bar chart */
 .ins-card .swatch.fire-swatch{ width:auto; height:auto; border:none; background:none; border-radius:0; font-size:1.05rem; line-height:1; }
@@ -546,18 +537,6 @@ const TABLITAS_DEFAULT = [
 ];
 // Palette offered in the color picker (Golden Casket)
 const PALETTE = ['var(--teal)','var(--orange)','var(--lavender)','var(--gold)','var(--pink)'];
-
-// Bonfire: logs always show; flames only appear (via .lit) when a streak is alive.
-const BONFIRE_SVG = `<svg class="bf-svg" viewBox="0 0 48 48" aria-hidden="true">
-  <g class="bf-flames">
-    <path class="bf-fire-out" d="M24 5 C 32 14 31 25 24 31 C 17 25 16 14 24 5 Z"/>
-    <path class="bf-fire-in" d="M24 14 C 28 18 27 26 24 30 C 21 26 20 18 24 14 Z"/>
-  </g>
-  <g class="bf-logs">
-    <rect x="6" y="31" width="36" height="8" rx="4" transform="rotate(-22 24 35)"/>
-    <rect x="6" y="31" width="36" height="8" rx="4" transform="rotate(22 24 35)"/>
-  </g>
-</svg>`;
 
 // Counter-type trackers (tally per day): + / - buttons, totals in Insights.
 // Editable & DB-backed; this is the offline/first-run fallback.
@@ -1025,9 +1004,7 @@ function renderInsights(){
     c.innerHTML = `
       <div class="ihead">
         <span class="swatch"></span><h3>${esc(tab.title)}</h3>
-        <span class="bonfire ${current>0?'lit':''}" title="Racha: ${current} días">
-          ${BONFIRE_SVG}${current>0?`<span class="bdays">${current}</span>`:''}
-        </span>
+        <span class="streak ihead-streak"><span class="flame">🔥</span><span class="num">${current}</span></span>
       </div>
       <div class="metric">
         <div class="top"><span class="k">Completado esta semana</span><span class="v">${pct}%</span></div>
