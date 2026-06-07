@@ -346,6 +346,97 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
 .cbtn.minus{ background:var(--paper); color:var(--ink); }
 .cbtn.minus[disabled]{ opacity:.35; pointer-events:none; }
 
+/* ---------- Edit mode ---------- */
+.trackerbar{ display:flex; justify-content:flex-end; margin:8px 2px 0; }
+.editbtn{
+  appearance:none; cursor:pointer; min-height:40px; padding:0 16px;
+  border:2.5px solid var(--line); border-radius:12px;
+  background:var(--paper); color:var(--ink);
+  font-family:var(--font-body); font-weight:700; font-size:.9rem;
+  box-shadow:3px 3px 0 var(--shadow);
+  transition:transform .1s var(--ease-out), box-shadow .1s var(--ease-out), background .2s;
+}
+.editbtn:active{ transform:translate(3px,3px); box-shadow:0 0 0 var(--shadow); }
+.panel.editing .editbtn{ background:var(--gold); }
+/* hide daily-tracking chrome while editing structure */
+.panel.editing > .weeknav,
+.panel.editing > .count-title,
+.panel.editing > #counters,
+.panel.editing > footer{ display:none; }
+
+.empty-note{ text-align:center; font-family:var(--font-hand); font-size:1.5rem; color:var(--ink-soft); line-height:1.4; margin:40px 8px; }
+
+.edit-card{ padding:12px 12px 14px; }
+.edit-head{ display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+.edit-head h2{ font-family:var(--font-display); font-weight:800; font-size:1.2rem; margin:0; flex:1; letter-spacing:-.01em; }
+.edit-ctrls, .er-ctrls{ display:flex; gap:5px; flex:0 0 auto; }
+.ebtn{
+  appearance:none; cursor:pointer; width:38px; height:38px; flex:0 0 38px;
+  border:2px solid var(--line); border-radius:10px;
+  background:var(--paper); color:var(--ink); font-size:1rem; line-height:1;
+  display:grid; place-items:center; box-shadow:2px 2px 0 var(--shadow);
+  transition:transform .1s var(--ease-out), box-shadow .1s var(--ease-out);
+}
+.ebtn:active{ transform:translate(2px,2px); box-shadow:0 0 0 var(--shadow); }
+.ebtn:disabled{ opacity:.3; pointer-events:none; box-shadow:none; }
+
+.edit-rows{ display:flex; flex-direction:column; gap:7px; }
+.edit-row{ display:flex; align-items:center; gap:8px; padding:5px 4px; border-bottom:1.5px dashed rgba(42,33,24,.18); }
+.edit-row:last-of-type{ border-bottom:none; }
+.er-label{ flex:1; font-weight:600; font-size:.95rem; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.edit-row.archived{ opacity:.6; }
+.edit-row.archived .er-label{ font-style:italic; font-weight:500; }
+
+.tbtn{
+  appearance:none; cursor:pointer; border:2px solid var(--line); border-radius:10px;
+  background:transparent; color:var(--ink); font-family:var(--font-body); font-weight:700;
+  font-size:.85rem; padding:8px 12px; min-height:40px;
+}
+.tbtn:active{ background:rgba(42,33,24,.06); }
+.tbtn.addbtn{ width:100%; border-style:dashed; margin-top:9px; color:var(--ink-soft); }
+.tbtn.addbtn.big{
+  margin:16px 0; border-style:solid; background:var(--paper); color:var(--ink);
+  box-shadow:5px 5px 0 var(--shadow); font-size:.95rem; border-width:2.5px;
+}
+
+/* ---------- Modal ---------- */
+.modal-ov{
+  position:fixed; inset:0; z-index:120; display:grid; place-items:center;
+  background:rgba(42,33,24,.45); padding:22px; animation:fadein .2s var(--ease-out);
+}
+.modal{
+  width:100%; max-width:340px; background:var(--paper);
+  border:3px solid var(--line); border-radius:18px; padding:18px 18px 16px;
+  box-shadow:7px 8px 0 var(--shadow); animation:popin .3s var(--bounce);
+}
+@keyframes popin{ from{ transform:scale(.9); opacity:.4; } to{ transform:scale(1); opacity:1; } }
+.modal h3{ font-family:var(--font-display); font-weight:800; font-size:1.25rem; margin:0 0 12px; letter-spacing:-.01em; }
+.modal-msg{ font-size:.98rem; line-height:1.45; margin:2px 0 16px; color:var(--ink); }
+.modal-input{
+  width:100%; box-sizing:border-box; font-family:var(--font-body); font-size:1.05rem;
+  padding:11px 12px; border:2.5px solid var(--line); border-radius:11px;
+  background:#fff8ea; color:var(--ink); margin-bottom:12px;
+}
+.modal-input:focus{ outline:none; border-color:var(--accent); }
+.swatches{ display:flex; gap:9px; margin:2px 0 16px; }
+.sw{
+  appearance:none; cursor:pointer; width:38px; height:38px; border-radius:50%;
+  border:2.5px solid var(--line); box-shadow:2px 2px 0 var(--shadow);
+}
+.sw.on{ outline:3px solid var(--ink); outline-offset:2px; }
+.modal-actions{ display:flex; gap:10px; }
+.mbtn{
+  flex:1; appearance:none; cursor:pointer; min-height:46px;
+  border:2.5px solid var(--line); border-radius:12px;
+  font-family:var(--font-body); font-weight:700; font-size:.95rem;
+  box-shadow:3px 3px 0 var(--shadow);
+  transition:transform .1s var(--ease-out), box-shadow .1s var(--ease-out);
+}
+.mbtn:active{ transform:translate(3px,3px); box-shadow:0 0 0 var(--shadow); }
+.mbtn.cancel{ background:var(--paper); color:var(--ink); }
+.mbtn.save{ background:var(--accent, var(--gold)); color:var(--paper); }
+.mbtn.save.warn{ background:var(--orange); }
+
 /* ---------- Responsive ---------- */
 @media (max-width:600px){
   :root{ --col-template:60px repeat(7, 1fr); --bar-h:28px; }
@@ -384,6 +475,7 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
 
   <!-- TRACKER -->
   <section class="panel active" id="panel-tracker">
+    <div class="trackerbar"><button id="editToggle" class="editbtn">✎ Editar</button></div>
     <div class="weeknav">
       <button class="navbtn" id="prevWeek" aria-label="Semana anterior">‹</button>
       <div class="label" id="weekLabel">—<small id="weekRange"></small></div>
@@ -412,14 +504,21 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
    ===================================================================== */
 const SUPABASE_URL  = 'https://gqjpkftshxqeuigcrecc.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdxanBrZnRzaHhxZXVpZ2NyZWNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMDgzOTEsImV4cCI6MjA5NTc4NDM5MX0.8W5g0zmppJGqL992kojb-Bgc9MxEjpqXzpTS3bgXvNU';
-const REST = SUPABASE_URL + '/rest/v1/checks';
+const REST_BASE = SUPABASE_URL + '/rest/v1/';
+const REST = REST_BASE + 'checks';
 const LS_KEY = 'roge_checks_v1';
+const LS_CONFIG = 'roge_config_v1';
 
-const TABLITAS = [
-  { id:'dientitos',   title:'Dientitos',   subActivities:['Mañana','Tarde','Noche'],            accent:'var(--teal)' },
-  { id:'salud',       title:'Salud',       subActivities:['Yoga','Skincare','Caminar','Claritin','Magnesio'], accent:'var(--orange)' },
-  { id:'casa_limpia', title:'Casa Limpia', subActivities:['Cocina','Cuarto','Baño','Oficina'],   accent:'var(--lavender)' },
+const TABLITAS_DEFAULT = [
+  { id:'dientitos',   title:'Dientitos',   accent:'var(--teal)',     sort_order:0, archived:false, subActivities:[
+    {id:'d_manana',label:'Mañana',sort_order:0,archived:false},{id:'d_tarde',label:'Tarde',sort_order:1,archived:false},{id:'d_noche',label:'Noche',sort_order:2,archived:false} ] },
+  { id:'salud',       title:'Salud',       accent:'var(--orange)',   sort_order:1, archived:false, subActivities:[
+    {id:'s_yoga',label:'Yoga',sort_order:0,archived:false},{id:'s_skincare',label:'Skincare',sort_order:1,archived:false},{id:'s_caminar',label:'Caminar',sort_order:2,archived:false},{id:'s_claritin',label:'Claritin',sort_order:3,archived:false},{id:'s_magnesio',label:'Magnesio',sort_order:4,archived:false} ] },
+  { id:'casa_limpia', title:'Casa Limpia', accent:'var(--lavender)', sort_order:2, archived:false, subActivities:[
+    {id:'c_cocina',label:'Cocina',sort_order:0,archived:false},{id:'c_cuarto',label:'Cuarto',sort_order:1,archived:false},{id:'c_bano',label:'Baño',sort_order:2,archived:false},{id:'c_oficina',label:'Oficina',sort_order:3,archived:false} ] },
 ];
+// Palette offered in the color picker (Golden Casket)
+const PALETTE = ['var(--teal)','var(--orange)','var(--lavender)','var(--gold)','var(--pink)'];
 
 // Counter-type trackers (tally per day): + / - buttons, totals in Insights.
 const COUNTERS = [
@@ -467,7 +566,9 @@ function weekIsLocked(offset){ return weekDates(offset).every(d => isLocked(iso(
    ===================================================================== */
 const state = {
   checks: new Set(),     // "tablita|sub_activity|YYYY-MM-DD"
-  mode: 'local',         // 'supabase' | 'local'
+  config: [],            // tablitas + their subActivities (from Supabase)
+  mode: 'local',         // 'supabase' | 'local' (controls whether editing is allowed)
+  editing: false,        // table-editor mode
   weekOffset: 0,
   tab: 'tracker',
   prevStreaks: {},       // for streak pop animation
@@ -486,6 +587,55 @@ function loadLocal(){
 }
 function saveLocal(){
   try{ localStorage.setItem(LS_KEY, JSON.stringify([...state.checks])); }catch(e){}
+}
+function loadConfigLocal(){
+  try{
+    const raw = JSON.parse(localStorage.getItem(LS_CONFIG) || 'null');
+    state.config = (Array.isArray(raw) && raw.length) ? raw : clone(TABLITAS_DEFAULT);
+  }catch(e){ state.config = clone(TABLITAS_DEFAULT); }
+}
+function saveConfigLocal(){
+  try{ localStorage.setItem(LS_CONFIG, JSON.stringify(state.config)); }catch(e){}
+}
+const clone = (x) => JSON.parse(JSON.stringify(x));
+const authHeaders = () => ({ apikey:SUPABASE_ANON, Authorization:'Bearer '+SUPABASE_ANON });
+
+// Active (non-archived) tablitas + sub-activities, sorted — what the UI shows.
+function activeTablitas(){
+  return state.config
+    .filter(t => !t.archived)
+    .slice().sort((a,b) => a.sort_order - b.sort_order)
+    .map(t => ({ ...t,
+      subActivities: (t.subActivities||[]).filter(s => !s.archived).slice().sort((a,b)=>a.sort_order-b.sort_order)
+    }));
+}
+
+async function sbFetchConfig(){
+  const [tRes, sRes] = await Promise.all([
+    fetch(REST_BASE + 'tablitas?select=*', { headers:authHeaders() }),
+    fetch(REST_BASE + 'sub_activities?select=*', { headers:authHeaders() }),
+  ]);
+  if(!tRes.ok || !sRes.ok) throw new Error('config HTTP');
+  const tabs = await tRes.json();
+  const subs = await sRes.json();
+  return tabs.map(t => ({ ...t, subActivities: subs.filter(s => s.tablita_id === t.id) }));
+}
+// Generic config writers (table = 'tablitas' | 'sub_activities')
+async function sbPost(table, body){
+  const res = await fetch(REST_BASE + table, {
+    method:'POST',
+    headers:{ ...authHeaders(), 'Content-Type':'application/json', Prefer:'return=minimal' },
+    body:JSON.stringify(body),
+  });
+  if(!res.ok) throw new Error(table+' POST '+res.status);
+}
+async function sbPatch(table, id, body){
+  const res = await fetch(REST_BASE + table + '?id=eq.' + encodeURIComponent(id), {
+    method:'PATCH',
+    headers:{ ...authHeaders(), 'Content-Type':'application/json', Prefer:'return=minimal' },
+    body:JSON.stringify(body),
+  });
+  if(!res.ok) throw new Error(table+' PATCH '+res.status);
 }
 
 async function sbFetchAll(){
@@ -517,13 +667,16 @@ async function sbDelete(t,s,d){
 }
 
 async function initData(){
-  loadLocal(); // warm cache so UI has something even if network is slow/blocked
+  loadLocal();        // warm caches so the UI has something even if offline
+  loadConfigLocal();
   try{
-    state.checks = await sbFetchAll();
+    const [checks, config] = await Promise.all([ sbFetchAll(), sbFetchConfig() ]);
+    state.checks = checks;
+    state.config = config;
     state.mode = 'supabase';
-    saveLocal();
+    saveLocal(); saveConfigLocal();
   }catch(e){
-    state.mode = 'local';
+    state.mode = 'local'; // editing tables stays disabled until we're back online
   }
   updateModePill();
 }
@@ -627,7 +780,12 @@ function renderCards(){
   const cards = document.getElementById('cards');
   cards.innerHTML = '';
 
-  TABLITAS.forEach(tab => {
+  const tabs = activeTablitas();
+  if(tabs.length === 0){
+    cards.innerHTML = '<p class="empty-note">No hay tablas todavía.<br>Toca ✎ Editar para crear una.</p>';
+    return;
+  }
+  tabs.forEach(tab => {
     const card = document.createElement('div');
     card.className = 'card';
     card.style.setProperty('--accent', tab.accent);
@@ -635,7 +793,7 @@ function renderCards(){
     // header
     const head = document.createElement('div');
     head.className = 'card-head';
-    head.innerHTML = `<h2>${tab.title}</h2>`;
+    head.innerHTML = `<h2>${esc(tab.title)}</h2>`;
     const badge = document.createElement('span');
     badge.className = 'streak';
     badge.id = 'streak-' + tab.id;
@@ -657,18 +815,18 @@ function renderCards(){
 
     // sub-activity rows
     tab.subActivities.forEach(sub => {
-      grid.appendChild(el('div','rowlabel', sub));
+      grid.appendChild(el('div','rowlabel', sub.label));
       isoDates.forEach(d => {
         const cell = document.createElement('button');
         cell.className = 'cell';
-        cell.setAttribute('aria-label', `${tab.title} · ${sub} · ${d}`);
-        if(state.checks.has(key(tab.id, sub, d))) cell.classList.add('checked');
+        cell.setAttribute('aria-label', `${tab.title} · ${sub.label} · ${d}`);
+        if(state.checks.has(key(tab.id, sub.id, d))) cell.classList.add('checked');
         const locked = isLocked(d);
         if(locked){ cell.classList.add('locked'); cell.setAttribute('aria-disabled','true'); }
         cell.innerHTML = '<span class="bar"><span class="fill"></span></span>';
         cell.addEventListener('click', ()=> {
           if(locked){ showToast('🔒 Bloqueado · más de dos semanas'); return; }
-          toggle(tab.id, sub, d, cell);
+          toggle(tab.id, sub.id, d, cell);
         });
         grid.appendChild(cell);
       });
@@ -788,10 +946,10 @@ function renderInsights(){
   const wrap = document.getElementById('insights');
   wrap.innerHTML = '';
 
-  TABLITAS.forEach(tab => {
+  activeTablitas().forEach(tab => {
     const possible = tab.subActivities.length * 7;
     let filled = 0;
-    tab.subActivities.forEach(sub => dates.forEach(d => { if(state.checks.has(key(tab.id,sub,d))) filled++; }));
+    tab.subActivities.forEach(sub => dates.forEach(d => { if(state.checks.has(key(tab.id,sub.id,d))) filled++; }));
     const pct = possible ? Math.round((filled/possible)*100) : 0;
     const { current, longest } = computeStreaks(tab.id);
 
@@ -799,7 +957,7 @@ function renderInsights(){
     c.className = 'ins-card';
     c.style.setProperty('--accent', tab.accent);
     c.innerHTML = `
-      <div class="ihead"><span class="swatch"></span><h3>${tab.title}</h3></div>
+      <div class="ihead"><span class="swatch"></span><h3>${esc(tab.title)}</h3></div>
       <div class="metric">
         <div class="top"><span class="k">Completado esta semana</span><span class="v">${pct}%</span></div>
         <div class="track"><span data-w="${pct}"></span></div>
@@ -837,6 +995,9 @@ function renderInsights(){
    UI plumbing
    ===================================================================== */
 function el(tag, cls, text){ const e = document.createElement(tag); if(cls) e.className = cls; if(text!=null) e.textContent = text; return e; }
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+const genId = (prefix) => prefix + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+const byOrder = (a,b) => a.sort_order - b.sort_order;
 
 let toastTimer;
 function showToast(msg){
@@ -873,9 +1034,242 @@ function bindUI(){
   document.getElementById('prevWeek').addEventListener('click', ()=> changeWeek(-1));
   document.getElementById('nextWeek').addEventListener('click', ()=> changeWeek(1));
   document.getElementById('todayBtn').addEventListener('click', ()=>{ if(state.weekOffset!==0){ state.weekOffset=0; renderWeekNav(); renderCards(); if(state.tab==='insights') renderInsights(); } });
+  document.getElementById('editToggle').addEventListener('click', toggleEdit);
 
   // keep "today" accurate if the app is left open past midnight
-  window.addEventListener('focus', ()=>{ renderWeekNav(); renderCards(); renderCounters(); if(state.tab==='insights') renderInsights(); });
+  window.addEventListener('focus', ()=>{
+    if(state.editing) return; // don't disturb an in-progress edit
+    renderWeekNav(); renderCards(); renderCounters();
+    if(state.tab==='insights') renderInsights();
+  });
+}
+
+/* =====================================================================
+   TABLE EDITOR  (add / rename / recolor / reorder / archive)
+   All writes go to Supabase, then config is re-fetched for consistency.
+   ===================================================================== */
+function renderTrackerArea(){
+  if(state.editing) renderEditor();
+  else { renderWeekNav(); renderCards(); renderCounters(); }
+}
+
+function toggleEdit(){
+  if(!state.editing && state.mode !== 'supabase'){
+    showToast('La edición de tablas necesita conexión');
+    return;
+  }
+  state.editing = !state.editing;
+  document.getElementById('editToggle').textContent = state.editing ? '✓ Listo' : '✎ Editar';
+  document.getElementById('panel-tracker').classList.toggle('editing', state.editing);
+  renderTrackerArea();
+}
+
+function ebtn(glyph, label, disabled, onClick){
+  const b = document.createElement('button');
+  b.className = 'ebtn'; b.textContent = glyph; b.title = label; b.setAttribute('aria-label', label);
+  if(disabled) b.disabled = true; else b.addEventListener('click', onClick);
+  return b;
+}
+function tbtn(text, cls, onClick){
+  const b = document.createElement('button');
+  b.className = 'tbtn' + (cls ? ' '+cls : ''); b.textContent = text;
+  b.addEventListener('click', onClick);
+  return b;
+}
+
+function renderEditor(){
+  const cards = document.getElementById('cards');
+  cards.innerHTML = '';
+  cards.appendChild(el('p','count-title','editar tablas'));
+
+  const tabs = state.config.filter(t => !t.archived).slice().sort(byOrder);
+  tabs.forEach((t, ti) => {
+    const card = document.createElement('div');
+    card.className = 'card edit-card';
+    card.style.setProperty('--accent', t.accent);
+
+    const head = document.createElement('div');
+    head.className = 'edit-head';
+    head.appendChild(el('h2', null, t.title));
+    const hc = el('div','edit-ctrls');
+    hc.appendChild(ebtn('↑','Subir', ti===0, ()=> moveTablita(t.id,-1)));
+    hc.appendChild(ebtn('↓','Bajar', ti===tabs.length-1, ()=> moveTablita(t.id,1)));
+    hc.appendChild(ebtn('✎','Editar', false, ()=> editTablita(t)));
+    hc.appendChild(ebtn('🗑','Archivar', false, ()=> archiveTablita(t)));
+    head.appendChild(hc);
+    card.appendChild(head);
+
+    const list = el('div','edit-rows');
+    const subs = (t.subActivities||[]).filter(s=>!s.archived).slice().sort(byOrder);
+    subs.forEach((s, si) => {
+      const row = el('div','edit-row');
+      row.appendChild(el('span','er-label', s.label));
+      const rc = el('div','er-ctrls');
+      rc.appendChild(ebtn('↑','Subir', si===0, ()=> moveSub(t.id,s.id,-1)));
+      rc.appendChild(ebtn('↓','Bajar', si===subs.length-1, ()=> moveSub(t.id,s.id,1)));
+      rc.appendChild(ebtn('✎','Renombrar', false, ()=> editSub(s)));
+      rc.appendChild(ebtn('🗑','Archivar', false, ()=> archiveSub(s)));
+      row.appendChild(rc);
+      list.appendChild(row);
+    });
+    (t.subActivities||[]).filter(s=>s.archived).forEach(s => {
+      const row = el('div','edit-row archived');
+      row.appendChild(el('span','er-label', s.label + ' · archivada'));
+      const rc = el('div','er-ctrls');
+      rc.appendChild(tbtn('Restaurar', null, ()=> restoreSub(s)));
+      row.appendChild(rc);
+      list.appendChild(row);
+    });
+    list.appendChild(tbtn('+ Agregar fila', 'addbtn', ()=> addSub(t)));
+    card.appendChild(list);
+    cards.appendChild(card);
+  });
+
+  cards.appendChild(tbtn('+ Nueva tabla', 'addbtn big', ()=> addTablita()));
+
+  const arch = state.config.filter(t => t.archived);
+  if(arch.length){
+    cards.appendChild(el('p','count-title','tablas archivadas'));
+    arch.forEach(t => {
+      const row = el('div','edit-row archived');
+      row.appendChild(el('span','er-label', t.title));
+      const rc = el('div','er-ctrls');
+      rc.appendChild(tbtn('Restaurar', null, ()=> restoreTablita(t)));
+      row.appendChild(rc);
+      cards.appendChild(row);
+    });
+  }
+}
+
+// Run a config write, then re-sync from Supabase and re-render the editor.
+async function withConfigWrite(fn){
+  if(state.mode !== 'supabase'){ showToast('La edición necesita conexión'); return; }
+  try{
+    await fn();
+    state.config = await sbFetchConfig();
+    saveConfigLocal();
+    renderEditor();
+  }catch(e){ showToast('No se pudo guardar — revisa tu conexión'); }
+}
+const nextOrder = (arr) => arr.length ? Math.max(...arr.map(x=>x.sort_order)) + 1 : 0;
+
+async function addTablita(){
+  const r = await promptModal({ heading:'Nueva tabla', name:'', showColor:true, accent:PALETTE[0] });
+  if(!r) return;
+  await withConfigWrite(()=> sbPost('tablitas', {
+    id: genId('tb'), title: r.name, accent: r.accent,
+    sort_order: nextOrder(state.config), archived:false,
+  }));
+}
+async function editTablita(t){
+  const r = await promptModal({ heading:'Editar tabla', name:t.title, showColor:true, accent:t.accent });
+  if(!r) return;
+  await withConfigWrite(()=> sbPatch('tablitas', t.id, { title:r.name, accent:r.accent }));
+}
+async function archiveTablita(t){
+  if(!await confirmModal(`¿Archivar “${t.title}”? Se ocultará, pero no se pierde el historial.`)) return;
+  await withConfigWrite(()=> sbPatch('tablitas', t.id, { archived:true }));
+}
+async function restoreTablita(t){ await withConfigWrite(()=> sbPatch('tablitas', t.id, { archived:false })); }
+
+async function addSub(t){
+  const r = await promptModal({ heading:`Nueva fila en ${t.title}`, name:'', showColor:false });
+  if(!r) return;
+  const sibs = t.subActivities || [];
+  await withConfigWrite(()=> sbPost('sub_activities', {
+    id: genId('sa'), tablita_id: t.id, label: r.name,
+    sort_order: nextOrder(sibs), archived:false,
+  }));
+}
+async function editSub(s){
+  const r = await promptModal({ heading:'Renombrar fila', name:s.label, showColor:false });
+  if(!r) return;
+  await withConfigWrite(()=> sbPatch('sub_activities', s.id, { label:r.name }));
+}
+async function archiveSub(s){
+  if(!await confirmModal(`¿Archivar “${s.label}”? Se ocultará, pero no se pierde el historial.`)) return;
+  await withConfigWrite(()=> sbPatch('sub_activities', s.id, { archived:true }));
+}
+async function restoreSub(s){ await withConfigWrite(()=> sbPatch('sub_activities', s.id, { archived:false })); }
+
+async function moveTablita(id, dir){
+  const arr = state.config.filter(t=>!t.archived).slice().sort(byOrder);
+  const i = arr.findIndex(t=>t.id===id), j = i + dir;
+  if(j < 0 || j >= arr.length) return;
+  const a = arr[i], b = arr[j];
+  await withConfigWrite(async ()=>{
+    await sbPatch('tablitas', a.id, { sort_order:b.sort_order });
+    await sbPatch('tablitas', b.id, { sort_order:a.sort_order });
+  });
+}
+async function moveSub(tid, sid, dir){
+  const t = state.config.find(x=>x.id===tid); if(!t) return;
+  const arr = (t.subActivities||[]).filter(s=>!s.archived).slice().sort(byOrder);
+  const i = arr.findIndex(s=>s.id===sid), j = i + dir;
+  if(j < 0 || j >= arr.length) return;
+  const a = arr[i], b = arr[j];
+  await withConfigWrite(async ()=>{
+    await sbPatch('sub_activities', a.id, { sort_order:b.sort_order });
+    await sbPatch('sub_activities', b.id, { sort_order:a.sort_order });
+  });
+}
+
+/* =====================================================================
+   MODALS  (text input + optional color picker, and confirm)
+   ===================================================================== */
+function promptModal({ heading, name='', showColor=false, accent=PALETTE[0] }){
+  return new Promise(resolve => {
+    let chosen = accent;
+    const ov = document.createElement('div');
+    ov.className = 'modal-ov';
+    ov.innerHTML = `
+      <div class="modal" style="--accent:${chosen}">
+        <h3>${esc(heading)}</h3>
+        <input class="modal-input" type="text" value="${esc(name)}" placeholder="Nombre" maxlength="40">
+        ${showColor ? `<div class="swatches">${PALETTE.map(p=>`<button class="sw${p===chosen?' on':''}" data-c="${p}" style="background:${p}" aria-label="color"></button>`).join('')}</div>` : ''}
+        <div class="modal-actions">
+          <button class="mbtn cancel">Cancelar</button>
+          <button class="mbtn save">Guardar</button>
+        </div>
+      </div>`;
+    document.body.appendChild(ov);
+    const input = ov.querySelector('.modal-input');
+    const modal = ov.querySelector('.modal');
+    setTimeout(()=> input.focus(), 60);
+    if(showColor){
+      ov.querySelectorAll('.sw').forEach(b => b.addEventListener('click', ()=>{
+        chosen = b.dataset.c;
+        ov.querySelectorAll('.sw').forEach(x=>x.classList.remove('on'));
+        b.classList.add('on');
+        modal.style.setProperty('--accent', chosen);
+      }));
+    }
+    const close = (val) => { ov.remove(); resolve(val); };
+    const save = () => { const v = input.value.trim(); if(!v){ input.focus(); return; } close({ name:v, accent:chosen }); };
+    ov.querySelector('.cancel').addEventListener('click', ()=> close(null));
+    ov.querySelector('.save').addEventListener('click', save);
+    ov.addEventListener('click', e => { if(e.target === ov) close(null); });
+    input.addEventListener('keydown', e => { if(e.key==='Enter') save(); });
+  });
+}
+function confirmModal(msg){
+  return new Promise(resolve => {
+    const ov = document.createElement('div');
+    ov.className = 'modal-ov';
+    ov.innerHTML = `
+      <div class="modal">
+        <p class="modal-msg">${esc(msg)}</p>
+        <div class="modal-actions">
+          <button class="mbtn cancel">Cancelar</button>
+          <button class="mbtn save warn">Archivar</button>
+        </div>
+      </div>`;
+    document.body.appendChild(ov);
+    const close = (v) => { ov.remove(); resolve(v); };
+    ov.querySelector('.cancel').addEventListener('click', ()=> close(false));
+    ov.querySelector('.save').addEventListener('click', ()=> close(true));
+    ov.addEventListener('click', e => { if(e.target === ov) close(false); });
+  });
 }
 
 /* =====================================================================
@@ -884,9 +1278,7 @@ function bindUI(){
 async function boot(){
   bindUI();
   await initData();
-  renderWeekNav();
-  renderCards();
-  renderCounters();
+  renderTrackerArea();
   document.getElementById('loader').classList.add('hide');
 }
 boot();
