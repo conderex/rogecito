@@ -478,6 +478,60 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
 @media (prefers-reduced-motion:reduce){
   *{ animation-duration:.001ms !important; transition-duration:.05ms !important; }
 }
+
+/* ---------- Auth gate ---------- */
+.editicon.logout{ color:var(--ink-soft); }
+.gate{
+  position:fixed; inset:0; z-index:60;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:14px; padding:24px calc(18px + env(safe-area-inset-left)) calc(18px + env(safe-area-inset-bottom));
+  background:radial-gradient(120% 90% at 50% 0%, var(--sand) 0%, var(--sand-deep) 100%);
+}
+.gate[hidden]{ display:none; }
+.gate-card{
+  width:100%; max-width:360px;
+  background:var(--paper); border:2.5px solid var(--line); border-radius:var(--r-card);
+  box-shadow:6px 6px 0 var(--shadow);
+  padding:26px 22px 22px; text-align:center;
+}
+.gate-brand{ display:flex; align-items:baseline; justify-content:center; gap:8px; }
+.gate-brand h1{
+  font-family:var(--font-display); font-weight:800; font-size:1.7rem; line-height:1;
+  letter-spacing:-.02em; margin:0; color:var(--ink);
+}
+.gate-brand .sub{ font-family:var(--font-hand); font-size:1.3rem; color:var(--orange); transform:rotate(-3deg); }
+.gate-tag{ font-family:var(--font-hand); font-size:1.15rem; color:var(--ink-soft); margin:6px 0 18px; }
+.gate-form{ display:flex; flex-direction:column; gap:10px; }
+.gate-input{
+  appearance:none; width:100%; box-sizing:border-box;
+  font-family:var(--font-body); font-size:1rem; color:var(--ink);
+  background:var(--sand); border:2.5px solid var(--line); border-radius:12px;
+  padding:13px 14px; min-height:48px;
+}
+.gate-input::placeholder{ color:var(--ink-soft); }
+.gate-input:focus{ outline:none; box-shadow:3px 3px 0 var(--shadow); }
+.gate-btn{
+  appearance:none; cursor:pointer; width:100%;
+  font-family:var(--font-body); font-weight:700; font-size:1rem; color:var(--paper);
+  background:var(--ink); border:2.5px solid var(--line); border-radius:12px;
+  padding:13px 14px; min-height:48px; box-shadow:4px 4px 0 var(--shadow);
+  transition:transform .12s var(--ease-out), box-shadow .12s var(--ease-out);
+}
+.gate-btn:active{ transform:translate(2px,2px); box-shadow:2px 2px 0 var(--shadow); }
+.gate-btn.ghost{ color:var(--ink); background:var(--paper); }
+.gate-btn[disabled]{ opacity:.55; pointer-events:none; }
+.gate-actions{ display:flex; flex-direction:column; gap:6px; margin:14px 0 4px; }
+.gate-link{
+  appearance:none; border:none; background:none; cursor:pointer;
+  font-family:var(--font-body); font-size:.85rem; color:var(--teal); padding:6px; min-height:36px;
+}
+.gate-link:active{ color:var(--orange); }
+.gate-or{ position:relative; margin:14px 0; }
+.gate-or::before{ content:''; position:absolute; top:50%; left:0; right:0; height:2px; background:var(--line); opacity:.25; }
+.gate-or span{ position:relative; background:var(--paper); padding:0 12px; font-family:var(--font-body); font-size:.8rem; color:var(--ink-soft); }
+.gate-msg{ min-height:1.1em; margin:12px 2px 0; font-family:var(--font-body); font-size:.85rem; line-height:1.35; color:var(--orange); }
+.gate-msg.ok{ color:var(--teal); }
+.gate-foot{ font-family:var(--font-hand); font-size:1.1rem; color:var(--ink-soft); }
 </style>
 </head>
 <body>
@@ -494,6 +548,7 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
       <span class="sub">conductual</span>
       <span class="modepill" id="modepill"><span class="led"></span><span id="modepilltxt">sync</span></span>
       <button id="editToggle" class="editicon" aria-label="Editar tablas y contadores" title="Editar">✎</button>
+      <button id="logoutBtn" class="editicon logout" aria-label="Cerrar sesión" title="Cerrar sesión">⏻</button>
     </div>
     <div class="tabs">
       <button class="tab active" data-tab="tracker">Tracker</button>
@@ -523,8 +578,37 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
   </section>
 </div>
 
+<!-- AUTH GATE -->
+<div class="gate" id="gate" hidden>
+  <div class="gate-card">
+    <div class="gate-brand">
+      <h1>Activación</h1>
+      <span class="sub">conductual</span>
+    </div>
+    <p class="gate-tag" id="gateTag">entra para ver tu progreso</p>
+
+    <form id="authForm" class="gate-form" autocomplete="on">
+      <input type="email" id="authEmail" class="gate-input" placeholder="tu correo" autocomplete="email" required>
+      <input type="password" id="authPass" class="gate-input" placeholder="contraseña" autocomplete="current-password" required>
+      <button type="submit" class="gate-btn" id="authSubmit">Entrar</button>
+    </form>
+
+    <div class="gate-actions">
+      <button class="gate-link" id="toggleMode">¿No tienes cuenta? Regístrate</button>
+      <button class="gate-link" id="forgotBtn">¿Olvidaste tu contraseña?</button>
+    </div>
+
+    <div class="gate-or"><span>o</span></div>
+    <button class="gate-btn ghost" id="magicBtn">Enviar enlace mágico ✨</button>
+
+    <p class="gate-msg" id="gateMsg"></p>
+  </div>
+  <p class="gate-foot">un día a la vez ✿</p>
+</div>
+
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* =====================================================================
    CONFIG
@@ -536,6 +620,14 @@ const REST = REST_BASE + 'checks';
 const LS_KEY = 'roge_checks_v1';
 const LS_CONFIG = 'roge_config_v1';
 const LS_COUNTERS = 'roge_counters_v1';
+
+// Supabase Auth client (session storage + token refresh + redirect handling).
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
+  auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true, flowType:'pkce' },
+});
+// Bearer token used for all REST calls — the logged-in user's JWT once signed in,
+// the anon key otherwise (RLS then returns nothing). Updated by handleSession().
+let accessToken = SUPABASE_ANON;
 
 const TABLITAS_DEFAULT = [
   { id:'dientitos',   title:'Dientitos',   accent:'var(--teal)',     sort_order:0, archived:false, subActivities:[
@@ -554,6 +646,19 @@ const COUNTERS_DEFAULT = [
   { id:'stogies',  label:'Stogies',  emoji:'🚬', accent:'var(--gold)',     sort_order:0, archived:false },
   { id:'porritos', label:'Porritos', emoji:'🌿', accent:'var(--teal)',     sort_order:1, archived:false },
   { id:'llantos',  label:'Llantos',  emoji:'😢', accent:'var(--lavender)', sort_order:2, archived:false },
+];
+
+// Starter set seeded into a brand-new account on first login (Dientitos + Casa Limpia,
+// counters Cafecito + Logros del día). Existing users keep whatever they already have.
+const NEW_USER_TABLITAS = [
+  { id:'dientitos',   title:'Dientitos',   accent:'var(--teal)',     sort_order:0, archived:false, subActivities:[
+    {id:'d_manana',label:'Mañana',sort_order:0,archived:false},{id:'d_tarde',label:'Tarde',sort_order:1,archived:false},{id:'d_noche',label:'Noche',sort_order:2,archived:false} ] },
+  { id:'casa_limpia', title:'Casa Limpia', accent:'var(--lavender)', sort_order:1, archived:false, subActivities:[
+    {id:'c_cocina',label:'Cocina',sort_order:0,archived:false},{id:'c_cuarto',label:'Cuarto',sort_order:1,archived:false},{id:'c_bano',label:'Baño',sort_order:2,archived:false},{id:'c_oficina',label:'Oficina',sort_order:3,archived:false} ] },
+];
+const NEW_USER_COUNTERS = [
+  { id:'cafecito', label:'Cafecito',       emoji:'☕', accent:'var(--gold)', sort_order:0, archived:false },
+  { id:'logros',   label:'Logros del día', emoji:'🏆', accent:'var(--teal)', sort_order:1, archived:false },
 ];
 
 const DAY_HEADERS = ['J','V','S','D','L','Ma','Mi']; // Thu → Wed
@@ -675,7 +780,7 @@ function activeCounters(){
   return state.counters.filter(c => !c.archived).slice().sort(byOrder);
 }
 const clone = (x) => JSON.parse(JSON.stringify(x));
-const authHeaders = () => ({ apikey:SUPABASE_ANON, Authorization:'Bearer '+SUPABASE_ANON });
+const authHeaders = () => ({ apikey:SUPABASE_ANON, Authorization:'Bearer '+accessToken });
 
 // Active (non-archived) tablitas + sub-activities, sorted — what the UI shows.
 function activeTablitas(){
@@ -722,7 +827,7 @@ async function sbPatch(table, id, body){
 
 async function sbFetchAll(){
   const res = await fetch(REST + '?select=tablita,sub_activity,check_date', {
-    headers:{ apikey:SUPABASE_ANON, Authorization:'Bearer '+SUPABASE_ANON },
+    headers: authHeaders(),
   });
   if(!res.ok) throw new Error('HTTP '+res.status);
   const rows = await res.json();
@@ -732,7 +837,7 @@ async function sbInsert(t,s,d){
   const res = await fetch(REST, {
     method:'POST',
     headers:{
-      apikey:SUPABASE_ANON, Authorization:'Bearer '+SUPABASE_ANON,
+      ...authHeaders(),
       'Content-Type':'application/json', Prefer:'resolution=ignore-duplicates,return=minimal',
     },
     body:JSON.stringify({ tablita:t, sub_activity:s, check_date:d }),
@@ -743,7 +848,7 @@ async function sbDelete(t,s,d){
   const q = `?tablita=eq.${encodeURIComponent(t)}&sub_activity=eq.${encodeURIComponent(s)}&check_date=eq.${d}`;
   const res = await fetch(REST + q, {
     method:'DELETE',
-    headers:{ apikey:SUPABASE_ANON, Authorization:'Bearer '+SUPABASE_ANON },
+    headers: authHeaders(),
   });
   if(!res.ok) throw new Error('HTTP '+res.status);
 }
@@ -1558,13 +1663,154 @@ function confirmModal(msg){
 }
 
 /* =====================================================================
+   AUTH  (login / signup / reset / magic link + per-user seeding)
+   ===================================================================== */
+let authMode = 'login';      // 'login' | 'signup'
+let currentUserId = null;    // logged-in user's uuid (also used to scope seed inserts)
+let appLoaded = false;       // guards against reloading data on repeated auth events
+const redirectTo = () => location.origin + location.pathname;
+const gateEl = () => document.getElementById('gate');
+const appEl  = () => document.querySelector('.app');
+
+function showApp(){ gateEl().hidden = true; appEl().style.display = ''; }
+function showGate(){ appEl().style.display = 'none'; gateEl().hidden = false; }
+function setGateMsg(text, ok){
+  const m = document.getElementById('gateMsg');
+  m.textContent = text || ''; m.classList.toggle('ok', !!ok);
+}
+function setGateBusy(b){
+  ['authSubmit','magicBtn','toggleMode','forgotBtn'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.disabled = b;
+  });
+}
+const gv = (id) => (document.getElementById(id).value || '').trim();
+
+function prettyAuthError(err){
+  const msg = (err && err.message ? err.message : String(err)).toLowerCase();
+  if(msg.includes('invalid login')) return 'Correo o contraseña incorrectos.';
+  if(msg.includes('already registered') || msg.includes('already been registered')) return 'Ese correo ya tiene cuenta. Entra normal.';
+  if(msg.includes('password') && msg.includes('6')) return 'La contraseña necesita al menos 6 caracteres.';
+  if(msg.includes('email') && msg.includes('confirm')) return 'Confirma tu correo antes de entrar (revisa tu bandeja).';
+  if(msg.includes('rate limit') || msg.includes('too many')) return 'Demasiados intentos. Espera un momento e inténtalo de nuevo.';
+  return 'Algo salió mal. Revisa tu conexión e inténtalo otra vez.';
+}
+
+// Seed a brand-new account with the starter set. No-op if the account already has tablitas.
+async function ensureSeed(){
+  if(state.config && state.config.length) return;
+  try{
+    const uid = currentUserId;
+    await sbPost('tablitas', NEW_USER_TABLITAS.map(t => ({
+      id:t.id, title:t.title, accent:t.accent, sort_order:t.sort_order, archived:false, user_id:uid })));
+    const subs = [];
+    NEW_USER_TABLITAS.forEach(t => (t.subActivities||[]).forEach(s => subs.push({
+      id:s.id, tablita_id:t.id, label:s.label, sort_order:s.sort_order, archived:false, user_id:uid })));
+    await sbPost('sub_activities', subs);
+    await sbPost('counters', NEW_USER_COUNTERS.map(c => ({
+      id:c.id, label:c.label, emoji:c.emoji, accent:c.accent, sort_order:c.sort_order, archived:false, user_id:uid })));
+    const [config, counters] = await Promise.all([ sbFetchConfig(), sbFetchCounters() ]);
+    state.config = config; state.counters = counters;
+    saveConfigLocal(); saveCountersLocal();
+  }catch(e){ /* leave empty — the user can still add tables manually */ }
+}
+
+async function handleSession(s){
+  const uid = (s && s.user) ? s.user.id : null;
+  if(uid){
+    accessToken = s.access_token;
+    if(uid === currentUserId && appLoaded){ return; } // already loaded this user
+    currentUserId = uid;
+    showApp();
+    await initData();
+    await ensureSeed();
+    appLoaded = true;
+    renderTrackerArea();
+    if(state.tab === 'insights') renderInsights();
+  }else{
+    accessToken = SUPABASE_ANON;
+    currentUserId = null; appLoaded = false;
+    showGate();
+  }
+  document.getElementById('loader').classList.add('hide');
+}
+
+async function onAuthSubmit(e){
+  e.preventDefault();
+  const email = gv('authEmail'), pass = gv('authPass');
+  if(!email || !pass) return;
+  setGateBusy(true); setGateMsg('');
+  try{
+    if(authMode === 'login'){
+      const { error } = await sb.auth.signInWithPassword({ email, password:pass });
+      if(error) throw error;
+    }else{
+      const { data, error } = await sb.auth.signUp({ email, password:pass, options:{ emailRedirectTo:redirectTo() } });
+      if(error) throw error;
+      if(data && data.user && !data.session){
+        setGateMsg('Cuenta creada ✉️ Revisa tu correo para confirmarla y luego entra.', true);
+        setGateBusy(false); return;
+      }
+    }
+    // onAuthStateChange → handleSession swaps to the app.
+  }catch(err){ setGateMsg(prettyAuthError(err)); setGateBusy(false); }
+}
+
+async function onMagicLink(){
+  const email = gv('authEmail');
+  if(!email){ setGateMsg('Escribe tu correo primero.'); return; }
+  setGateBusy(true); setGateMsg('');
+  const { error } = await sb.auth.signInWithOtp({ email, options:{ emailRedirectTo:redirectTo() } });
+  setGateBusy(false);
+  setGateMsg(error ? prettyAuthError(error) : 'Te enviamos un enlace mágico ✨ Revisa tu correo.', !error);
+}
+
+async function onForgot(){
+  const email = gv('authEmail');
+  if(!email){ setGateMsg('Escribe tu correo primero.'); return; }
+  setGateBusy(true); setGateMsg('');
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo:redirectTo() });
+  setGateBusy(false);
+  setGateMsg(error ? prettyAuthError(error) : 'Te enviamos un correo para restablecer tu contraseña 🔑', !error);
+}
+
+function toggleAuthMode(){
+  authMode = (authMode === 'login') ? 'signup' : 'login';
+  const login = authMode === 'login';
+  document.getElementById('authSubmit').textContent = login ? 'Entrar' : 'Crear cuenta';
+  document.getElementById('toggleMode').textContent = login ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Entra';
+  document.getElementById('gateTag').textContent = login ? 'entra para ver tu progreso' : 'crea tu cuenta y empieza';
+  document.getElementById('authPass').setAttribute('autocomplete', login ? 'current-password' : 'new-password');
+  setGateMsg('');
+}
+
+async function onLogout(){
+  if(!await confirmModal('¿Cerrar sesión?')) return;
+  await sb.auth.signOut(); // onAuthStateChange → handleSession shows the gate
+}
+
+function bindAuthUI(){
+  document.getElementById('authForm').addEventListener('submit', onAuthSubmit);
+  document.getElementById('magicBtn').addEventListener('click', onMagicLink);
+  document.getElementById('forgotBtn').addEventListener('click', onForgot);
+  document.getElementById('toggleMode').addEventListener('click', toggleAuthMode);
+  document.getElementById('logoutBtn').addEventListener('click', onLogout);
+}
+
+/* =====================================================================
    BOOT
    ===================================================================== */
 async function boot(){
+  appEl().style.display = 'none'; // avoid a flash of the app before we know the session
   bindUI();
-  await initData();
-  renderTrackerArea();
-  document.getElementById('loader').classList.add('hide');
+  bindAuthUI();
+  // Later sign-in/out events (incl. magic-link / reset redirects) swap views.
+  sb.auth.onAuthStateChange((event, s) => {
+    if(event === 'INITIAL_SESSION') return;                 // handled by getSession below
+    if(event === 'TOKEN_REFRESHED'){ if(s) accessToken = s.access_token; return; }
+    handleSession(s);
+  });
+  const { data:{ session } } = await sb.auth.getSession();
+  await handleSession(session);
 }
 boot();
 </script>
