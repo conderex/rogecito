@@ -1,5 +1,7 @@
 # Plan — Migración a multiusuario con autenticación (v1: RLS)
 
+> **ESTADO: ✅ IMPLEMENTADO Y VERIFICADO (2026-06-09).** Resumen al pie del documento.
+
 > Decisiones tomadas (2026-06-09):
 > - **Privacidad v1 = RLS** (cada quien ve lo suyo). E2E queda para cuando se publique al mercado.
 > - **Login**: Email+contraseña+reset · Magic link · Google.
@@ -108,3 +110,34 @@ grant select,insert,update,delete on checks to authenticated;
 - **Google OAuth** necesita credenciales de Google Cloud (paso manual). Si no las tienes a mano, arrancamos con Email + Magic link y sumamos Google después.
 - **Ventana de corte**: las Fases 2–4 deben ir juntas y rápido; ~minutos de "mantenimiento" si algo se desfasa.
 - **Confirmar** que la cuenta dueña es `rogerthatbunny@gmail.com` (distinta del correo del perfil `rogerthatheart@gmail.com`).
+
+---
+
+## ✅ Resultado de la implementación (2026-06-09)
+
+**Base de datos** (migraciones aplicadas, snapshots `bak_*_pre_auth` intactos como respaldo):
+- `multiuser_phase1_add_user_id` — `user_id` + índices + backfill (84→90 checks a la cuenta de Roge).
+- `multiuser_phase2_per_user_keys` — `user_id NOT NULL DEFAULT auth.uid()`, PKs `(user_id, id)`, FK compuesta, unicidad de checks por usuario.
+- `multiuser_phase3_per_user_rls` — fuera `allow_all`; políticas `own_rows` (`auth.uid() = user_id`) para `authenticated`; `anon` revocado.
+
+**Cuenta dueña:** `rogerthatbunny@gmail.com` (confirmada, contraseña la fijó Roge).
+uid `17681eed-0893-43c8-8856-80d403a371ec` — sus 90 checks / 3 tablitas / 4 contadores / 12 subs.
+
+**Frontend** (`index.html`, desplegado a `main`): `supabase-js` para sesión; gate de acceso
+(contraseña + registro, enlace mágico, reset); logout; REST con el JWT del usuario; seeding
+del set de arranque (Dientitos + Casa Limpia, Cafecito + Logros del día) para cuentas nuevas.
+
+**Verificación (RLS simulado en Postgres):**
+- Roge → ve 90/3/4/12. · Otro usuario → ve **0**. · `anon` → **permission denied**.
+- Advisors: **0** WARN `allow_all`. Backups = INFO (blindados a propósito).
+- Sintaxis JS OK; regresión de lógica 8/8.
+
+## Pendientes manuales (panel Supabase / Roge)
+1. **Auth ▸ URL Configuration**: poner el **Site URL** = URL de GitHub Pages de la app
+   (p. ej. `https://conderex.github.io/rogecito/`) y agregarla a *Redirect URLs*, para que
+   los correos de **enlace mágico y reset** regresen a la app. (El login con contraseña ya
+   funciona sin esto.)
+2. **Probar en el teléfono**: entrar con `rogerthatbunny@gmail.com`, ver datos intactos;
+   crear una 2ª cuenta y confirmar que arranca con el set nuevo y **no** ve lo de Roge.
+3. *(Opcional)* Activar "Leaked password protection" (Auth ▸ Policies).
+4. **Google**: pendiente para una iteración futura (credenciales de Google Cloud).
