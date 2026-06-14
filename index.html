@@ -622,7 +622,6 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
 
 <div class="toast" id="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* =====================================================================
    CONFIG
@@ -635,12 +634,27 @@ const LS_KEY = 'roge_checks_v1';
 const LS_CONFIG = 'roge_config_v1';
 const LS_COUNTERS = 'roge_counters_v1';
 
-// Supabase Auth client (session storage + token refresh + redirect handling).
-const sb = (window.supabase && window.supabase.createClient)
-  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
-      auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true, flowType:'pkce' },
-    })
-  : null; // the auth library failed to load (offline / blocked CDN) — handled in boot()
+// Supabase Auth client — created in boot() once the library is loaded (with a
+// backup CDN so a single CDN hiccup can't lock everyone out of login).
+let sb = null;
+function loadScript(src){
+  return new Promise((resolve, reject) => {
+    const el = document.createElement('script');
+    el.src = src; el.onload = resolve; el.onerror = () => reject(new Error(src));
+    document.head.appendChild(el);
+  });
+}
+async function loadSupabaseLib(){
+  if(window.supabase && window.supabase.createClient) return true;
+  for(const url of [
+    'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
+    'https://unpkg.com/@supabase/supabase-js@2',
+  ]){
+    try{ await loadScript(url); if(window.supabase && window.supabase.createClient) return true; }
+    catch(e){ /* try the next CDN */ }
+  }
+  return false;
+}
 // Bearer token used for all REST calls — the logged-in user's JWT once signed in,
 // the anon key otherwise (RLS then returns nothing). Updated by handleSession().
 let accessToken = SUPABASE_ANON;
@@ -1240,10 +1254,10 @@ function lineChart({ months, series, yMax, yFormat }){
   series.forEach(s => {
     const pts = s.values.map((v,i)=> `${xAt(i).toFixed(1)},${yAt(v).toFixed(1)}`);
     if(n > 1){
-      lines += `<polyline class="sline" data-line points="${pts.join(' ')}" fill="none" stroke="${s.accent}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+      lines += `<polyline class="sline" data-line points="${pts.join(' ')}" fill="none" stroke="${safeAccent(s.accent)}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`;
     }
     s.values.forEach((v,i)=>{
-      lines += `<circle class="sdot" cx="${xAt(i).toFixed(1)}" cy="${yAt(v).toFixed(1)}" r="3" fill="${s.accent}" stroke="var(--paper)" stroke-width="1.5"/>`;
+      lines += `<circle class="sdot" cx="${xAt(i).toFixed(1)}" cy="${yAt(v).toFixed(1)}" r="3" fill="${safeAccent(s.accent)}" stroke="var(--paper)" stroke-width="1.5"/>`;
     });
   });
 
@@ -1252,7 +1266,7 @@ function lineChart({ months, series, yMax, yFormat }){
 
 function legend(series){
   return `<div class="legend">${series.map(s =>
-    `<span class="lg-item"><span class="lg-dot" style="background:${s.accent}"></span>${esc(s.label)}</span>`
+    `<span class="lg-item"><span class="lg-dot" style="background:${safeAccent(s.accent)}"></span>${esc(s.label)}</span>`
   ).join('')}</div>`;
 }
 
@@ -1283,7 +1297,7 @@ function renderInsights(){
   if(tabs.length){
     const pills = tabs.map(t => {
       const longest = computeStreaks(t.id).longest;
-      return `<span class="streak maxpill" style="--accent:${t.accent}"><span class="mp-name">${esc(t.title)}</span><span class="num">${longest}</span><span class="flame">🔥</span></span>`;
+      return `<span class="streak maxpill" style="--accent:${safeAccent(t.accent)}"><span class="mp-name">${esc(t.title)}</span><span class="num">${longest}</span><span class="flame">🔥</span></span>`;
     }).join('');
     const mc = el('div','ins-card');
     mc.style.setProperty('--accent', 'var(--orange)');
@@ -1329,6 +1343,11 @@ function renderInsights(){
    ===================================================================== */
 function el(tag, cls, text){ const e = document.createElement(tag); if(cls) e.className = cls; if(text!=null) e.textContent = text; return e; }
 function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+// Accent colors are interpolated into inline style/SVG (not text), so esc() doesn't
+// cover them. Whitelist to a safe CSS-variable shape; anything weird falls back. This
+// neutralizes any tampered accent value (matters once therapists view patient data).
+const ACCENT_RE = /^var\(--[a-z-]+\)$/;
+const safeAccent = (a) => ACCENT_RE.test(a) ? a : 'var(--teal)';
 const genId = (prefix) => prefix + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
 const byOrder = (a,b) => a.sort_order - b.sort_order;
 
@@ -1621,7 +1640,7 @@ function promptModal({ heading, name='', showColor=false, accent=PALETTE[0], sho
     const ov = document.createElement('div');
     ov.className = 'modal-ov';
     ov.innerHTML = `
-      <div class="modal" style="--accent:${chosen}">
+      <div class="modal" style="--accent:${safeAccent(chosen)}">
         <h3>${esc(heading)}</h3>
         <div class="modal-fields">
           ${showEmoji ? `<input class="modal-emoji" type="text" value="${esc(emoji)}" placeholder="🙂" maxlength="2" aria-label="emoji">` : ''}
@@ -1829,8 +1848,14 @@ async function boot(){
   appEl().style.display = 'none'; // avoid a flash of the app before we know the session
   bindUI();
   bindAuthUI();
-  // If the auth library failed to load, show the gate with a clear message instead of
-  // silently doing nothing when the user taps a button.
+  // Load the auth library (with backup CDN) and create the client.
+  if(await loadSupabaseLib()){
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
+      auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true, flowType:'pkce' },
+    });
+  }
+  // If it still failed, show the gate with a clear message instead of silently
+  // doing nothing when the user taps a button.
   if(!sb){
     document.getElementById('loader').classList.add('hide');
     showGate();
