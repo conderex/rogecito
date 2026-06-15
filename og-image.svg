@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect x="0" y="0" width="1200" height="630" fill="#FFF1DC"/>
+  <rect x="22" y="22" width="1156" height="586" fill="none" stroke="#1A1A1A" stroke-width="16"/>
+
+  <!-- sun top-left -->
+  <g stroke="#1A1A1A" stroke-width="11" stroke-linecap="butt">
+    <line x1="165" y1="92" x2="165" y2="52"/>
+    <line x1="106" y1="116" x2="78" y2="88"/>
+    <line x1="84" y1="175" x2="44" y2="175"/>
+    <line x1="224" y1="116" x2="252" y2="88"/>
+  </g>
+  <circle cx="165" cy="175" r="52" fill="#FFC83D" stroke="#1A1A1A" stroke-width="11"/>
+
+  <!-- checkbox -->
+  <rect x="150" y="280" width="250" height="250" fill="#E0492B"/>
+  <rect x="124" y="254" width="250" height="250" fill="#FF7A2F" stroke="#1A1A1A" stroke-width="20"/>
+  <polyline points="178,378 238,438 330,318" fill="none" stroke="#1A1A1A"
+            stroke-width="30" stroke-linecap="square" stroke-linejoin="miter"/>
+
+  <!-- wordmark + subtitle -->
+  <g font-family="DejaVu Sans" font-weight="bold">
+    <text x="470" y="258" font-size="92" fill="#1A1A1A" stroke="#1A1A1A" stroke-width="2" letter-spacing="-1">DoingThe</text>
+    <text x="470" y="350" font-size="92" fill="#1A1A1A" stroke="#1A1A1A" stroke-width="2" letter-spacing="-1">Doings</text>
+    <text x="474" y="412" font-size="40" fill="#FF5747" letter-spacing="2">activación conductual</text>
+    <text x="474" y="495" font-size="44" fill="#1A1A1A" letter-spacing="2">un día a la vez</text>
+  </g>
+  <circle cx="930" cy="480" r="11" fill="#FF7A2F"/>
+</svg>
