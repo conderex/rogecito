@@ -6,7 +6,21 @@
 <meta name="theme-color" content="#1f1a16">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Registro de Activación · Roge</title>
+<meta name="apple-mobile-web-app-title" content="DoingTheDoings">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<title>DoingTheDoings · activación conductual</title>
+<meta name="description" content="DoingTheDoings — construye constancia un día a la vez. Sin culpa, sin rachas perfectas.">
+<!-- Link preview (WhatsApp, iMessage, redes) -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="DoingTheDoings ✿">
+<meta property="og:description" content="Constancia, un día a la vez. Para días buenos y difíciles.">
+<meta property="og:url" content="https://conderex.github.io/rogecito/">
+<meta property="og:image" content="https://conderex.github.io/rogecito/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="DoingTheDoings ✿">
+<meta name="twitter:description" content="Constancia, un día a la vez. Para días buenos y difíciles.">
+<meta name="twitter:image" content="https://conderex.github.io/rogecito/og-image.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..700&family=Space+Grotesk:wght@400;500;600;700&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
@@ -76,16 +90,17 @@ header{
   background:linear-gradient(var(--sand) 72%, rgba(231,216,184,0));
 }
 .brand{
-  display:flex; align-items:baseline; gap:8px; padding:0 4px 8px;
+  display:flex; align-items:center; gap:8px; padding:0 4px 8px;
 }
+.brandtxt{ display:flex; flex-direction:column; gap:1px; min-width:0; }
 .brand h1{
   font-family:var(--font-display);
-  font-weight:800; font-size:1.45rem; line-height:1;
+  font-weight:800; font-size:1.32rem; line-height:1;
   letter-spacing:-.02em; margin:0; color:var(--ink);
 }
 .brand .sub{
-  font-family:var(--font-hand); font-size:1.25rem; color:var(--orange);
-  transform:rotate(-3deg); transform-origin:left;
+  font-family:var(--font-hand); font-size:1.02rem; color:var(--orange);
+  line-height:1; transform:rotate(-2deg); transform-origin:left;
 }
 .tabs{
   display:flex; gap:8px; padding:6px;
@@ -494,7 +509,7 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
   box-shadow:6px 6px 0 var(--shadow);
   padding:26px 22px 22px; text-align:center;
 }
-.gate-brand{ display:flex; align-items:baseline; justify-content:center; gap:8px; }
+.gate-brand{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; }
 .gate-brand h1{
   font-family:var(--font-display); font-weight:800; font-size:1.7rem; line-height:1;
   letter-spacing:-.02em; margin:0; color:var(--ink);
@@ -549,8 +564,10 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
 <div class="app">
   <header>
     <div class="brand">
-      <h1>Activación</h1>
-      <span class="sub">conductual</span>
+      <div class="brandtxt">
+        <h1>DoingTheDoings</h1>
+        <span class="sub">activación conductual</span>
+      </div>
       <span class="modepill" id="modepill"><span class="led"></span><span id="modepilltxt">sync</span></span>
       <button id="editToggle" class="editicon" aria-label="Editar tablas y contadores" title="Editar">✎</button>
       <button id="logoutBtn" class="editicon logout" aria-label="Cerrar sesión" title="Cerrar sesión">⏻</button>
@@ -587,8 +604,8 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
 <div class="gate" id="gate" hidden>
   <div class="gate-card">
     <div class="gate-brand">
-      <h1>Activación</h1>
-      <span class="sub">conductual</span>
+      <h1>DoingTheDoings</h1>
+      <span class="sub">activación conductual</span>
     </div>
     <p class="gate-tag" id="gateTag">entra para ver tu progreso</p>
 
