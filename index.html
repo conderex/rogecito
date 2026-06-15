@@ -102,6 +102,19 @@ header{
   font-family:var(--font-hand); font-size:1.02rem; color:var(--orange);
   line-height:1; transform:rotate(-2deg); transform-origin:left;
 }
+.langtoggle{
+  appearance:none; cursor:pointer; flex:0 0 auto;
+  display:inline-flex; align-items:center; gap:3px;
+  border:2px solid var(--ink-soft); border-radius:999px;
+  background:transparent; padding:4px 8px; line-height:1;
+  font-family:var(--font-body); font-weight:700; font-size:.6rem; letter-spacing:.05em;
+  color:var(--ink-soft);
+}
+.langtoggle [data-l]{ opacity:.45; transition:opacity .15s; }
+.langtoggle [data-l].on{ opacity:1; color:var(--ink); }
+.langtoggle .sep{ opacity:.35; font-weight:400; }
+.langtoggle:active{ transform:translateY(1px); }
+.gate-langrow{ display:flex; justify-content:flex-end; margin:-6px -4px 8px; }
 .tabs{
   display:flex; gap:8px; padding:6px;
   background:var(--paper);
@@ -558,7 +571,7 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
 
 <div class="loader" id="loader">
   <div class="dot"></div>
-  <div class="msg">cargando…</div>
+  <div class="msg" data-i18n="loading">cargando…</div>
 </div>
 
 <div class="app">
@@ -566,11 +579,12 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
     <div class="brand">
       <div class="brandtxt">
         <h1>DoingTheDoings</h1>
-        <span class="sub">activación conductual</span>
+        <span class="sub" data-i18n="brand_sub">activación conductual</span>
       </div>
       <span class="modepill" id="modepill"><span class="led"></span><span id="modepilltxt">sync</span></span>
-      <button id="editToggle" class="editicon" aria-label="Editar tablas y contadores" title="Editar">✎</button>
-      <button id="logoutBtn" class="editicon logout" aria-label="Cerrar sesión" title="Cerrar sesión">⏻</button>
+      <button class="langtoggle" type="button" aria-label="Language / Idioma" title="Language / Idioma"><span data-l="es">ES</span><span class="sep">/</span><span data-l="en">EN</span></button>
+      <button id="editToggle" class="editicon" data-i18n-title="edit_icon" aria-label="Editar" title="Editar">✎</button>
+      <button id="logoutBtn" class="editicon logout" data-i18n-title="logout_icon" aria-label="Cerrar sesión" title="Cerrar sesión">⏻</button>
     </div>
     <div class="tabs">
       <button class="tab active" data-tab="tracker">Tracker</button>
@@ -581,46 +595,49 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
   <!-- TRACKER -->
   <section class="panel active" id="panel-tracker">
     <div class="weeknav">
-      <button class="navbtn" id="prevWeek" aria-label="Semana anterior">‹</button>
+      <button class="navbtn" id="prevWeek" data-i18n-title="prev_week" aria-label="Semana anterior">‹</button>
       <div class="label" id="weekLabel">—<small id="weekRange"></small></div>
-      <button class="navbtn today-btn" id="todayBtn">Hoy</button>
-      <button class="navbtn" id="nextWeek" aria-label="Semana siguiente">›</button>
+      <button class="navbtn today-btn" id="todayBtn" data-i18n="today_btn">Hoy</button>
+      <button class="navbtn" id="nextWeek" data-i18n-title="next_week" aria-label="Semana siguiente">›</button>
     </div>
     <div id="cards"></div>
-    <p class="count-title" id="countTitle">conteo de hoy</p>
+    <p class="count-title" id="countTitle" data-i18n="count_today">conteo de hoy</p>
     <div id="counters" class="counters"></div>
-    <footer><p>tap para llenar · tap para vaciar</p></footer>
+    <footer><p data-i18n="tap_hint">tap para llenar · tap para vaciar</p></footer>
   </section>
 
   <!-- INSIGHTS -->
   <section class="panel" id="panel-insights">
-    <p class="ins-intro">¿cómo va la semana?</p>
+    <p class="ins-intro" data-i18n="week_q">¿cómo va la semana?</p>
     <div id="insights"></div>
-    <footer><p>un día a la vez ✿</p></footer>
+    <footer><p data-i18n="one_day">un día a la vez ✿</p></footer>
   </section>
 </div>
 
 <!-- AUTH GATE -->
 <div class="gate" id="gate" hidden>
   <div class="gate-card">
+    <div class="gate-langrow">
+      <button class="langtoggle" type="button" aria-label="Language / Idioma" title="Language / Idioma"><span data-l="es">ES</span><span class="sep">/</span><span data-l="en">EN</span></button>
+    </div>
     <div class="gate-brand">
       <h1>DoingTheDoings</h1>
-      <span class="sub">activación conductual</span>
+      <span class="sub" data-i18n="brand_sub">activación conductual</span>
     </div>
     <p class="gate-tag" id="gateTag">entra para ver tu progreso</p>
 
     <form id="authForm" class="gate-form" autocomplete="on">
-      <input type="email" id="authEmail" class="gate-input" placeholder="tu correo" autocomplete="email" required>
-      <input type="password" id="authPass" class="gate-input" placeholder="contraseña" autocomplete="current-password" required>
+      <input type="email" id="authEmail" class="gate-input" placeholder="tu correo" data-i18n-ph="ph_email" autocomplete="email" required>
+      <input type="password" id="authPass" class="gate-input" placeholder="contraseña" data-i18n-ph="ph_pass" autocomplete="current-password" required>
       <button type="submit" class="gate-btn" id="authSubmit">Entrar</button>
     </form>
 
     <div class="gate-actions">
       <button class="gate-link" id="toggleMode">¿No tienes cuenta? Regístrate</button>
-      <button class="gate-link" id="forgotBtn">¿Olvidaste tu contraseña?</button>
+      <button class="gate-link" id="forgotBtn" data-i18n="forgot">¿Olvidaste tu contraseña?</button>
     </div>
 
-    <div class="gate-or"><span>o</span></div>
+    <div class="gate-or"><span data-i18n="or_sep">o</span></div>
     <button class="gate-btn google" id="googleBtn">
       <svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true">
         <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.6 2.4 30.2 0 24 0 14.6 0 6.4 5.4 2.5 13.3l7.9 6.1C12.3 13.3 17.7 9.5 24 9.5z"/>
@@ -628,13 +645,13 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
         <path fill="#FBBC05" d="M10.4 28.6c-.5-1.5-.8-3-.8-4.6s.3-3.1.8-4.6l-7.9-6.1C.9 16.5 0 20.1 0 24s.9 7.5 2.5 10.7l7.9-6.1z"/>
         <path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.3-5.7c-2 1.4-4.7 2.3-8.6 2.3-6.3 0-11.7-3.8-13.6-9.1l-7.9 6.1C6.4 42.6 14.6 48 24 48z"/>
       </svg>
-      <span>Continuar con Google</span>
+      <span data-i18n="google_btn">Continuar con Google</span>
     </button>
-    <button class="gate-btn ghost" id="magicBtn">Enviar enlace mágico ✨</button>
+    <button class="gate-btn ghost" id="magicBtn" data-i18n="magic_btn">Enviar enlace mágico ✨</button>
 
     <p class="gate-msg" id="gateMsg"></p>
   </div>
-  <p class="gate-foot">un día a la vez ✿</p>
+  <p class="gate-foot" data-i18n="one_day">un día a la vez ✿</p>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -650,6 +667,224 @@ const REST = REST_BASE + 'checks';
 const LS_KEY = 'roge_checks_v1';
 const LS_CONFIG = 'roge_config_v1';
 const LS_COUNTERS = 'roge_counters_v1';
+const LS_LANG = 'roge_lang_v1';
+
+/* =====================================================================
+   I18N  — Spanish / English. Stored choice wins; otherwise we guess
+   from the browser language (so a US visitor lands in English).
+   ===================================================================== */
+const I18N = {
+  es: {
+    months: ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'],
+    dayHeaders: ['J','V','S','D','L','Ma','Mi'],
+    loading: 'cargando…',
+    brand_sub: 'activación conductual',
+    today_btn: 'Hoy',
+    count_today: 'conteo de hoy',
+    tap_hint: 'tap para llenar · tap para vaciar',
+    week_q: '¿cómo va la semana?',
+    one_day: 'un día a la vez ✿',
+    edit_icon: 'Editar',
+    logout_icon: 'Cerrar sesión',
+    prev_week: 'Semana anterior',
+    next_week: 'Semana siguiente',
+    // week nav
+    this_week: 'Esta semana',
+    last_week: 'Semana pasada',
+    next_week_lbl: 'Próxima semana',
+    weeks_ago: n => `${n} semanas atrás`,
+    weeks_ahead: n => `${n} semanas adelante`,
+    read_only: 'solo lectura',
+    locked_toast: '🔒 Bloqueado · más de dos semanas',
+    offline_local: 'Sin conexión — guardado local',
+    no_tables: 'No hay tablas todavía.<br>Toca ✎ Editar para crear una.',
+    // editor
+    edit_tables: 'editar tablas',
+    counters_title: 'contadores',
+    archived_title: 'archivadas',
+    archived_one: 'archivada',
+    restore: 'Restaurar',
+    add_row: '+ Agregar fila',
+    new_table: '+ Nueva tabla',
+    new_counter: '+ Nuevo contador',
+    up: 'Subir', down: 'Bajar', edit: 'Editar', rename: 'Renombrar', archive: 'Archivar',
+    edit_needs_conn: 'La edición necesita conexión',
+    edit_tables_needs_conn: 'La edición de tablas necesita conexión',
+    save_failed: 'No se pudo guardar — revisa tu conexión',
+    // modals
+    m_new_table: 'Nueva tabla',
+    m_edit_table: 'Editar tabla',
+    m_new_row: x => `Nueva fila en ${x}`,
+    m_rename_row: 'Renombrar fila',
+    m_new_counter: 'Nuevo contador',
+    m_edit_counter: 'Editar contador',
+    ph_name: 'Nombre',
+    cancel: 'Cancelar',
+    save: 'Guardar',
+    confirm_archive: x => `¿Archivar “${x}”? Se ocultará, pero no se pierde el historial.`,
+    confirm_logout: '¿Cerrar sesión?',
+    // insights
+    ins_journey: 'tu viaje, mes a mes ✨',
+    ins_consistency: 'Constancia por mes',
+    ins_consistency_sub: '% de casillas completadas · mes actual al día de hoy',
+    ins_streaks: 'Rachas máximas',
+    ins_streaks_sub: 'días seguidos, récord de cada tabla',
+    ins_counts: 'Conteos por mes',
+    ins_counts_sub: 'total de cada conteo por mes',
+    // auth — labels
+    ph_email: 'tu correo',
+    ph_pass: 'contraseña',
+    forgot: '¿Olvidaste tu contraseña?',
+    or_sep: 'o',
+    google_btn: 'Continuar con Google',
+    magic_btn: 'Enviar enlace mágico ✨',
+    login_submit: 'Entrar',
+    signup_submit: 'Crear cuenta',
+    to_signup: '¿No tienes cuenta? Regístrate',
+    to_login: '¿Ya tienes cuenta? Entra',
+    tag_login: 'entra para ver tu progreso',
+    tag_signup: 'crea tu cuenta y empieza',
+    // auth — messages
+    err_invalid: 'Correo o contraseña incorrectos.',
+    err_registered: 'Ese correo ya tiene cuenta. Entra normal.',
+    err_pass6: 'La contraseña necesita al menos 6 caracteres.',
+    err_confirm: 'Confirma tu correo antes de entrar (revisa tu bandeja).',
+    err_rate: 'Demasiados intentos. Espera un momento e inténtalo de nuevo.',
+    err_generic: 'Algo salió mal. Revisa tu conexión e inténtalo otra vez.',
+    msg_no_access: 'No cargó el acceso. Revisa tu conexión y recarga la página.',
+    msg_need_email: 'Escribe tu correo.',
+    msg_need_pass: 'Escribe tu contraseña.',
+    msg_entering: 'Entrando…',
+    msg_account_created: 'Cuenta creada ✉️ Revisa tu correo para confirmarla y luego entra.',
+    msg_magic_sent: 'Te enviamos un enlace mágico ✨ Revisa tu correo.',
+    msg_reset_sent: 'Te enviamos un correo para restablecer tu contraseña 🔑',
+    msg_need_email_first: 'Escribe tu correo primero.',
+    msg_load_failed: 'No se pudo cargar el sistema de acceso. Revisa tu conexión e intenta recargar la página.',
+  },
+  en: {
+    months: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+    dayHeaders: ['Th','F','Sa','Su','M','Tu','W'],
+    loading: 'loading…',
+    brand_sub: 'behavioral activation',
+    today_btn: 'Today',
+    count_today: "today's count",
+    tap_hint: 'tap to fill · tap to clear',
+    week_q: "how's the week going?",
+    one_day: 'one day at a time ✿',
+    edit_icon: 'Edit',
+    logout_icon: 'Log out',
+    prev_week: 'Previous week',
+    next_week: 'Next week',
+    this_week: 'This week',
+    last_week: 'Last week',
+    next_week_lbl: 'Next week',
+    weeks_ago: n => `${n} weeks ago`,
+    weeks_ahead: n => `${n} weeks ahead`,
+    read_only: 'read only',
+    locked_toast: '🔒 Locked · more than two weeks',
+    offline_local: 'Offline — saved locally',
+    no_tables: 'No tables yet.<br>Tap ✎ Edit to create one.',
+    edit_tables: 'edit tables',
+    counters_title: 'counters',
+    archived_title: 'archived',
+    archived_one: 'archived',
+    restore: 'Restore',
+    add_row: '+ Add row',
+    new_table: '+ New table',
+    new_counter: '+ New counter',
+    up: 'Move up', down: 'Move down', edit: 'Edit', rename: 'Rename', archive: 'Archive',
+    edit_needs_conn: 'Editing needs a connection',
+    edit_tables_needs_conn: 'Editing tables needs a connection',
+    save_failed: "Couldn't save — check your connection",
+    m_new_table: 'New table',
+    m_edit_table: 'Edit table',
+    m_new_row: x => `New row in ${x}`,
+    m_rename_row: 'Rename row',
+    m_new_counter: 'New counter',
+    m_edit_counter: 'Edit counter',
+    ph_name: 'Name',
+    cancel: 'Cancel',
+    save: 'Save',
+    confirm_archive: x => `Archive “${x}”? It'll be hidden, but the history isn't lost.`,
+    confirm_logout: 'Log out?',
+    ins_journey: 'your journey, month by month ✨',
+    ins_consistency: 'Consistency by month',
+    ins_consistency_sub: '% of boxes completed · current month to date',
+    ins_streaks: 'Longest streaks',
+    ins_streaks_sub: 'days in a row, record for each table',
+    ins_counts: 'Counts by month',
+    ins_counts_sub: 'total of each count per month',
+    ph_email: 'your email',
+    ph_pass: 'password',
+    forgot: 'Forgot your password?',
+    or_sep: 'or',
+    google_btn: 'Continue with Google',
+    magic_btn: 'Send magic link ✨',
+    login_submit: 'Log in',
+    signup_submit: 'Create account',
+    to_signup: "No account? Sign up",
+    to_login: 'Already have an account? Log in',
+    tag_login: 'log in to see your progress',
+    tag_signup: 'create your account and start',
+    err_invalid: 'Wrong email or password.',
+    err_registered: 'That email already has an account. Just log in.',
+    err_pass6: 'Password needs at least 6 characters.',
+    err_confirm: 'Confirm your email before logging in (check your inbox).',
+    err_rate: 'Too many attempts. Wait a moment and try again.',
+    err_generic: 'Something went wrong. Check your connection and try again.',
+    msg_no_access: "Login didn't load. Check your connection and reload the page.",
+    msg_need_email: 'Enter your email.',
+    msg_need_pass: 'Enter your password.',
+    msg_entering: 'Logging in…',
+    msg_account_created: 'Account created ✉️ Check your email to confirm it, then log in.',
+    msg_magic_sent: 'We sent you a magic link ✨ Check your email.',
+    msg_reset_sent: 'We sent you an email to reset your password 🔑',
+    msg_need_email_first: 'Enter your email first.',
+    msg_load_failed: "Couldn't load the login system. Check your connection and try reloading the page.",
+  },
+};
+let LANG = (() => {
+  try { const s = localStorage.getItem(LS_LANG); if(s === 'es' || s === 'en') return s; } catch(e){}
+  return (navigator.language || navigator.userLanguage || 'en').toLowerCase().startsWith('es') ? 'es' : 'en';
+})();
+function tr(key, ...args){
+  const tbl = I18N[LANG] || I18N.es;
+  let v = (key in tbl) ? tbl[key] : I18N.es[key];
+  if(v == null) return key;
+  return (typeof v === 'function') ? v(...args) : v;
+}
+function setLang(l){
+  LANG = l;
+  try { localStorage.setItem(LS_LANG, l); } catch(e){}
+  applyLang();
+}
+function applyLang(){
+  document.documentElement.lang = LANG;
+  MONTHS = I18N[LANG].months;
+  DAY_HEADERS = I18N[LANG].dayHeaders;
+  document.querySelectorAll('[data-i18n]').forEach(e => { e.textContent = tr(e.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-ph]').forEach(e => { e.setAttribute('placeholder', tr(e.dataset.i18nPh)); });
+  document.querySelectorAll('[data-i18n-title]').forEach(e => {
+    const v = tr(e.dataset.i18nTitle); e.title = v; e.setAttribute('aria-label', v);
+  });
+  if(typeof applyAuthModeTexts === 'function') applyAuthModeTexts();
+  if(typeof updateModePill === 'function') updateModePill();
+  updateLangToggles();
+  if(typeof appLoaded !== 'undefined' && appLoaded){
+    if(state.editing) renderEditor(); else { renderWeekNav(); renderCards(); renderCounters(); }
+    if(state.tab === 'insights') renderInsights();
+  }
+}
+function updateLangToggles(){
+  document.querySelectorAll('.langtoggle').forEach(tg => {
+    tg.querySelectorAll('[data-l]').forEach(s => s.classList.toggle('on', s.dataset.l === LANG));
+  });
+}
+function bindLangToggles(){
+  document.querySelectorAll('.langtoggle').forEach(tg => {
+    tg.addEventListener('click', () => setLang(LANG === 'es' ? 'en' : 'es'));
+  });
+}
 
 // Supabase Auth client — created in boot() once the library is loaded (with a
 // backup CDN so a single CDN hiccup can't lock everyone out of login).
@@ -708,8 +943,8 @@ const NEW_USER_COUNTERS = [
   { id:'logros',   label:'Logros del día', emoji:'🏆', accent:'var(--teal)', sort_order:1, archived:false },
 ];
 
-const DAY_HEADERS = ['J','V','S','D','L','Ma','Mi']; // Thu → Wed
-const MONTHS = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+let DAY_HEADERS = I18N[LANG].dayHeaders; // Thu → Wed
+let MONTHS = I18N[LANG].months;
 
 /* =====================================================================
    DATE HELPERS  (local-time, week = Thursday → Wednesday)
@@ -944,7 +1179,7 @@ async function toggle(t, s, d, cellEl){
     refreshStreak(t);
     // a hard failure mid-session means we lost the connection
     state.mode = 'local'; updateModePill();
-    showToast('Sin conexión — guardado local');
+    showToast(tr('offline_local'));
   }
 }
 
@@ -998,13 +1233,13 @@ function renderWeekNav(){
   const a = dates[0], b = dates[6];
   const range = `${a.getDate()} ${MONTHS[a.getMonth()]} – ${b.getDate()} ${MONTHS[b.getMonth()]}`;
   let label;
-  if(state.weekOffset === 0)       label = 'Esta semana';
-  else if(state.weekOffset === -1) label = 'Semana pasada';
-  else if(state.weekOffset === 1)  label = 'Próxima semana';
-  else label = (state.weekOffset<0 ? Math.abs(state.weekOffset)+' semanas atrás' : state.weekOffset+' semanas adelante');
+  if(state.weekOffset === 0)       label = tr('this_week');
+  else if(state.weekOffset === -1) label = tr('last_week');
+  else if(state.weekOffset === 1)  label = tr('next_week_lbl');
+  else label = (state.weekOffset<0 ? tr('weeks_ago', Math.abs(state.weekOffset)) : tr('weeks_ahead', state.weekOffset));
 
   document.getElementById('weekLabel').firstChild.textContent = label;
-  document.getElementById('weekRange').textContent = weekIsLocked(state.weekOffset) ? range + ' · 🔒 solo lectura' : range;
+  document.getElementById('weekRange').textContent = weekIsLocked(state.weekOffset) ? range + ' · 🔒 ' + tr('read_only') : range;
   const tb = document.getElementById('todayBtn');
   tb.toggleAttribute('disabled', state.weekOffset === 0);
 }
@@ -1018,7 +1253,7 @@ function renderCards(){
 
   const tabs = activeTablitas();
   if(tabs.length === 0){
-    cards.innerHTML = '<p class="empty-note">No hay tablas todavía.<br>Toca ✎ Editar para crear una.</p>';
+    cards.innerHTML = '<p class="empty-note">' + tr('no_tables') + '</p>';
     return;
   }
   tabs.forEach(tab => {
@@ -1061,7 +1296,7 @@ function renderCards(){
         if(locked){ cell.classList.add('locked'); cell.setAttribute('aria-disabled','true'); }
         cell.innerHTML = '<span class="bar"><span class="fill"></span></span>';
         cell.addEventListener('click', ()=> {
-          if(locked){ showToast('🔒 Bloqueado · más de dos semanas'); return; }
+          if(locked){ showToast(tr('locked_toast')); return; }
           toggle(tab.id, sub.id, d, cell);
         });
         grid.appendChild(cell);
@@ -1118,7 +1353,7 @@ async function counterInc(itemId){
   try{ await sbInsert(COUNTER_TABLITA, sub, d); }
   catch(e){
     state.checks.delete(k); saveLocal(); paintCounter(itemId);
-    state.mode = 'local'; updateModePill(); showToast('Sin conexión — guardado local');
+    state.mode = 'local'; updateModePill(); showToast(tr('offline_local'));
   }
 }
 async function counterDec(itemId){
@@ -1133,7 +1368,7 @@ async function counterDec(itemId){
   try{ await sbDelete(COUNTER_TABLITA, sub, d); }
   catch(e){
     state.checks.add(k); saveLocal(); paintCounter(itemId);
-    state.mode = 'local'; updateModePill(); showToast('Sin conexión — guardado local');
+    state.mode = 'local'; updateModePill(); showToast(tr('offline_local'));
   }
 }
 
@@ -1294,7 +1529,7 @@ function renderInsights(){
   const cnts = activeCounters();
   const months = monthBuckets();
 
-  const intro = el('p','ins-intro','tu viaje, mes a mes ✨');
+  const intro = el('p','ins-intro',tr('ins_journey'));
   wrap.appendChild(intro);
 
   // (A) Completion % per month — one line per category
@@ -1303,10 +1538,10 @@ function renderInsights(){
     const card = el('div','ins-card');
     card.style.setProperty('--accent', 'var(--teal)');
     card.innerHTML = `
-      <div class="ihead"><span class="swatch"></span><h3>Constancia por mes</h3></div>
+      <div class="ihead"><span class="swatch"></span><h3>${tr('ins_consistency')}</h3></div>
       <div class="chart-wrap">${lineChart({ months, series, yMax:100, yFormat:v=>Math.round(v)+'%' })}</div>
       ${legend(series)}
-      <div class="top" style="margin-top:10px"><span class="k" style="font-size:.78rem">% de casillas completadas · mes actual al día de hoy</span></div>`;
+      <div class="top" style="margin-top:10px"><span class="k" style="font-size:.78rem">${tr('ins_consistency_sub')}</span></div>`;
     wrap.appendChild(card);
   }
 
@@ -1319,9 +1554,9 @@ function renderInsights(){
     const mc = el('div','ins-card');
     mc.style.setProperty('--accent', 'var(--orange)');
     mc.innerHTML = `
-      <div class="ihead"><span class="swatch fire-swatch">🔥</span><h3>Rachas máximas</h3></div>
+      <div class="ihead"><span class="swatch fire-swatch">🔥</span><h3>${tr('ins_streaks')}</h3></div>
       <div class="maxpills">${pills}</div>
-      <div class="top" style="margin-top:10px"><span class="k" style="font-size:.78rem">días seguidos, récord de cada tabla</span></div>`;
+      <div class="top" style="margin-top:10px"><span class="k" style="font-size:.78rem">${tr('ins_streaks_sub')}</span></div>`;
     wrap.appendChild(mc);
   }
 
@@ -1332,10 +1567,10 @@ function renderInsights(){
     const card = el('div','ins-card');
     card.style.setProperty('--accent', 'var(--gold)');
     card.innerHTML = `
-      <div class="ihead"><span class="swatch fire-swatch">📊</span><h3>Conteos por mes</h3></div>
+      <div class="ihead"><span class="swatch fire-swatch">📊</span><h3>${tr('ins_counts')}</h3></div>
       <div class="chart-wrap">${lineChart({ months, series, yMax:niceMax(rawMax), yFormat:v=>String(Math.round(v)) })}</div>
       ${legend(series)}
-      <div class="top" style="margin-top:10px"><span class="k" style="font-size:.78rem">total de cada conteo por mes</span></div>`;
+      <div class="top" style="margin-top:10px"><span class="k" style="font-size:.78rem">${tr('ins_counts_sub')}</span></div>`;
     wrap.appendChild(card);
   }
 
@@ -1425,7 +1660,7 @@ function renderTrackerArea(){
 
 function toggleEdit(){
   if(!state.editing && state.mode !== 'supabase'){
-    showToast('La edición de tablas necesita conexión');
+    showToast(tr('edit_tables_needs_conn'));
     return;
   }
   state.editing = !state.editing;
@@ -1453,7 +1688,7 @@ function tbtn(text, cls, onClick){
 function renderEditor(){
   const cards = document.getElementById('cards');
   cards.innerHTML = '';
-  cards.appendChild(el('p','count-title','editar tablas'));
+  cards.appendChild(el('p','count-title',tr('edit_tables')));
 
   const tabs = state.config.filter(t => !t.archived).slice().sort(byOrder);
   tabs.forEach((t, ti) => {
@@ -1465,10 +1700,10 @@ function renderEditor(){
     head.className = 'edit-head';
     head.appendChild(el('h2', null, t.title));
     const hc = el('div','edit-ctrls');
-    hc.appendChild(ebtn('↑','Subir', ti===0, ()=> moveTablita(t.id,-1)));
-    hc.appendChild(ebtn('↓','Bajar', ti===tabs.length-1, ()=> moveTablita(t.id,1)));
-    hc.appendChild(ebtn('✎','Editar', false, ()=> editTablita(t)));
-    hc.appendChild(ebtn('🗑','Archivar', false, ()=> archiveTablita(t)));
+    hc.appendChild(ebtn('↑',tr('up'), ti===0, ()=> moveTablita(t.id,-1)));
+    hc.appendChild(ebtn('↓',tr('down'), ti===tabs.length-1, ()=> moveTablita(t.id,1)));
+    hc.appendChild(ebtn('✎',tr('edit'), false, ()=> editTablita(t)));
+    hc.appendChild(ebtn('🗑',tr('archive'), false, ()=> archiveTablita(t)));
     head.appendChild(hc);
     card.appendChild(head);
 
@@ -1478,30 +1713,30 @@ function renderEditor(){
       const row = el('div','edit-row');
       row.appendChild(el('span','er-label', s.label));
       const rc = el('div','er-ctrls');
-      rc.appendChild(ebtn('↑','Subir', si===0, ()=> moveSub(t.id,s.id,-1)));
-      rc.appendChild(ebtn('↓','Bajar', si===subs.length-1, ()=> moveSub(t.id,s.id,1)));
-      rc.appendChild(ebtn('✎','Renombrar', false, ()=> editSub(s)));
-      rc.appendChild(ebtn('🗑','Archivar', false, ()=> archiveSub(s)));
+      rc.appendChild(ebtn('↑',tr('up'), si===0, ()=> moveSub(t.id,s.id,-1)));
+      rc.appendChild(ebtn('↓',tr('down'), si===subs.length-1, ()=> moveSub(t.id,s.id,1)));
+      rc.appendChild(ebtn('✎',tr('rename'), false, ()=> editSub(s)));
+      rc.appendChild(ebtn('🗑',tr('archive'), false, ()=> archiveSub(s)));
       row.appendChild(rc);
       list.appendChild(row);
     });
     (t.subActivities||[]).filter(s=>s.archived).forEach(s => {
       const row = el('div','edit-row archived');
-      row.appendChild(el('span','er-label', s.label + ' · archivada'));
+      row.appendChild(el('span','er-label', s.label + ' · ' + tr('archived_one')));
       const rc = el('div','er-ctrls');
-      rc.appendChild(tbtn('Restaurar', null, ()=> restoreSub(s)));
+      rc.appendChild(tbtn(tr('restore'), null, ()=> restoreSub(s)));
       row.appendChild(rc);
       list.appendChild(row);
     });
-    list.appendChild(tbtn('+ Agregar fila', 'addbtn', ()=> addSub(t)));
+    list.appendChild(tbtn(tr('add_row'), 'addbtn', ()=> addSub(t)));
     card.appendChild(list);
     cards.appendChild(card);
   });
 
-  cards.appendChild(tbtn('+ Nueva tabla', 'addbtn big', ()=> addTablita()));
+  cards.appendChild(tbtn(tr('new_table'), 'addbtn big', ()=> addTablita()));
 
   // ---- Counters ----
-  cards.appendChild(el('p','count-title','contadores'));
+  cards.appendChild(el('p','count-title',tr('counters_title')));
   const ccard = document.createElement('div');
   ccard.className = 'card edit-card';
   const clist = el('div','edit-rows');
@@ -1510,14 +1745,14 @@ function renderEditor(){
     const row = el('div','edit-row');
     row.appendChild(el('span','er-label', c.emoji + '  ' + c.label));
     const rc = el('div','er-ctrls');
-    rc.appendChild(ebtn('↑','Subir', ci===0, ()=> moveCounter(c.id,-1)));
-    rc.appendChild(ebtn('↓','Bajar', ci===cnts.length-1, ()=> moveCounter(c.id,1)));
-    rc.appendChild(ebtn('✎','Editar', false, ()=> editCounter(c)));
-    rc.appendChild(ebtn('🗑','Archivar', false, ()=> archiveCounter(c)));
+    rc.appendChild(ebtn('↑',tr('up'), ci===0, ()=> moveCounter(c.id,-1)));
+    rc.appendChild(ebtn('↓',tr('down'), ci===cnts.length-1, ()=> moveCounter(c.id,1)));
+    rc.appendChild(ebtn('✎',tr('edit'), false, ()=> editCounter(c)));
+    rc.appendChild(ebtn('🗑',tr('archive'), false, ()=> archiveCounter(c)));
     row.appendChild(rc);
     clist.appendChild(row);
   });
-  clist.appendChild(tbtn('+ Nuevo contador', 'addbtn', ()=> addCounter()));
+  clist.appendChild(tbtn(tr('new_counter'), 'addbtn', ()=> addCounter()));
   ccard.appendChild(clist);
   cards.appendChild(ccard);
 
@@ -1525,12 +1760,12 @@ function renderEditor(){
   const archT = state.config.filter(t => t.archived);
   const archC = state.counters.filter(c => c.archived);
   if(archT.length || archC.length){
-    cards.appendChild(el('p','count-title','archivadas'));
+    cards.appendChild(el('p','count-title',tr('archived_title')));
     archT.forEach(t => {
       const row = el('div','edit-row archived');
       row.appendChild(el('span','er-label', '📋  ' + t.title));
       const rc = el('div','er-ctrls');
-      rc.appendChild(tbtn('Restaurar', null, ()=> restoreTablita(t)));
+      rc.appendChild(tbtn(tr('restore'), null, ()=> restoreTablita(t)));
       row.appendChild(rc);
       cards.appendChild(row);
     });
@@ -1538,7 +1773,7 @@ function renderEditor(){
       const row = el('div','edit-row archived');
       row.appendChild(el('span','er-label', (c.emoji||'•') + '  ' + c.label));
       const rc = el('div','er-ctrls');
-      rc.appendChild(tbtn('Restaurar', null, ()=> restoreCounter(c)));
+      rc.appendChild(tbtn(tr('restore'), null, ()=> restoreCounter(c)));
       row.appendChild(rc);
       cards.appendChild(row);
     });
@@ -1547,19 +1782,19 @@ function renderEditor(){
 
 // Run a config write, then re-sync from Supabase and re-render the editor.
 async function withConfigWrite(fn){
-  if(state.mode !== 'supabase'){ showToast('La edición necesita conexión'); return; }
+  if(state.mode !== 'supabase'){ showToast(tr('edit_needs_conn')); return; }
   try{
     await fn();
     const [config, counters] = await Promise.all([ sbFetchConfig(), sbFetchCounters() ]);
     state.config = config; state.counters = counters;
     saveConfigLocal(); saveCountersLocal();
     renderEditor();
-  }catch(e){ showToast('No se pudo guardar — revisa tu conexión'); }
+  }catch(e){ showToast(tr('save_failed')); }
 }
 const nextOrder = (arr) => arr.length ? Math.max(...arr.map(x=>x.sort_order)) + 1 : 0;
 
 async function addTablita(){
-  const r = await promptModal({ heading:'Nueva tabla', name:'', showColor:true, accent:PALETTE[0] });
+  const r = await promptModal({ heading:tr('m_new_table'), name:'', showColor:true, accent:PALETTE[0] });
   if(!r) return;
   await withConfigWrite(()=> sbPost('tablitas', {
     id: genId('tb'), title: r.name, accent: r.accent,
@@ -1567,18 +1802,18 @@ async function addTablita(){
   }));
 }
 async function editTablita(t){
-  const r = await promptModal({ heading:'Editar tabla', name:t.title, showColor:true, accent:t.accent });
+  const r = await promptModal({ heading:tr('m_edit_table'), name:t.title, showColor:true, accent:t.accent });
   if(!r) return;
   await withConfigWrite(()=> sbPatch('tablitas', t.id, { title:r.name, accent:r.accent }));
 }
 async function archiveTablita(t){
-  if(!await confirmModal(`¿Archivar “${t.title}”? Se ocultará, pero no se pierde el historial.`)) return;
+  if(!await confirmModal(tr('confirm_archive', t.title))) return;
   await withConfigWrite(()=> sbPatch('tablitas', t.id, { archived:true }));
 }
 async function restoreTablita(t){ await withConfigWrite(()=> sbPatch('tablitas', t.id, { archived:false })); }
 
 async function addSub(t){
-  const r = await promptModal({ heading:`Nueva fila en ${t.title}`, name:'', showColor:false });
+  const r = await promptModal({ heading:tr('m_new_row', t.title), name:'', showColor:false });
   if(!r) return;
   const sibs = t.subActivities || [];
   await withConfigWrite(()=> sbPost('sub_activities', {
@@ -1587,18 +1822,18 @@ async function addSub(t){
   }));
 }
 async function editSub(s){
-  const r = await promptModal({ heading:'Renombrar fila', name:s.label, showColor:false });
+  const r = await promptModal({ heading:tr('m_rename_row'), name:s.label, showColor:false });
   if(!r) return;
   await withConfigWrite(()=> sbPatch('sub_activities', s.id, { label:r.name }));
 }
 async function archiveSub(s){
-  if(!await confirmModal(`¿Archivar “${s.label}”? Se ocultará, pero no se pierde el historial.`)) return;
+  if(!await confirmModal(tr('confirm_archive', s.label))) return;
   await withConfigWrite(()=> sbPatch('sub_activities', s.id, { archived:true }));
 }
 async function restoreSub(s){ await withConfigWrite(()=> sbPatch('sub_activities', s.id, { archived:false })); }
 
 async function addCounter(){
-  const r = await promptModal({ heading:'Nuevo contador', name:'', showColor:true, accent:PALETTE[3], showEmoji:true, emoji:'' });
+  const r = await promptModal({ heading:tr('m_new_counter'), name:'', showColor:true, accent:PALETTE[3], showEmoji:true, emoji:'' });
   if(!r) return;
   await withConfigWrite(()=> sbPost('counters', {
     id: genId('ct'), label:r.name, emoji:r.emoji, accent:r.accent,
@@ -1606,12 +1841,12 @@ async function addCounter(){
   }));
 }
 async function editCounter(c){
-  const r = await promptModal({ heading:'Editar contador', name:c.label, showColor:true, accent:c.accent, showEmoji:true, emoji:c.emoji });
+  const r = await promptModal({ heading:tr('m_edit_counter'), name:c.label, showColor:true, accent:c.accent, showEmoji:true, emoji:c.emoji });
   if(!r) return;
   await withConfigWrite(()=> sbPatch('counters', c.id, { label:r.name, emoji:r.emoji, accent:r.accent }));
 }
 async function archiveCounter(c){
-  if(!await confirmModal(`¿Archivar “${c.label}”? Se ocultará, pero no se pierde el historial.`)) return;
+  if(!await confirmModal(tr('confirm_archive', c.label))) return;
   await withConfigWrite(()=> sbPatch('counters', c.id, { archived:true }));
 }
 async function restoreCounter(c){ await withConfigWrite(()=> sbPatch('counters', c.id, { archived:false })); }
@@ -1661,12 +1896,12 @@ function promptModal({ heading, name='', showColor=false, accent=PALETTE[0], sho
         <h3>${esc(heading)}</h3>
         <div class="modal-fields">
           ${showEmoji ? `<input class="modal-emoji" type="text" value="${esc(emoji)}" placeholder="🙂" maxlength="2" aria-label="emoji">` : ''}
-          <input class="modal-input" type="text" value="${esc(name)}" placeholder="Nombre" maxlength="40">
+          <input class="modal-input" type="text" value="${esc(name)}" placeholder="${esc(tr('ph_name'))}" maxlength="40">
         </div>
         ${showColor ? `<div class="swatches">${PALETTE.map(p=>`<button class="sw${p===chosen?' on':''}" data-c="${p}" style="background:${p}" aria-label="color"></button>`).join('')}</div>` : ''}
         <div class="modal-actions">
-          <button class="mbtn cancel">Cancelar</button>
-          <button class="mbtn save">Guardar</button>
+          <button class="mbtn cancel">${tr('cancel')}</button>
+          <button class="mbtn save">${tr('save')}</button>
         </div>
       </div>`;
     document.body.appendChild(ov);
@@ -1694,7 +1929,7 @@ function promptModal({ heading, name='', showColor=false, accent=PALETTE[0], sho
     input.addEventListener('keydown', e => { if(e.key==='Enter') save(); });
   });
 }
-function confirmModal(msg){
+function confirmModal(msg, confirmLabel){
   return new Promise(resolve => {
     const ov = document.createElement('div');
     ov.className = 'modal-ov';
@@ -1702,8 +1937,8 @@ function confirmModal(msg){
       <div class="modal">
         <p class="modal-msg">${esc(msg)}</p>
         <div class="modal-actions">
-          <button class="mbtn cancel">Cancelar</button>
-          <button class="mbtn save warn">Archivar</button>
+          <button class="mbtn cancel">${tr('cancel')}</button>
+          <button class="mbtn save warn">${esc(confirmLabel || tr('archive'))}</button>
         </div>
       </div>`;
     document.body.appendChild(ov);
@@ -1739,12 +1974,12 @@ const gv = (id) => (document.getElementById(id).value || '').trim();
 
 function prettyAuthError(err){
   const msg = (err && err.message ? err.message : String(err)).toLowerCase();
-  if(msg.includes('invalid login')) return 'Correo o contraseña incorrectos.';
-  if(msg.includes('already registered') || msg.includes('already been registered')) return 'Ese correo ya tiene cuenta. Entra normal.';
-  if(msg.includes('password') && msg.includes('6')) return 'La contraseña necesita al menos 6 caracteres.';
-  if(msg.includes('email') && msg.includes('confirm')) return 'Confirma tu correo antes de entrar (revisa tu bandeja).';
-  if(msg.includes('rate limit') || msg.includes('too many')) return 'Demasiados intentos. Espera un momento e inténtalo de nuevo.';
-  return 'Algo salió mal. Revisa tu conexión e inténtalo otra vez.';
+  if(msg.includes('invalid login')) return tr('err_invalid');
+  if(msg.includes('already registered') || msg.includes('already been registered')) return tr('err_registered');
+  if(msg.includes('password') && msg.includes('6')) return tr('err_pass6');
+  if(msg.includes('email') && msg.includes('confirm')) return tr('err_confirm');
+  if(msg.includes('rate limit') || msg.includes('too many')) return tr('err_rate');
+  return tr('err_generic');
 }
 
 // Seed a brand-new account with the starter set. No-op if the account already has tablitas.
@@ -1788,11 +2023,11 @@ async function handleSession(s){
 
 async function onAuthSubmit(e){
   e.preventDefault();
-  if(!sb){ setGateMsg('No cargó el acceso. Revisa tu conexión y recarga la página.'); return; }
+  if(!sb){ setGateMsg(tr('msg_no_access')); return; }
   const email = gv('authEmail'), pass = gv('authPass');
-  if(!email){ setGateMsg('Escribe tu correo.'); return; }
-  if(!pass){ setGateMsg('Escribe tu contraseña.'); return; }
-  setGateBusy(true); setGateMsg('Entrando…', true);
+  if(!email){ setGateMsg(tr('msg_need_email')); return; }
+  if(!pass){ setGateMsg(tr('msg_need_pass')); return; }
+  setGateBusy(true); setGateMsg(tr('msg_entering'), true);
   try{
     if(authMode === 'login'){
       const { error } = await sb.auth.signInWithPassword({ email, password:pass });
@@ -1801,7 +2036,7 @@ async function onAuthSubmit(e){
       const { data, error } = await sb.auth.signUp({ email, password:pass, options:{ emailRedirectTo:redirectTo() } });
       if(error) throw error;
       if(data && data.user && !data.session){
-        setGateMsg('Cuenta creada ✉️ Revisa tu correo para confirmarla y luego entra.', true);
+        setGateMsg(tr('msg_account_created'), true);
         setGateBusy(false); return;
       }
     }
@@ -1811,20 +2046,20 @@ async function onAuthSubmit(e){
 
 async function onMagicLink(){
   const email = gv('authEmail');
-  if(!email){ setGateMsg('Escribe tu correo primero.'); return; }
+  if(!email){ setGateMsg(tr('msg_need_email_first')); return; }
   setGateBusy(true); setGateMsg('');
   const { error } = await sb.auth.signInWithOtp({ email, options:{ emailRedirectTo:redirectTo() } });
   setGateBusy(false);
-  setGateMsg(error ? prettyAuthError(error) : 'Te enviamos un enlace mágico ✨ Revisa tu correo.', !error);
+  setGateMsg(error ? prettyAuthError(error) : tr('msg_magic_sent'), !error);
 }
 
 async function onForgot(){
   const email = gv('authEmail');
-  if(!email){ setGateMsg('Escribe tu correo primero.'); return; }
+  if(!email){ setGateMsg(tr('msg_need_email_first')); return; }
   setGateBusy(true); setGateMsg('');
   const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo:redirectTo() });
   setGateBusy(false);
-  setGateMsg(error ? prettyAuthError(error) : 'Te enviamos un correo para restablecer tu contraseña 🔑', !error);
+  setGateMsg(error ? prettyAuthError(error) : tr('msg_reset_sent'), !error);
 }
 
 async function onGoogle(){
@@ -1834,18 +2069,22 @@ async function onGoogle(){
   if(error){ setGateBusy(false); setGateMsg(prettyAuthError(error)); }
 }
 
+function applyAuthModeTexts(){
+  const login = authMode === 'login';
+  document.getElementById('authSubmit').textContent = login ? tr('login_submit') : tr('signup_submit');
+  document.getElementById('toggleMode').textContent = login ? tr('to_signup') : tr('to_login');
+  document.getElementById('gateTag').textContent = login ? tr('tag_login') : tr('tag_signup');
+  document.getElementById('authPass').setAttribute('autocomplete', login ? 'current-password' : 'new-password');
+}
+
 function toggleAuthMode(){
   authMode = (authMode === 'login') ? 'signup' : 'login';
-  const login = authMode === 'login';
-  document.getElementById('authSubmit').textContent = login ? 'Entrar' : 'Crear cuenta';
-  document.getElementById('toggleMode').textContent = login ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Entra';
-  document.getElementById('gateTag').textContent = login ? 'entra para ver tu progreso' : 'crea tu cuenta y empieza';
-  document.getElementById('authPass').setAttribute('autocomplete', login ? 'current-password' : 'new-password');
+  applyAuthModeTexts();
   setGateMsg('');
 }
 
 async function onLogout(){
-  if(!await confirmModal('¿Cerrar sesión?')) return;
+  if(!await confirmModal(tr('confirm_logout'), tr('logout_icon'))) return;
   await sb.auth.signOut(); // onAuthStateChange → handleSession shows the gate
 }
 
@@ -1865,6 +2104,8 @@ async function boot(){
   appEl().style.display = 'none'; // avoid a flash of the app before we know the session
   bindUI();
   bindAuthUI();
+  bindLangToggles();
+  applyLang();          // localize all static text + set the toggle to the chosen/guessed language
   // Load the auth library (with backup CDN) and create the client.
   if(await loadSupabaseLib()){
     sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
@@ -1876,7 +2117,7 @@ async function boot(){
   if(!sb){
     document.getElementById('loader').classList.add('hide');
     showGate();
-    setGateMsg('No se pudo cargar el sistema de acceso. Revisa tu conexión e intenta recargar la página.');
+    setGateMsg(tr('msg_load_failed'));
     return;
   }
   // Later sign-in/out events (incl. magic-link / reset redirects) swap views.
