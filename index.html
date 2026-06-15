@@ -37,6 +37,7 @@
   --ink:         #2a2118;   /* near-black warm brown */
   --gold:        #d9a441;   /* dusty desert gold */
   --orange:      #cf6a39;   /* burnt orange */
+  --orange-deep: #b04f22;   /* deeper burnt orange — for subtitles (better contrast) */
   --teal:        #3f8a80;   /* muted teal */
   --lavender:    #8f82c2;   /* soft lavender */
   --pink:        #d98798;   /* warm pink */
@@ -90,16 +91,16 @@ header{
   background:linear-gradient(var(--sand) 72%, rgba(231,216,184,0));
 }
 .brand{
-  display:flex; align-items:center; gap:8px; padding:0 4px 8px;
+  display:flex; align-items:center; gap:6px; padding:0 4px 8px;
 }
-.brandtxt{ display:flex; flex-direction:column; gap:1px; min-width:0; }
+.brandtxt{ display:flex; flex-direction:column; gap:1px; min-width:0; flex:1 1 auto; overflow:hidden; }
 .brand h1{
   font-family:var(--font-display);
-  font-weight:800; font-size:1.32rem; line-height:1;
+  font-weight:800; font-size:clamp(1.02rem, 4.7vw, 1.32rem); line-height:1; white-space:nowrap;
   letter-spacing:-.02em; margin:0; color:var(--ink);
 }
 .brand .sub{
-  font-family:var(--font-hand); font-size:1.02rem; color:var(--orange);
+  font-family:var(--font-hand); font-size:1.02rem; color:var(--orange-deep);
   line-height:1; transform:rotate(-2deg); transform-origin:left;
 }
 .langtoggle{
@@ -344,8 +345,8 @@ svg.linechart .sdot{ filter:drop-shadow(0 1px 0 var(--shadow)); }
 /* ---------- Offline pill ---------- */
 .modepill{
   display:inline-flex; align-items:center; gap:6px; margin-left:auto;
-  font-size:.66rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
-  color:var(--ink-soft); padding:3px 8px; border:2px solid var(--ink-soft);
+  font-size:.62rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--ink-soft); padding:3px 7px; border:2px solid var(--ink-soft);
   border-radius:999px; opacity:0; transition:opacity .3s; line-height:1;
 }
 .modepill.show{ opacity:.85; }
@@ -496,7 +497,6 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
 @media (max-width:600px){
   :root{ --col-template:60px repeat(7, 1fr); --bar-h:28px; }
   .rowlabel{ font-size:.82rem; }
-  .brand h1{ font-size:1.3rem; }
   .grid{ gap:7px 4px; }
 }
 @media (min-width:900px){
@@ -527,7 +527,7 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
   font-family:var(--font-display); font-weight:800; font-size:1.7rem; line-height:1;
   letter-spacing:-.02em; margin:0; color:var(--ink);
 }
-.gate-brand .sub{ font-family:var(--font-hand); font-size:1.3rem; color:var(--orange); transform:rotate(-3deg); }
+.gate-brand .sub{ font-family:var(--font-hand); font-size:1.3rem; color:var(--orange-deep); transform:rotate(-3deg); }
 .gate-tag{ font-family:var(--font-hand); font-size:1.15rem; color:var(--ink-soft); margin:6px 0 18px; }
 .gate-form{ display:flex; flex-direction:column; gap:10px; }
 .gate-input{
