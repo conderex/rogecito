@@ -942,6 +942,24 @@ const NEW_USER_COUNTERS = [
   { id:'cafecito', label:'Cafecito',       emoji:'☕', accent:'var(--gold)', sort_order:0, archived:false },
   { id:'logros',   label:'Logros del día', emoji:'🏆', accent:'var(--teal)', sort_order:1, archived:false },
 ];
+// English starter set — same internal ids, English-facing titles/labels. Picked at
+// seed time for accounts created while the UI is in English (see seedSets()).
+const NEW_USER_TABLITAS_EN = [
+  { id:'dientitos',   title:'Teeth',       accent:'var(--teal)',     sort_order:0, archived:false, subActivities:[
+    {id:'d_manana',label:'Morning',sort_order:0,archived:false},{id:'d_tarde',label:'Afternoon',sort_order:1,archived:false},{id:'d_noche',label:'Night',sort_order:2,archived:false} ] },
+  { id:'casa_limpia', title:'Clean House', accent:'var(--lavender)', sort_order:1, archived:false, subActivities:[
+    {id:'c_cocina',label:'Kitchen',sort_order:0,archived:false},{id:'c_cuarto',label:'Bedroom',sort_order:1,archived:false},{id:'c_bano',label:'Bathroom',sort_order:2,archived:false},{id:'c_oficina',label:'Office',sort_order:3,archived:false} ] },
+];
+const NEW_USER_COUNTERS_EN = [
+  { id:'cafecito', label:'Coffee',     emoji:'☕', accent:'var(--gold)', sort_order:0, archived:false },
+  { id:'logros',   label:'Daily wins', emoji:'🏆', accent:'var(--teal)', sort_order:1, archived:false },
+];
+// Resolve the starter set for the current UI language.
+function seedSets(){
+  return (LANG === 'en')
+    ? { tablitas: NEW_USER_TABLITAS_EN, counters: NEW_USER_COUNTERS_EN }
+    : { tablitas: NEW_USER_TABLITAS,    counters: NEW_USER_COUNTERS };
+}
 
 let DAY_HEADERS = I18N[LANG].dayHeaders; // Thu → Wed
 let MONTHS = I18N[LANG].months;
@@ -1987,13 +2005,14 @@ async function ensureSeed(){
   if(state.config && state.config.length) return;
   try{
     const uid = currentUserId;
-    await sbPost('tablitas', NEW_USER_TABLITAS.map(t => ({
+    const seed = seedSets();
+    await sbPost('tablitas', seed.tablitas.map(t => ({
       id:t.id, title:t.title, accent:t.accent, sort_order:t.sort_order, archived:false, user_id:uid })));
     const subs = [];
-    NEW_USER_TABLITAS.forEach(t => (t.subActivities||[]).forEach(s => subs.push({
+    seed.tablitas.forEach(t => (t.subActivities||[]).forEach(s => subs.push({
       id:s.id, tablita_id:t.id, label:s.label, sort_order:s.sort_order, archived:false, user_id:uid })));
     await sbPost('sub_activities', subs);
-    await sbPost('counters', NEW_USER_COUNTERS.map(c => ({
+    await sbPost('counters', seed.counters.map(c => ({
       id:c.id, label:c.label, emoji:c.emoji, accent:c.accent, sort_order:c.sort_order, archived:false, user_id:uid })));
     const [config, counters] = await Promise.all([ sbFetchConfig(), sbFetchCounters() ]);
     state.config = config; state.counters = counters;
