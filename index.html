@@ -565,6 +565,17 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
   color:var(--ink); background:#fff; margin-bottom:10px;
 }
 .gate-btn.google svg{ flex:0 0 auto; }
+/* ---------- Stats (owner-only dashboard) ---------- */
+.stat-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin:8px 0 6px; }
+.stat-card{ border:var(--border); box-shadow:4px 4px 0 var(--shadow); border-radius:14px; background:#fff; padding:12px 14px; }
+.stat-card .big{ font-family:var(--font-display,inherit); font-weight:800; font-size:1.9rem; line-height:1; color:var(--ink); }
+.stat-card .lbl{ font-family:var(--font-body); font-size:.78rem; color:var(--ink-soft); margin-top:6px; }
+.stat-sub{ display:flex; gap:10px; margin-top:4px; font-family:var(--font-body); font-size:.74rem; color:var(--ink-soft); }
+.stat-sub b{ color:var(--ink); font-weight:700; }
+.spark{ display:flex; align-items:flex-end; gap:4px; height:60px; margin:6px 2px 2px; }
+.spark .bar{ flex:1; min-height:3px; background:var(--teal); border:1.5px solid var(--ink); border-radius:4px 4px 0 0; }
+.spark-row .lbl{ font-family:var(--font-body); font-size:.78rem; color:var(--ink-soft); margin-top:8px; }
+.stats-note{ font-family:var(--font-body); font-size:.85rem; line-height:1.4; color:var(--orange); margin:8px 2px; }
 </style>
 </head>
 <body>
@@ -589,6 +600,7 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
     <div class="tabs">
       <button class="tab active" data-tab="tracker">Tracker</button>
       <button class="tab" data-tab="insights">Insights</button>
+      <button class="tab" data-tab="stats" id="statsTab" hidden title="Stats">📊</button>
     </div>
   </header>
 
@@ -611,6 +623,12 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
     <p class="ins-intro" data-i18n="week_q">¿cómo va la semana?</p>
     <div id="insights"></div>
     <footer><p data-i18n="one_day">un día a la vez ✿</p></footer>
+  </section>
+
+  <!-- STATS (owner only) -->
+  <section class="panel" id="panel-stats">
+    <p class="ins-intro" data-i18n="stats_title">Métricas</p>
+    <div id="stats"></div>
   </section>
 </div>
 
@@ -760,6 +778,19 @@ const I18N = {
     msg_reset_sent: 'Te enviamos un correo para restablecer tu contraseña 🔑',
     msg_need_email_first: 'Escribe tu correo primero.',
     msg_load_failed: 'No se pudo cargar el sistema de acceso. Revisa tu conexión e intenta recargar la página.',
+    stats_title: 'Métricas',
+    stats_total_users: 'Usuarios totales',
+    stats_active: 'Activos',
+    stats_new: 'Nuevos',
+    stats_returning: 'Recurrentes (7d)',
+    stats_today: 'hoy',
+    stats_7d: '7 días',
+    stats_30d: '30 días',
+    stats_dau: 'Activos por día (14d)',
+    stats_stickiness: 'Constancia (DAU/WAU)',
+    stats_loading: 'Cargando métricas…',
+    stats_err: 'No se pudieron cargar las métricas.',
+    stats_setup: 'Falta crear la función en Supabase (owner_stats). Corre el SQL de configuración una vez y recarga.',
   },
   en: {
     months: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
@@ -841,6 +872,19 @@ const I18N = {
     msg_reset_sent: 'We sent you an email to reset your password 🔑',
     msg_need_email_first: 'Enter your email first.',
     msg_load_failed: "Couldn't load the login system. Check your connection and try reloading the page.",
+    stats_title: 'Stats',
+    stats_total_users: 'Total users',
+    stats_active: 'Active',
+    stats_new: 'New',
+    stats_returning: 'Returning (7d)',
+    stats_today: 'today',
+    stats_7d: '7 days',
+    stats_30d: '30 days',
+    stats_dau: 'Daily active (14d)',
+    stats_stickiness: 'Stickiness (DAU/WAU)',
+    stats_loading: 'Loading stats…',
+    stats_err: 'Could not load stats.',
+    stats_setup: 'The Supabase function (owner_stats) is not set up yet. Run the setup SQL once and reload.',
   },
 };
 let LANG = (() => {
@@ -873,6 +917,7 @@ function applyLang(){
   if(typeof appLoaded !== 'undefined' && appLoaded){
     if(state.editing) renderEditor(); else { renderWeekNav(); renderCards(); renderCounters(); }
     if(state.tab === 'insights') renderInsights();
+    if(state.tab === 'stats') renderStats();
   }
 }
 function updateLangToggles(){
@@ -1642,8 +1687,10 @@ function switchTab(name){
   document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
   document.getElementById('panel-tracker').classList.toggle('active', name==='tracker');
   document.getElementById('panel-insights').classList.toggle('active', name==='insights');
+  document.getElementById('panel-stats').classList.toggle('active', name==='stats');
   document.getElementById('editToggle').style.display = name==='tracker' ? '' : 'none';
   if(name==='insights') renderInsights();
+  if(name==='stats') renderStats();
 }
 
 function changeWeek(delta){
@@ -1972,7 +2019,11 @@ function confirmModal(msg, confirmLabel){
    ===================================================================== */
 let authMode = 'login';      // 'login' | 'signup'
 let currentUserId = null;    // logged-in user's uuid (also used to scope seed inserts)
+let currentUserEmail = null; // logged-in user's email (gates the owner-only Stats panel)
 let appLoaded = false;       // guards against reloading data on repeated auth events
+// Only this account sees the Stats panel; owner_stats() also re-checks server-side.
+const OWNER_EMAIL = 'rogerthatheart@gmail.com';
+const isOwner = () => (currentUserEmail || '').toLowerCase() === OWNER_EMAIL;
 const redirectTo = () => location.origin + location.pathname;
 const gateEl = () => document.getElementById('gate');
 const appEl  = () => document.querySelector('.app');
@@ -2024,6 +2075,8 @@ async function handleSession(s){
   const uid = (s && s.user) ? s.user.id : null;
   if(uid){
     accessToken = s.access_token;
+    currentUserEmail = (s.user && s.user.email) || null;
+    applyOwnerUI();
     if(uid === currentUserId && appLoaded){ return; } // already loaded this user
     currentUserId = uid;
     showApp();
@@ -2034,10 +2087,71 @@ async function handleSession(s){
     if(state.tab === 'insights') renderInsights();
   }else{
     accessToken = SUPABASE_ANON;
-    currentUserId = null; appLoaded = false;
+    currentUserId = null; currentUserEmail = null; appLoaded = false;
+    applyOwnerUI();
+    if(state.tab === 'stats') switchTab('tracker');
     showGate();
   }
   document.getElementById('loader').classList.add('hide');
+}
+
+// Show/hide the owner-only Stats tab based on who's logged in.
+function applyOwnerUI(){
+  const tab = document.getElementById('statsTab');
+  if(tab) tab.hidden = !isOwner();
+}
+
+// Aggregated, owner-only metrics. The server function re-checks the caller's
+// email, so this returns nothing useful to anyone else even if they call it.
+async function fetchOwnerStats(){
+  const res = await fetch(REST_BASE + 'rpc/owner_stats', {
+    method:'POST',
+    headers:{ ...authHeaders(), 'Content-Type':'application/json' },
+    body:'{}',
+  });
+  if(res.status === 404) return { __missing:true };
+  if(!res.ok) throw new Error('stats HTTP '+res.status);
+  return res.json();
+}
+
+function statCard(big, lbl){
+  return `<div class="stat-card"><div class="big">${big}</div><div class="lbl">${esc(lbl)}</div></div>`;
+}
+
+async function renderStats(){
+  const host = document.getElementById('stats');
+  if(!host) return;
+  if(!isOwner()){ host.innerHTML = ''; return; }
+  host.innerHTML = `<p class="stat-sub">${esc(tr('stats_loading'))}</p>`;
+  let d;
+  try{ d = await fetchOwnerStats(); }
+  catch(e){ host.innerHTML = `<p class="stats-note">${esc(tr('stats_err'))}</p>`; return; }
+  if(!d || d.__missing || d.error === 'forbidden'){
+    host.innerHTML = `<p class="stats-note">${esc(tr('stats_setup'))}</p>`; return;
+  }
+  const n = v => (v == null ? 0 : v);
+  const wau = n(d.active_7d);
+  const stickiness = wau ? Math.round(n(d.active_today) / wau * 100) : 0;
+  const daily = Array.isArray(d.daily) ? d.daily : [];
+  const peak = daily.reduce((m,x)=> Math.max(m, n(x.users)), 0) || 1;
+  const bars = daily.map(x => {
+    const h = Math.max(3, Math.round(n(x.users) / peak * 56));
+    return `<div class="bar" style="height:${h}px" title="${esc(x.day)}: ${n(x.users)}"></div>`;
+  }).join('');
+
+  host.innerHTML = `
+    <div class="stat-grid">
+      ${statCard(n(d.active_today), tr('stats_active') + ' · ' + tr('stats_today'))}
+      ${statCard(wau, tr('stats_active') + ' · ' + tr('stats_7d'))}
+      ${statCard(n(d.total_users), tr('stats_total_users'))}
+      ${statCard(n(d.new_7d), tr('stats_new') + ' · ' + tr('stats_7d'))}
+      ${statCard(n(d.returning_7d), tr('stats_returning'))}
+      ${statCard(stickiness + '%', tr('stats_stickiness'))}
+    </div>
+    <div class="spark-row">
+      <div class="spark">${bars || ''}</div>
+      <div class="lbl">${esc(tr('stats_dau'))}</div>
+    </div>`;
 }
 
 async function onAuthSubmit(e){
