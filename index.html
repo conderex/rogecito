@@ -845,7 +845,7 @@ const I18N = {
 };
 let LANG = (() => {
   try { const s = localStorage.getItem(LS_LANG); if(s === 'es' || s === 'en') return s; } catch(e){}
-  return (navigator.language || navigator.userLanguage || 'en').toLowerCase().startsWith('es') ? 'es' : 'en';
+  return 'es'; // default to Spanish; English is one tap away via the ES/EN toggle
 })();
 function tr(key, ...args){
   const tbl = I18N[LANG] || I18N.es;
