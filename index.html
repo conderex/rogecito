@@ -329,6 +329,25 @@ header{
 .cmp-val{ flex:0 0 auto; min-width:26px; text-align:right;
   font-family:var(--font-display); font-weight:800; font-variant-numeric:tabular-nums; font-size:.95rem; }
 
+/* Constancia (tablita completion): per-period bars (week/month) or line (quarter/year) */
+.cons + .cons{ margin-top:20px; }
+.cons-head{ display:flex; align-items:baseline; justify-content:space-between; gap:8px; }
+.cons-name{ font-family:var(--font-body); font-weight:700; font-size:.9rem; }
+.cons-score{ font-family:var(--font-display); font-weight:800; font-size:.98rem; font-variant-numeric:tabular-nums; }
+.cons-frac{ color:var(--ink-soft); font-weight:600; font-size:.76rem; }
+.bars{ display:flex; align-items:flex-end; gap:3px; height:90px; margin-top:8px; }
+.bar{ flex:1 1 0; min-width:0; display:flex; flex-direction:column; justify-content:flex-end; height:100%; }
+.bar .bfill{ width:100%; height:0; background:var(--accent); align-self:flex-end;
+  border-radius:4px 4px 2px 2px; transition:height .7s var(--ease-out); }
+.bar.zero .bfill{ background:var(--line); height:6px !important; opacity:.6; }
+.bar.future .bfill{ background:var(--line); height:6px !important; opacity:.25; }
+.blab{ text-align:center; font-size:.58rem; color:var(--ink-soft); margin-top:5px; min-height:.7em; line-height:1; }
+svg.consline{ width:100%; height:auto; display:block; overflow:visible; margin-top:8px; }
+svg.consline .cgrid{ stroke:var(--line); opacity:.4; stroke-dasharray:2 4; }
+svg.consline .cline{ fill:none; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round;
+  filter:drop-shadow(1px 1.5px 0 var(--shadow)); }
+svg.consline .clab{ font-family:var(--font-body); font-size:8px; fill:var(--ink-soft); }
+
 /* ---------- Toast ---------- */
 .toast{
   position:fixed; left:50%; bottom:calc(22px + env(safe-area-inset-bottom));
@@ -749,10 +768,12 @@ const I18N = {
     confirm_logout: '¿Cerrar sesión?',
     // insights
     ins_journey: 'tu viaje, día a día ✨',
+    ins_consistency: 'Constancia',
+    ins_consistency_sub: 'qué tanto completaste cada tablita',
     ins_streaks: 'Rachas máximas',
     ins_streaks_sub: 'días seguidos, récord de cada tabla',
     ins_counts: 'Conteos',
-    ins_p_day: 'Ayer', ins_p_week: 'Semana', ins_p_month: 'Mes', ins_p_year: 'Año',
+    ins_p_day: 'Ayer', ins_p_week: 'Semana', ins_p_month: 'Mes', ins_p_quarter: 'Trimestre', ins_p_year: 'Año',
     ins_today: 'hoy', ins_yesterday: 'ayer',
     ins_this_week: 'esta semana', ins_last_week: 'semana pasada',
     ins_this_month: 'este mes', ins_last_month: 'mes pasado',
@@ -851,10 +872,12 @@ const I18N = {
     confirm_archive: x => `Archive “${x}”? It'll be hidden, but the history isn't lost.`,
     confirm_logout: 'Log out?',
     ins_journey: 'your journey, day by day ✨',
+    ins_consistency: 'Consistency',
+    ins_consistency_sub: 'how much you completed each table',
     ins_streaks: 'Longest streaks',
     ins_streaks_sub: 'days in a row, record for each table',
     ins_counts: 'Counts',
-    ins_p_day: 'Yesterday', ins_p_week: 'Week', ins_p_month: 'Month', ins_p_year: 'Year',
+    ins_p_day: 'Yesterday', ins_p_week: 'Week', ins_p_month: 'Month', ins_p_quarter: 'Quarter', ins_p_year: 'Year',
     ins_today: 'today', ins_yesterday: 'yesterday',
     ins_this_week: 'this week', ins_last_week: 'last week',
     ins_this_month: 'this month', ins_last_month: 'last month',
@@ -1466,6 +1489,91 @@ function paintCounter(itemId){
    ===================================================================== */
 // Counter comparison period: 'day' | 'week' | 'month' | 'year'.
 let insPeriod = 'month';
+// Tablita constancia period: 'week' | 'month' | 'quarter' | 'year'.
+let insTabPeriod = 'week';
+
+// Whole days from aISO to bISO inclusive (both 'YYYY-MM-DD').
+function daysBetween(aISO, bISO){
+  return Math.round((new Date(bISO+'T00:00:00') - new Date(aISO+'T00:00:00')) / 86400000);
+}
+
+// Completion buckets for a tablita over the selected period.
+// week/month -> one bucket per day (bar chart); quarter/year -> per week/month (line).
+// Each bucket pct = filled checks / (nSubs * elapsed days), bounded 0..100.
+function tablitaConsData(t, period){
+  const subs = new Set(t.subActivities.map(s=>s.id));
+  const nSubs = subs.size;
+  const perDay = new Map();
+  for(const k of state.checks){
+    const i1 = k.indexOf('|'); if(k.slice(0, i1) !== t.id) continue;
+    const i2 = k.indexOf('|', i1 + 1);
+    if(!subs.has(k.slice(i1 + 1, i2))) continue;       // archived/removed sub
+    const d = k.slice(-10); perDay.set(d, (perDay.get(d) || 0) + 1);
+  }
+  const today = startOfToday(), tISO = iso(today);
+  const filledIn = (a, b) => { let s = 0; for(const [d, n] of perDay){ if(d >= a && d <= b) s += n; } return s; };
+  const elapsedIn = (a, b) => {                          // non-future days in [a,b]
+    if(a > tISO) return 0;
+    return daysBetween(a, b < tISO ? b : tISO) + 1;
+  };
+  const mk = (a, b, label) => {
+    const filled = filledIn(a, b), possible = nSubs * elapsedIn(a, b);
+    return { label, filled, possible, future: a > tISO,
+             pct: possible > 0 ? Math.min(100, Math.round(filled / possible * 100)) : 0 };
+  };
+
+  let type = 'bar', buckets = [];
+  if(period === 'week'){
+    const ws = weekStart(today);
+    for(let i = 0; i < 7; i++){ const d = iso(addDays(ws, i)); buckets.push(mk(d, d, DAY_HEADERS[i])); }
+  } else if(period === 'month'){
+    const y = today.getFullYear(), mo = today.getMonth(), dim = new Date(y, mo+1, 0).getDate();
+    for(let i = 1; i <= dim; i++){ const d = iso(new Date(y, mo, i)); buckets.push(mk(d, d, (i === 1 || i % 5 === 0) ? String(i) : '')); }
+  } else if(period === 'quarter'){
+    type = 'line';
+    const y = today.getFullYear(), q = Math.floor(today.getMonth() / 3);
+    const qStart = new Date(y, q*3, 1), qEnd = new Date(y, q*3 + 3, 0);
+    const qS = iso(qStart), qE = iso(qEnd);
+    for(let wk = weekStart(qStart); wk <= qEnd; wk = addDays(wk, 7)){
+      let a = iso(wk); if(a < qS) a = qS;
+      let b = iso(addDays(wk, 6)); if(b > qE) b = qE;
+      buckets.push(mk(a, b, MONTHS[wk.getMonth()]));
+    }
+  } else {                                               // year
+    type = 'line';
+    const y = today.getFullYear();
+    for(let m = 0; m < 12; m++){ buckets.push(mk(iso(new Date(y, m, 1)), iso(new Date(y, m+1, 0)), MONTHS[m])); }
+  }
+  let f = 0, p = 0; buckets.forEach(b => { f += b.filled; p += b.possible; });
+  return { type, nSubs, buckets, total: { filled: f, possible: p, pct: p > 0 ? Math.min(100, Math.round(f / p * 100)) : 0 } };
+}
+
+// Vertical bars (week/month): height = pct; zero = stub, future = faint stub.
+function consBars(buckets, accent){
+  return `<div class="bars" style="--accent:${accent}">${buckets.map(b => {
+    const cls = b.future ? 'bar future' : (b.pct <= 0 ? 'bar zero' : 'bar');
+    const h = (b.future || b.pct <= 0) ? 0 : b.pct;
+    return `<div class="${cls}"><span class="bfill" data-h="${h}" title="${esc((b.label||'') + ' · ' + b.filled + '/' + b.possible)}"></span><span class="blab">${esc(b.label || '')}</span></div>`;
+  }).join('')}</div>`;
+}
+
+// Mini % line chart (quarter/year): plots non-future buckets only.
+function consLine(buckets, accent){
+  const W = 320, H = 120, padL = 8, padR = 8, padT = 10, padB = 18;
+  const plotW = W - padL - padR, plotH = H - padT - padB, n = buckets.length;
+  const xAt = i => n <= 1 ? padL + plotW/2 : padL + (i/(n-1))*plotW;
+  const yAt = v => padT + plotH - (Math.max(0, Math.min(100, v))/100)*plotH;
+  let grid = '';
+  [0, 50, 100].forEach(v => { const y = yAt(v); grid += `<line class="cgrid" x1="${padL}" y1="${y.toFixed(1)}" x2="${W-padR}" y2="${y.toFixed(1)}"/>`; });
+  const live = buckets.map((b, i) => ({ b, i })).filter(o => !o.b.future);
+  let line = '';
+  if(live.length > 1) line += `<polyline class="cline" data-line points="${live.map(o => xAt(o.i).toFixed(1)+','+yAt(o.b.pct).toFixed(1)).join(' ')}" stroke="${accent}"/>`;
+  line += live.map(o => `<circle cx="${xAt(o.i).toFixed(1)}" cy="${yAt(o.b.pct).toFixed(1)}" r="3" fill="${accent}" stroke="var(--paper)" stroke-width="1.5"/>`).join('');
+  const everyX = n > 8 ? 2 : 1;
+  let xl = '';
+  buckets.forEach((b, i) => { if((i % everyX !== 0 && i !== n-1) || !b.label) return; xl += `<text class="clab" x="${xAt(i).toFixed(1)}" y="${H-5}" text-anchor="middle">${esc(b.label)}</text>`; });
+  return `<svg class="consline" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img">${grid}${line}${xl}</svg>`;
+}
 
 // Inclusive ISO date ranges for the comparison: current = this period to date,
 // previous = the full preceding period. Also carries the i18n keys for labels.
@@ -1526,7 +1634,35 @@ function renderInsights(){
   const intro = el('p','ins-intro',tr('ins_journey'));
   wrap.appendChild(intro);
 
-  // (A) Rachas máximas — compact pills (name · days · flame), in each accent
+  // (A) Constancia — per-tablita completion: bars (week/month) or line (quarter/year)
+  if(tabs.length){
+    const tabPeriods = [['week','ins_p_week'],['month','ins_p_month'],['quarter','ins_p_quarter'],['year','ins_p_year']];
+    const seg = tabPeriods.map(([p,k]) =>
+      `<button type="button" class="segbtn${p===insTabPeriod?' on':''}" data-tp="${p}">${tr(k)}</button>`).join('');
+    const blocks = tabs.map(t => {
+      const d = tablitaConsData(t, insTabPeriod);
+      const ac = safeAccent(t.accent);
+      const chart = d.type === 'bar' ? consBars(d.buckets, ac) : consLine(d.buckets, ac);
+      return `<div class="cons" style="--accent:${ac}">
+        <div class="cons-head"><span class="cons-name">${esc(t.title)}</span><span class="cons-score">${d.total.pct}% <span class="cons-frac">${d.total.filled}/${d.total.possible}</span></span></div>
+        ${chart}</div>`;
+    }).join('');
+    const card = el('div','ins-card');
+    card.style.setProperty('--accent', 'var(--teal)');
+    card.innerHTML = `
+      <div class="ihead"><span class="swatch"></span><h3>${tr('ins_consistency')}</h3></div>
+      <div class="seg">${seg}</div>
+      ${blocks}
+      <div class="top" style="margin-top:12px"><span class="k" style="font-size:.78rem">${tr('ins_consistency_sub')}</span></div>`;
+    card.querySelectorAll('.segbtn').forEach(b => b.addEventListener('click', () => {
+      if(insTabPeriod === b.dataset.tp) return;
+      insTabPeriod = b.dataset.tp;
+      renderInsights();
+    }));
+    wrap.appendChild(card);
+  }
+
+  // (B) Rachas máximas — compact pills (name · days · flame), in each accent
   if(tabs.length){
     const pills = tabs.map(t => {
       const longest = computeStreaks(t.id).longest;
@@ -1576,6 +1712,7 @@ function renderInsights(){
   // animate bars + draw the chart lines in, next frame
   requestAnimationFrame(()=> requestAnimationFrame(()=>{
     wrap.querySelectorAll('[data-w]').forEach(s => s.style.width = s.dataset.w + '%');
+    wrap.querySelectorAll('[data-h]').forEach(s => s.style.height = s.dataset.h + '%');
     wrap.querySelectorAll('[data-line]').forEach(p => {
       try{
         const len = p.getTotalLength();
