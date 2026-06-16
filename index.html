@@ -310,19 +310,14 @@ header{
 
 .ins-intro{ font-family:var(--font-hand); font-size:1.45rem; color:var(--ink-soft); text-align:center; margin:4px 0 -4px; transform:rotate(-1deg); }
 
-/* ---------- Insights: heatmap + month comparison ---------- */
-.heat-list{ display:flex; flex-direction:column; gap:2px; }
-.heat-row{ margin-top:2px; }
-.heat-name{ font-family:var(--font-body); font-weight:700; font-size:.84rem; margin:10px 0 5px; }
-.heat-grid{ display:grid; grid-template-rows:repeat(7,1fr); grid-auto-flow:column;
-  grid-auto-columns:1fr; gap:3px; }
-.hc{ aspect-ratio:1; border-radius:3px; background:var(--accent); }
-.hc-empty{ background:var(--line); opacity:.4 !important; }
-.hc-future{ background:transparent !important; opacity:1 !important; }
-.heat-legend{ display:flex; align-items:center; gap:5px; justify-content:flex-end;
-  margin-top:12px; font-size:.72rem; color:var(--ink-soft); --accent:var(--teal); }
-.heat-legend .hc{ width:12px; height:12px; aspect-ratio:auto; }
-
+/* ---------- Insights: period comparison ---------- */
+.seg{ display:flex; gap:4px; padding:4px; margin:2px 0 16px;
+  background:var(--paper); border:2px solid var(--line); border-radius:11px; }
+.segbtn{ flex:1; appearance:none; border:none; cursor:pointer;
+  font-family:var(--font-body); font-weight:700; font-size:.78rem;
+  color:var(--ink-soft); background:transparent; padding:7px 4px; border-radius:7px;
+  min-height:34px; transition:color .2s, background .2s; }
+.segbtn.on{ color:var(--paper); background:var(--ink); }
 .cmp-list{ display:flex; flex-direction:column; gap:16px; }
 .cmp-name{ font-family:var(--font-body); font-weight:700; font-size:.9rem; margin-bottom:7px; }
 .cmp-line{ display:flex; align-items:center; gap:8px; margin-top:5px; }
@@ -754,16 +749,18 @@ const I18N = {
     confirm_logout: '¿Cerrar sesión?',
     // insights
     ins_journey: 'tu viaje, día a día ✨',
-    ins_consistency: 'Tu constancia',
-    ins_consistency_sub: 'actividad diaria · últimas 12 semanas',
-    ins_heat_less: 'menos',
-    ins_heat_more: 'más',
     ins_streaks: 'Rachas máximas',
     ins_streaks_sub: 'días seguidos, récord de cada tabla',
-    ins_counts: 'Conteos: este mes vs el anterior',
-    ins_counts_sub: 'comparado con el mes pasado',
-    ins_this_month: 'este mes',
-    ins_last_month: 'mes pasado',
+    ins_counts: 'Conteos',
+    ins_p_day: 'Ayer', ins_p_week: 'Semana', ins_p_month: 'Mes', ins_p_year: 'Año',
+    ins_today: 'hoy', ins_yesterday: 'ayer',
+    ins_this_week: 'esta semana', ins_last_week: 'semana pasada',
+    ins_this_month: 'este mes', ins_last_month: 'mes pasado',
+    ins_this_year: 'este año', ins_last_year: 'año pasado',
+    ins_sub_day: 'hoy comparado con ayer',
+    ins_sub_week: 'esta semana comparada con la pasada',
+    ins_sub_month: 'este mes comparado con el pasado',
+    ins_sub_year: 'este año comparado con el pasado',
     // auth — labels
     ph_email: 'tu correo',
     ph_pass: 'contraseña',
@@ -854,16 +851,18 @@ const I18N = {
     confirm_archive: x => `Archive “${x}”? It'll be hidden, but the history isn't lost.`,
     confirm_logout: 'Log out?',
     ins_journey: 'your journey, day by day ✨',
-    ins_consistency: 'Your consistency',
-    ins_consistency_sub: 'daily activity · last 12 weeks',
-    ins_heat_less: 'less',
-    ins_heat_more: 'more',
     ins_streaks: 'Longest streaks',
     ins_streaks_sub: 'days in a row, record for each table',
-    ins_counts: 'Counts: this month vs last',
-    ins_counts_sub: 'compared with last month',
-    ins_this_month: 'this month',
-    ins_last_month: 'last month',
+    ins_counts: 'Counts',
+    ins_p_day: 'Yesterday', ins_p_week: 'Week', ins_p_month: 'Month', ins_p_year: 'Year',
+    ins_today: 'today', ins_yesterday: 'yesterday',
+    ins_this_week: 'this week', ins_last_week: 'last week',
+    ins_this_month: 'this month', ins_last_month: 'last month',
+    ins_this_year: 'this year', ins_last_year: 'last year',
+    ins_sub_day: 'today compared with yesterday',
+    ins_sub_week: 'this week compared with last',
+    ins_sub_month: 'this month compared with last',
+    ins_sub_year: 'this year compared with last',
     ph_email: 'your email',
     ph_pass: 'password',
     forgot: 'Forgot your password?',
@@ -1465,48 +1464,41 @@ function paintCounter(itemId){
 /* =====================================================================
    RENDER — INSIGHTS  (current displayed week)
    ===================================================================== */
-// Per-tablita daily completion fraction (0..1): distinct active-sub checks that
-// day divided by the count of currently-active sub-activities. Map<isoDate, frac>.
-function tablitaDayFrac(t){
-  const subs = new Set(t.subActivities.map(s=>s.id));
-  const nSubs = subs.size;
-  const out = new Map();
-  if(!nSubs) return out;
-  const perDay = new Map();
-  for(const k of state.checks){
-    const i1 = k.indexOf('|');
-    if(k.slice(0, i1) !== t.id) continue;
-    const i2 = k.indexOf('|', i1 + 1);
-    const sId = k.slice(i1 + 1, i2);
-    if(!subs.has(sId)) continue;                 // archived/removed sub -> skip
-    const d = k.slice(-10);                      // YYYY-MM-DD
-    perDay.set(d, (perDay.get(d) || 0) + 1);
-  }
-  perDay.forEach((c, d) => out.set(d, Math.min(1, c / nSubs)));
-  return out;
-}
+// Counter comparison period: 'day' | 'week' | 'month' | 'year'.
+let insPeriod = 'month';
 
-// 84 days (12 weeks) aligned to the app's Thursday-start week, in column-major
-// order (week = column, weekday = row, Thu..Wed). Each cell: {iso, future}.
-function heatWindow(){
-  const todayISO = iso(startOfToday());
-  const start = addDays(weekStart(startOfToday()), -7 * 11);  // 12 columns incl. current week
-  const cells = [];
-  for(let w = 0; w < 12; w++){
-    for(let r = 0; r < 7; r++){
-      const dISO = iso(addDays(start, w * 7 + r));
-      cells.push({ iso: dISO, future: dISO > todayISO });
-    }
-  }
-  return cells;
-}
-
-// Per active counter: tallies for the current month and the previous month.
-function counterMonthCompare(){
+// Inclusive ISO date ranges for the comparison: current = this period to date,
+// previous = the full preceding period. Also carries the i18n keys for labels.
+function periodRanges(period){
   const today = startOfToday();
-  const curYM = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0');
-  const pd = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-  const prevYM = pd.getFullYear() + '-' + String(pd.getMonth()+1).padStart(2,'0');
+  const t = iso(today);
+  if(period === 'day'){
+    const y = iso(addDays(today, -1));
+    return { curStart:t, curEnd:t, prevStart:y, prevEnd:y,
+             cur:'ins_today', prev:'ins_yesterday', sub:'ins_sub_day' };
+  }
+  if(period === 'week'){
+    const ws = weekStart(today);                       // this week's Thursday
+    return { curStart:iso(ws), curEnd:t,
+             prevStart:iso(addDays(ws, -7)), prevEnd:iso(addDays(ws, -1)),
+             cur:'ins_this_week', prev:'ins_last_week', sub:'ins_sub_week' };
+  }
+  if(period === 'year'){
+    const y = today.getFullYear();
+    return { curStart:y+'-01-01', curEnd:t, prevStart:(y-1)+'-01-01', prevEnd:(y-1)+'-12-31',
+             cur:'ins_this_year', prev:'ins_last_year', sub:'ins_sub_year' };
+  }
+  // month (default)
+  const first = new Date(today.getFullYear(), today.getMonth(), 1);
+  const prevFirst = new Date(today.getFullYear(), today.getMonth()-1, 1);
+  const prevLast = new Date(today.getFullYear(), today.getMonth(), 0);
+  return { curStart:iso(first), curEnd:t, prevStart:iso(prevFirst), prevEnd:iso(prevLast),
+           cur:'ins_this_month', prev:'ins_last_month', sub:'ins_sub_month' };
+}
+
+// Per active counter: tap tallies for the current vs previous period.
+function counterPeriodCompare(period){
+  const r = periodRanges(period);
   const cnts = activeCounters();
   const cur = {}, prev = {};
   cnts.forEach(c => { cur[c.id] = 0; prev[c.id] = 0; });
@@ -1517,11 +1509,12 @@ function counterMonthCompare(){
     if(hashPos < 0) continue;
     const itemId = k.slice(pre.length, hashPos);
     if(!(itemId in cur)) continue;               // archived counter -> skip
-    const ym = k.slice(-10, -3);
-    if(ym === curYM) cur[itemId]++;
-    else if(ym === prevYM) prev[itemId]++;
+    const d = k.slice(-10);                       // YYYY-MM-DD
+    if(d >= r.curStart && d <= r.curEnd) cur[itemId]++;
+    else if(d >= r.prevStart && d <= r.prevEnd) prev[itemId]++;
   }
-  return cnts.map(c => ({ emoji: c.emoji, label: c.label, accent: c.accent, cur: cur[c.id], prev: prev[c.id] }));
+  const rows = cnts.map(c => ({ emoji:c.emoji, label:c.label, accent:c.accent, cur:cur[c.id], prev:prev[c.id] }));
+  return { rows, curLabel:r.cur, prevLabel:r.prev, subKey:r.sub };
 }
 
 function renderInsights(){
@@ -1533,31 +1526,7 @@ function renderInsights(){
   const intro = el('p','ins-intro',tr('ins_journey'));
   wrap.appendChild(intro);
 
-  // (A) Daily consistency heatmap — one mini-calendar (12 weeks) per tablita
-  if(tabs.length){
-    const cells = heatWindow();
-    const blocks = tabs.map(t => {
-      const frac = tablitaDayFrac(t);
-      const ac = safeAccent(t.accent);
-      const grid = cells.map(c => {
-        if(c.future) return `<i class="hc hc-future"></i>`;
-        const f = frac.get(c.iso) || 0;
-        if(f <= 0) return `<i class="hc hc-empty" title="${c.iso}"></i>`;
-        return `<i class="hc" style="opacity:${(0.30 + 0.70*f).toFixed(2)}" title="${c.iso}"></i>`;
-      }).join('');
-      return `<div class="heat-row"><div class="heat-name" style="color:${ac}">${esc(t.title)}</div><div class="heat-grid" style="--accent:${ac}">${grid}</div></div>`;
-    }).join('');
-    const card = el('div','ins-card');
-    card.style.setProperty('--accent', 'var(--teal)');
-    card.innerHTML = `
-      <div class="ihead"><span class="swatch"></span><h3>${tr('ins_consistency')}</h3></div>
-      <div class="heat-list">${blocks}</div>
-      <div class="heat-legend"><span>${tr('ins_heat_less')}</span><i class="hc hc-empty"></i><i class="hc" style="opacity:.5"></i><i class="hc" style="opacity:.75"></i><i class="hc" style="opacity:1"></i><span>${tr('ins_heat_more')}</span></div>
-      <div class="top" style="margin-top:8px"><span class="k" style="font-size:.78rem">${tr('ins_consistency_sub')}</span></div>`;
-    wrap.appendChild(card);
-  }
-
-  // (B) Rachas máximas — compact pills (name · days · flame), in each accent
+  // (A) Rachas máximas — compact pills (name · days · flame), in each accent
   if(tabs.length){
     const pills = tabs.map(t => {
       const longest = computeStreaks(t.id).longest;
@@ -1572,9 +1541,9 @@ function renderInsights(){
     wrap.appendChild(mc);
   }
 
-  // (C) Counters: this month vs last month — two bars per counter
+  // (B) Counters: current vs previous period — selectable period, two bars each
   if(cnts.length){
-    const rows = counterMonthCompare();
+    const { rows, curLabel, prevLabel, subKey } = counterPeriodCompare(insPeriod);
     const list = rows.map(r => {
       const ac = safeAccent(r.accent);
       const den = Math.max(r.cur, r.prev, 1);
@@ -1582,16 +1551,25 @@ function renderInsights(){
       const name = (r.emoji ? r.emoji + ' ' : '') + r.label;
       return `<div class="cmp" style="--accent:${ac}">
         <div class="cmp-name">${esc(name)}</div>
-        <div class="cmp-line"><span class="cmp-lab">${tr('ins_last_month')}</span><span class="cmp-track"><span class="cmp-fill prev" data-w="${wp}"></span></span><span class="cmp-val">${r.prev}</span></div>
-        <div class="cmp-line"><span class="cmp-lab">${tr('ins_this_month')}</span><span class="cmp-track"><span class="cmp-fill cur" data-w="${wc}"></span></span><span class="cmp-val">${r.cur}</span></div>
+        <div class="cmp-line"><span class="cmp-lab">${tr(prevLabel)}</span><span class="cmp-track"><span class="cmp-fill prev" data-w="${wp}"></span></span><span class="cmp-val">${r.prev}</span></div>
+        <div class="cmp-line"><span class="cmp-lab">${tr(curLabel)}</span><span class="cmp-track"><span class="cmp-fill cur" data-w="${wc}"></span></span><span class="cmp-val">${r.cur}</span></div>
       </div>`;
     }).join('');
+    const periods = [['day','ins_p_day'],['week','ins_p_week'],['month','ins_p_month'],['year','ins_p_year']];
+    const seg = periods.map(([p,k]) =>
+      `<button type="button" class="segbtn${p===insPeriod?' on':''}" data-p="${p}">${tr(k)}</button>`).join('');
     const card = el('div','ins-card');
     card.style.setProperty('--accent', 'var(--gold)');
     card.innerHTML = `
       <div class="ihead"><span class="swatch fire-swatch">📊</span><h3>${tr('ins_counts')}</h3></div>
+      <div class="seg">${seg}</div>
       <div class="cmp-list">${list}</div>
-      <div class="top" style="margin-top:10px"><span class="k" style="font-size:.78rem">${tr('ins_counts_sub')}</span></div>`;
+      <div class="top" style="margin-top:10px"><span class="k" style="font-size:.78rem">${tr(subKey)}</span></div>`;
+    card.querySelectorAll('.segbtn').forEach(b => b.addEventListener('click', () => {
+      if(insPeriod === b.dataset.p) return;
+      insPeriod = b.dataset.p;
+      renderInsights();
+    }));
     wrap.appendChild(card);
   }
 
