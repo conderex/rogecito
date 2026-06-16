@@ -310,18 +310,29 @@ header{
 
 .ins-intro{ font-family:var(--font-hand); font-size:1.45rem; color:var(--ink-soft); text-align:center; margin:4px 0 -4px; transform:rotate(-1deg); }
 
-/* ---------- Insights line charts ---------- */
-.chart-wrap{ width:100%; margin-top:6px; }
-svg.linechart{ width:100%; height:auto; display:block; overflow:visible; }
-svg.linechart .grid{ stroke:var(--line); stroke-width:1; opacity:.3; stroke-dasharray:2 4; }
-svg.linechart .ylab, svg.linechart .xlab{
-  font-family:var(--font-body); font-size:8px; fill:var(--ink-soft); font-variant-numeric:tabular-nums;
-}
-svg.linechart .sline{ filter:drop-shadow(1px 1.5px 0 var(--shadow)); }
-svg.linechart .sdot{ filter:drop-shadow(0 1px 0 var(--shadow)); }
-.legend{ display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:12px; }
-.lg-item{ display:inline-flex; align-items:center; gap:6px; font-size:.78rem; font-weight:600; color:var(--ink); }
-.lg-dot{ width:11px; height:11px; border-radius:50%; border:2px solid var(--line); flex:0 0 auto; }
+/* ---------- Insights: heatmap + month comparison ---------- */
+.heat-list{ display:flex; flex-direction:column; gap:2px; }
+.heat-row{ margin-top:2px; }
+.heat-name{ font-family:var(--font-body); font-weight:700; font-size:.84rem; margin:10px 0 5px; }
+.heat-grid{ display:grid; grid-template-rows:repeat(7,1fr); grid-auto-flow:column;
+  grid-auto-columns:1fr; gap:3px; }
+.hc{ aspect-ratio:1; border-radius:3px; background:var(--accent); }
+.hc-empty{ background:var(--line); opacity:.4 !important; }
+.hc-future{ background:transparent !important; opacity:1 !important; }
+.heat-legend{ display:flex; align-items:center; gap:5px; justify-content:flex-end;
+  margin-top:12px; font-size:.72rem; color:var(--ink-soft); --accent:var(--teal); }
+.heat-legend .hc{ width:12px; height:12px; aspect-ratio:auto; }
+
+.cmp-list{ display:flex; flex-direction:column; gap:16px; }
+.cmp-name{ font-family:var(--font-body); font-weight:700; font-size:.9rem; margin-bottom:7px; }
+.cmp-line{ display:flex; align-items:center; gap:8px; margin-top:5px; }
+.cmp-lab{ flex:0 0 72px; font-size:.74rem; color:var(--ink-soft); }
+.cmp-track{ flex:1 1 auto; height:13px; background:var(--line); border-radius:999px; overflow:hidden; }
+.cmp-fill{ display:block; width:0; height:100%; background:var(--accent);
+  border-radius:999px; transition:width .8s var(--ease-out); }
+.cmp-fill.prev{ opacity:.45; }
+.cmp-val{ flex:0 0 auto; min-width:26px; text-align:right;
+  font-family:var(--font-display); font-weight:800; font-variant-numeric:tabular-nums; font-size:.95rem; }
 
 /* ---------- Toast ---------- */
 .toast{
@@ -742,13 +753,17 @@ const I18N = {
     confirm_archive: x => `¿Archivar “${x}”? Se ocultará, pero no se pierde el historial.`,
     confirm_logout: '¿Cerrar sesión?',
     // insights
-    ins_journey: 'tu viaje, mes a mes ✨',
-    ins_consistency: 'Constancia por mes',
-    ins_consistency_sub: '% de casillas completadas · mes actual al día de hoy',
+    ins_journey: 'tu viaje, día a día ✨',
+    ins_consistency: 'Tu constancia',
+    ins_consistency_sub: 'actividad diaria · últimas 12 semanas',
+    ins_heat_less: 'menos',
+    ins_heat_more: 'más',
     ins_streaks: 'Rachas máximas',
     ins_streaks_sub: 'días seguidos, récord de cada tabla',
-    ins_counts: 'Conteos por mes',
-    ins_counts_sub: 'total de cada conteo por mes',
+    ins_counts: 'Conteos: este mes vs el anterior',
+    ins_counts_sub: 'comparado con el mes pasado',
+    ins_this_month: 'este mes',
+    ins_last_month: 'mes pasado',
     // auth — labels
     ph_email: 'tu correo',
     ph_pass: 'contraseña',
@@ -838,13 +853,17 @@ const I18N = {
     save: 'Save',
     confirm_archive: x => `Archive “${x}”? It'll be hidden, but the history isn't lost.`,
     confirm_logout: 'Log out?',
-    ins_journey: 'your journey, month by month ✨',
-    ins_consistency: 'Consistency by month',
-    ins_consistency_sub: '% of boxes completed · current month to date',
+    ins_journey: 'your journey, day by day ✨',
+    ins_consistency: 'Your consistency',
+    ins_consistency_sub: 'daily activity · last 12 weeks',
+    ins_heat_less: 'less',
+    ins_heat_more: 'more',
     ins_streaks: 'Longest streaks',
     ins_streaks_sub: 'days in a row, record for each table',
-    ins_counts: 'Counts by month',
-    ins_counts_sub: 'total of each count per month',
+    ins_counts: 'Counts: this month vs last',
+    ins_counts_sub: 'compared with last month',
+    ins_this_month: 'this month',
+    ins_last_month: 'last month',
     ph_email: 'your email',
     ph_pass: 'password',
     forgot: 'Forgot your password?',
@@ -1040,39 +1059,8 @@ function lockBeforeISO(){ return iso(addDays(weekStart(startOfToday()), -7)); }
 function isLocked(dISO){ return dISO < lockBeforeISO(); }
 function weekIsLocked(offset){ return weekDates(offset).every(d => isLocked(iso(d))); }
 
-// ---- Month helpers for Insights (all-history; ignores weekOffset) ----
-function daysInMonth(y, m){ return new Date(y, m + 1, 0).getDate(); } // m: 0-based
-
-// Earliest 'YYYY-MM' present in state.checks, or null if there's no data.
-function earliestCheckMonth(){
-  let min = null;
-  for(const k of state.checks){
-    const ym = k.slice(-10, -3);          // key ends in YYYY-MM-DD -> YYYY-MM
-    if(min === null || ym < min) min = ym;
-  }
-  return min;
-}
-// [{ym,y,m,label}] from earliest data month to the current month (cap last 12).
-function monthBuckets(){
-  const min = earliestCheckMonth();
-  const today = startOfToday();
-  const curY = today.getFullYear(), curM = today.getMonth();
-  let y, m;
-  if(min){ y = +min.slice(0,4); m = +min.slice(5,7) - 1; }
-  else { y = curY; m = curM; }
-  const out = [];
-  while(y < curY || (y === curY && m <= curM)){
-    out.push({ ym: y + '-' + String(m+1).padStart(2,'0'), y, m });
-    m++; if(m > 11){ m = 0; y++; }
-  }
-  const capped = out.slice(-12);
-  let prevY = null;
-  for(const b of capped){
-    b.label = (b.y !== prevY) ? (MONTHS[b.m] + " '" + String(b.y).slice(2)) : MONTHS[b.m];
-    prevY = b.y;
-  }
-  return capped;
-}
+// (Insights month-bucket helpers removed — Insights now uses a daily heatmap
+//  and a this-month-vs-last comparison; see the helpers near renderInsights.)
 
 
 /* =====================================================================
@@ -1477,112 +1465,63 @@ function paintCounter(itemId){
 /* =====================================================================
    RENDER — INSIGHTS  (current displayed week)
    ===================================================================== */
-// Per-tablita monthly completion %, prorated for the current (in-progress) month.
-// Numerator counts only checks whose subId is in the tablita's CURRENT active set,
-// keeping numerator/denominator consistent and bounded <=100%.
-function tablitaMonthlySeries(months){
-  const today = startOfToday();
-  const curYM = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0');
-  const elapsed = Math.max(1, today.getDate());
-  const tabs = activeTablitas();
-  const subSets = {}, counts = {};
-  tabs.forEach(t => { subSets[t.id] = new Set(t.subActivities.map(s=>s.id)); counts[t.id] = new Map(); });
-
+// Per-tablita daily completion fraction (0..1): distinct active-sub checks that
+// day divided by the count of currently-active sub-activities. Map<isoDate, frac>.
+function tablitaDayFrac(t){
+  const subs = new Set(t.subActivities.map(s=>s.id));
+  const nSubs = subs.size;
+  const out = new Map();
+  if(!nSubs) return out;
+  const perDay = new Map();
   for(const k of state.checks){
     const i1 = k.indexOf('|');
-    const tId = k.slice(0, i1);
-    if(!subSets[tId]) continue;                 // not an active tablita (or 'conteo')
+    if(k.slice(0, i1) !== t.id) continue;
     const i2 = k.indexOf('|', i1 + 1);
     const sId = k.slice(i1 + 1, i2);
-    if(!subSets[tId].has(sId)) continue;        // archived/removed sub -> skip
-    const ym = k.slice(-10, -3);
-    counts[tId].set(ym, (counts[tId].get(ym) || 0) + 1);
+    if(!subs.has(sId)) continue;                 // archived/removed sub -> skip
+    const d = k.slice(-10);                      // YYYY-MM-DD
+    perDay.set(d, (perDay.get(d) || 0) + 1);
   }
-
-  return tabs.map(t => {
-    const nSubs = subSets[t.id].size;
-    const values = months.map(b => {
-      if(!nSubs) return 0;
-      const days = (b.ym === curYM) ? elapsed : daysInMonth(b.y, b.m);
-      const filled = counts[t.id].get(b.ym) || 0;
-      return Math.min(100, Math.round((filled / (nSubs * days)) * 100));
-    });
-    return { label: t.title, accent: t.accent, values };
-  });
+  perDay.forEach((c, d) => out.set(d, Math.min(1, c / nSubs)));
+  return out;
 }
 
-// Per-counter raw tallies per month.
-function counterMonthlySeries(months){
+// 84 days (12 weeks) aligned to the app's Thursday-start week, in column-major
+// order (week = column, weekday = row, Thu..Wed). Each cell: {iso, future}.
+function heatWindow(){
+  const todayISO = iso(startOfToday());
+  const start = addDays(weekStart(startOfToday()), -7 * 11);  // 12 columns incl. current week
+  const cells = [];
+  for(let w = 0; w < 12; w++){
+    for(let r = 0; r < 7; r++){
+      const dISO = iso(addDays(start, w * 7 + r));
+      cells.push({ iso: dISO, future: dISO > todayISO });
+    }
+  }
+  return cells;
+}
+
+// Per active counter: tallies for the current month and the previous month.
+function counterMonthCompare(){
+  const today = startOfToday();
+  const curYM = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0');
+  const pd = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+  const prevYM = pd.getFullYear() + '-' + String(pd.getMonth()+1).padStart(2,'0');
   const cnts = activeCounters();
-  const byId = {};
-  cnts.forEach(c => byId[c.id] = new Map());
+  const cur = {}, prev = {};
+  cnts.forEach(c => { cur[c.id] = 0; prev[c.id] = 0; });
   const pre = COUNTER_TABLITA + '|';
   for(const k of state.checks){
     if(!k.startsWith(pre)) continue;
     const hashPos = k.indexOf('#', pre.length);
     if(hashPos < 0) continue;
     const itemId = k.slice(pre.length, hashPos);
-    const mp = byId[itemId];
-    if(!mp) continue;                            // archived counter -> skip
+    if(!(itemId in cur)) continue;               // archived counter -> skip
     const ym = k.slice(-10, -3);
-    mp.set(ym, (mp.get(ym) || 0) + 1);
+    if(ym === curYM) cur[itemId]++;
+    else if(ym === prevYM) prev[itemId]++;
   }
-  return cnts.map(c => ({
-    label: c.emoji + ' ' + c.label, accent: c.accent,
-    values: months.map(b => byId[c.id].get(b.ym) || 0),
-  }));
-}
-
-// Clean ceiling for a count axis (1/2/5 × 10^n).
-function niceMax(maxVal){
-  if(maxVal <= 0) return 5;
-  const pow = Math.pow(10, Math.floor(Math.log10(maxVal)));
-  const n = maxVal / pow;
-  const step = n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10;
-  return step * pow;
-}
-
-// Reusable cute SVG line chart. series = [{label,accent,values:[...]}].
-function lineChart({ months, series, yMax, yFormat }){
-  const W = 320, H = 180, padL = 30, padR = 12, padT = 12, padB = 26;
-  const plotW = W - padL - padR, plotH = H - padT - padB;
-  const fmt = yFormat || (v => String(v));
-  const n = months.length;
-  const xAt = i => n <= 1 ? padL + plotW/2 : padL + (i/(n-1))*plotW;
-  const yAt = v => padT + plotH - (Math.max(0, Math.min(yMax, v))/yMax)*plotH;
-
-  let grid = '';
-  [0, yMax/2, yMax].forEach(t => {
-    const y = yAt(t);
-    grid += `<line class="grid" x1="${padL}" y1="${y.toFixed(1)}" x2="${W-padR}" y2="${y.toFixed(1)}"/>`;
-    grid += `<text class="ylab" x="${padL-5}" y="${(y+3).toFixed(1)}" text-anchor="end">${esc(fmt(t))}</text>`;
-  });
-
-  const everyX = n > 8 ? 2 : 1;
-  let xlabs = '';
-  months.forEach((b, i) => {
-    if(i % everyX !== 0 && i !== n-1) return;
-    xlabs += `<text class="xlab" x="${xAt(i).toFixed(1)}" y="${H-8}" text-anchor="middle">${esc(b.label)}</text>`;
-  });
-
-  let lines = '';
-  series.forEach(s => {
-    const pts = s.values.map((v,i)=> `${xAt(i).toFixed(1)},${yAt(v).toFixed(1)}`);
-    if(n > 1){
-      lines += `<polyline class="sline" data-line points="${pts.join(' ')}" fill="none" stroke="${safeAccent(s.accent)}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`;
-    }
-    s.values.forEach((v,i)=>{
-      lines += `<circle class="sdot" cx="${xAt(i).toFixed(1)}" cy="${yAt(v).toFixed(1)}" r="3" fill="${safeAccent(s.accent)}" stroke="var(--paper)" stroke-width="1.5"/>`;
-    });
-  });
-
-  return `<svg class="linechart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img">${grid}${lines}${xlabs}</svg>`;
-}
-
-function legend(series){
-  return `<div class="legend">${series.map(s =>
-    `<span class="lg-item"><span class="lg-dot" style="background:${safeAccent(s.accent)}"></span>${esc(s.label)}</span>`
-  ).join('')}</div>`;
+  return cnts.map(c => ({ emoji: c.emoji, label: c.label, accent: c.accent, cur: cur[c.id], prev: prev[c.id] }));
 }
 
 function renderInsights(){
@@ -1590,21 +1529,31 @@ function renderInsights(){
   wrap.innerHTML = '';
   const tabs = activeTablitas();
   const cnts = activeCounters();
-  const months = monthBuckets();
 
   const intro = el('p','ins-intro',tr('ins_journey'));
   wrap.appendChild(intro);
 
-  // (A) Completion % per month — one line per category
+  // (A) Daily consistency heatmap — one mini-calendar (12 weeks) per tablita
   if(tabs.length){
-    const series = tablitaMonthlySeries(months);
+    const cells = heatWindow();
+    const blocks = tabs.map(t => {
+      const frac = tablitaDayFrac(t);
+      const ac = safeAccent(t.accent);
+      const grid = cells.map(c => {
+        if(c.future) return `<i class="hc hc-future"></i>`;
+        const f = frac.get(c.iso) || 0;
+        if(f <= 0) return `<i class="hc hc-empty" title="${c.iso}"></i>`;
+        return `<i class="hc" style="opacity:${(0.30 + 0.70*f).toFixed(2)}" title="${c.iso}"></i>`;
+      }).join('');
+      return `<div class="heat-row"><div class="heat-name" style="color:${ac}">${esc(t.title)}</div><div class="heat-grid" style="--accent:${ac}">${grid}</div></div>`;
+    }).join('');
     const card = el('div','ins-card');
     card.style.setProperty('--accent', 'var(--teal)');
     card.innerHTML = `
       <div class="ihead"><span class="swatch"></span><h3>${tr('ins_consistency')}</h3></div>
-      <div class="chart-wrap">${lineChart({ months, series, yMax:100, yFormat:v=>Math.round(v)+'%' })}</div>
-      ${legend(series)}
-      <div class="top" style="margin-top:10px"><span class="k" style="font-size:.78rem">${tr('ins_consistency_sub')}</span></div>`;
+      <div class="heat-list">${blocks}</div>
+      <div class="heat-legend"><span>${tr('ins_heat_less')}</span><i class="hc hc-empty"></i><i class="hc" style="opacity:.5"></i><i class="hc" style="opacity:.75"></i><i class="hc" style="opacity:1"></i><span>${tr('ins_heat_more')}</span></div>
+      <div class="top" style="margin-top:8px"><span class="k" style="font-size:.78rem">${tr('ins_consistency_sub')}</span></div>`;
     wrap.appendChild(card);
   }
 
@@ -1623,16 +1572,25 @@ function renderInsights(){
     wrap.appendChild(mc);
   }
 
-  // (C) Counter tallies per month — one line per counter
+  // (C) Counters: this month vs last month — two bars per counter
   if(cnts.length){
-    const series = counterMonthlySeries(months);
-    const rawMax = Math.max(0, ...series.flatMap(s => s.values));
+    const rows = counterMonthCompare();
+    const list = rows.map(r => {
+      const ac = safeAccent(r.accent);
+      const den = Math.max(r.cur, r.prev, 1);
+      const wp = Math.round(r.prev / den * 100), wc = Math.round(r.cur / den * 100);
+      const name = (r.emoji ? r.emoji + ' ' : '') + r.label;
+      return `<div class="cmp" style="--accent:${ac}">
+        <div class="cmp-name">${esc(name)}</div>
+        <div class="cmp-line"><span class="cmp-lab">${tr('ins_last_month')}</span><span class="cmp-track"><span class="cmp-fill prev" data-w="${wp}"></span></span><span class="cmp-val">${r.prev}</span></div>
+        <div class="cmp-line"><span class="cmp-lab">${tr('ins_this_month')}</span><span class="cmp-track"><span class="cmp-fill cur" data-w="${wc}"></span></span><span class="cmp-val">${r.cur}</span></div>
+      </div>`;
+    }).join('');
     const card = el('div','ins-card');
     card.style.setProperty('--accent', 'var(--gold)');
     card.innerHTML = `
       <div class="ihead"><span class="swatch fire-swatch">📊</span><h3>${tr('ins_counts')}</h3></div>
-      <div class="chart-wrap">${lineChart({ months, series, yMax:niceMax(rawMax), yFormat:v=>String(Math.round(v)) })}</div>
-      ${legend(series)}
+      <div class="cmp-list">${list}</div>
       <div class="top" style="margin-top:10px"><span class="k" style="font-size:.78rem">${tr('ins_counts_sub')}</span></div>`;
     wrap.appendChild(card);
   }
