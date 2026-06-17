@@ -773,7 +773,7 @@ const I18N = {
     ins_streaks: 'Rachas máximas',
     ins_streaks_sub: 'días seguidos, récord de cada tabla',
     ins_counts: 'Conteos',
-    ins_p_day: 'Ayer', ins_p_week: 'Semana', ins_p_month: 'Mes', ins_p_quarter: 'Trimestre', ins_p_year: 'Año',
+    ins_p_day: 'Ayer', ins_p_week: 'Semana', ins_p_month: 'Mes', ins_p_year: 'Año',
     ins_today: 'hoy', ins_yesterday: 'ayer',
     ins_this_week: 'esta semana', ins_last_week: 'semana pasada',
     ins_this_month: 'este mes', ins_last_month: 'mes pasado',
@@ -877,7 +877,7 @@ const I18N = {
     ins_streaks: 'Longest streaks',
     ins_streaks_sub: 'days in a row, record for each table',
     ins_counts: 'Counts',
-    ins_p_day: 'Yesterday', ins_p_week: 'Week', ins_p_month: 'Month', ins_p_quarter: 'Quarter', ins_p_year: 'Year',
+    ins_p_day: 'Yesterday', ins_p_week: 'Week', ins_p_month: 'Month', ins_p_year: 'Year',
     ins_today: 'today', ins_yesterday: 'yesterday',
     ins_this_week: 'this week', ins_last_week: 'last week',
     ins_this_month: 'this month', ins_last_month: 'last month',
@@ -1527,18 +1527,9 @@ function tablitaConsData(t, period){
     const ws = weekStart(today);
     for(let i = 0; i < 7; i++){ const d = iso(addDays(ws, i)); buckets.push(mk(d, d, DAY_HEADERS[i])); }
   } else if(period === 'month'){
+    type = 'line';
     const y = today.getFullYear(), mo = today.getMonth(), dim = new Date(y, mo+1, 0).getDate();
     for(let i = 1; i <= dim; i++){ const d = iso(new Date(y, mo, i)); buckets.push(mk(d, d, (i === 1 || i % 5 === 0) ? String(i) : '')); }
-  } else if(period === 'quarter'){
-    type = 'line';
-    const y = today.getFullYear(), q = Math.floor(today.getMonth() / 3);
-    const qStart = new Date(y, q*3, 1), qEnd = new Date(y, q*3 + 3, 0);
-    const qS = iso(qStart), qE = iso(qEnd);
-    for(let wk = weekStart(qStart); wk <= qEnd; wk = addDays(wk, 7)){
-      let a = iso(wk); if(a < qS) a = qS;
-      let b = iso(addDays(wk, 6)); if(b > qE) b = qE;
-      buckets.push(mk(a, b, MONTHS[wk.getMonth()]));
-    }
   } else {                                               // year
     type = 'line';
     const y = today.getFullYear();
@@ -1636,7 +1627,7 @@ function renderInsights(){
 
   // (A) Constancia — per-tablita completion: bars (week/month) or line (quarter/year)
   if(tabs.length){
-    const tabPeriods = [['week','ins_p_week'],['month','ins_p_month'],['quarter','ins_p_quarter'],['year','ins_p_year']];
+    const tabPeriods = [['week','ins_p_week'],['month','ins_p_month'],['year','ins_p_year']];
     const seg = tabPeriods.map(([p,k]) =>
       `<button type="button" class="segbtn${p===insTabPeriod?' on':''}" data-tp="${p}">${tr(k)}</button>`).join('');
     const blocks = tabs.map(t => {
