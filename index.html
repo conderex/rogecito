@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#1f1a16">
+<link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="DoingTheDoings">
@@ -380,6 +381,10 @@ svg.consline .clab{ font-family:var(--font-body); font-size:8px; fill:var(--ink-
 
 footer{ text-align:center; padding:18px 0 28px; }
 footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft); margin:0; transform:rotate(-1.5deg); }
+.privacy-link{
+  display:inline-block; margin-top:8px; font-family:var(--font-body); font-size:.72rem;
+  color:var(--ink-soft); text-decoration:underline dotted; text-underline-offset:3px;
+}
 
 /* ---------- Counters (tally) ---------- */
 .count-title{
@@ -474,6 +479,9 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
   margin:16px 0; border-style:solid; background:var(--paper); color:var(--ink);
   box-shadow:5px 5px 0 var(--shadow); font-size:.95rem; border-width:2.5px;
 }
+.dz-note{ font-family:var(--font-body); font-size:.82rem; line-height:1.45; color:var(--ink-soft); margin:0 0 10px; }
+.tbtn.dangerbtn{ width:100%; border-color:var(--orange-deep); color:var(--orange-deep); }
+.tbtn.dangerbtn:active{ background:rgba(176,79,34,.08); }
 
 /* ---------- Modal ---------- */
 .modal-ov{
@@ -647,7 +655,7 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
   <section class="panel" id="panel-insights">
     <p class="ins-intro" data-i18n="week_q">¿cómo va la semana?</p>
     <div id="insights"></div>
-    <footer><p data-i18n="one_day">un día a la vez ✿</p></footer>
+    <footer><p data-i18n="one_day">un día a la vez ✿</p><a class="privacy-link" href="privacy.html" data-i18n="privacy_link">privacidad</a></footer>
   </section>
 
   <!-- STATS (owner only) -->
@@ -695,6 +703,7 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
     <p class="gate-msg" id="gateMsg"></p>
   </div>
   <p class="gate-foot" data-i18n="one_day">un día a la vez ✿</p>
+  <p class="gate-foot"><a class="privacy-link" href="privacy.html" data-i18n="privacy_link">privacidad</a></p>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -745,6 +754,16 @@ const I18N = {
     edit_tables: 'editar tablas',
     counters_title: 'contadores',
     archived_title: 'archivadas',
+    account_title: 'cuenta',
+    privacy_link: 'privacidad',
+    delete_note: 'Borrar tu cuenta elimina para siempre tus tablas, marcas y conteos. No se puede deshacer.',
+    delete_account: 'Borrar mi cuenta…',
+    confirm_delete_1: '¿Borrar tu cuenta y todos tus datos para siempre?',
+    confirm_delete_2: 'Última confirmación: esto es permanente y no se puede deshacer. ¿Borrar todo?',
+    delete_btn: 'Borrar',
+    delete_btn_final: 'Borrar todo',
+    toast_deleted: 'Cuenta borrada. Cuídate mucho 🤍',
+    msg_delete_failed: 'No se pudo borrar la cuenta. Revisa tu conexión e intenta de nuevo.',
     archived_one: 'archivada',
     restore: 'Restaurar',
     add_row: '+ Agregar fila',
@@ -851,6 +870,16 @@ const I18N = {
     edit_tables: 'edit tables',
     counters_title: 'counters',
     archived_title: 'archived',
+    account_title: 'account',
+    privacy_link: 'privacy',
+    delete_note: 'Deleting your account permanently removes your tables, checks and counts. This cannot be undone.',
+    delete_account: 'Delete my account…',
+    confirm_delete_1: 'Delete your account and all your data forever?',
+    confirm_delete_2: 'Last confirmation: this is permanent and cannot be undone. Delete everything?',
+    delete_btn: 'Delete',
+    delete_btn_final: 'Delete everything',
+    toast_deleted: 'Account deleted. Take care 🤍',
+    msg_delete_failed: 'Could not delete the account. Check your connection and try again.',
     archived_one: 'archived',
     restore: 'Restore',
     add_row: '+ Add row',
@@ -1907,6 +1936,43 @@ function renderEditor(){
       cards.appendChild(row);
     });
   }
+
+  // ---- Account (danger zone; in-app deletion is an App Store / Play requirement) ----
+  cards.appendChild(el('p','count-title',tr('account_title')));
+  const dz = document.createElement('div');
+  dz.className = 'card edit-card';
+  dz.appendChild(el('p','dz-note',tr('delete_note')));
+  dz.appendChild(tbtn(tr('delete_account'), 'dangerbtn', ()=> deleteAccount()));
+  cards.appendChild(dz);
+}
+
+// Permanently delete the signed-in user's account + data (double confirm).
+async function deleteAccount(){
+  if(!await confirmModal(tr('confirm_delete_1'), tr('delete_btn'))) return;
+  if(!await confirmModal(tr('confirm_delete_2'), tr('delete_btn_final'))) return;
+  try{
+    const res = await fetch(REST_BASE + 'rpc/delete_user', {
+      method:'POST',
+      headers:{ ...authHeaders(), 'Content-Type':'application/json' },
+      body:'{}',
+    });
+    if(!res.ok) throw new Error('delete HTTP '+res.status);
+    // Wipe this device's local copy too (keep only the language preference).
+    try{
+      localStorage.removeItem(LS_KEY);
+      localStorage.removeItem(LS_CONFIG);
+      localStorage.removeItem(LS_COUNTERS);
+    }catch(e){}
+    state.checks = new Set(); state.config = []; state.counters = []; state.editing = false;
+    showToast(tr('toast_deleted'));
+    // The auth user no longer exists, so server-side signout can fail — ignore it
+    // and drop the local session either way.
+    try{ await sb.auth.signOut(); }
+    catch(e){ try{ await sb.auth.signOut({ scope:'local' }); }catch(e2){} }
+    handleSession(null);
+  }catch(e){
+    showToast(tr('msg_delete_failed'));
+  }
 }
 
 // Run a config write, then re-sync from Supabase and re-render the editor.
@@ -2327,6 +2393,10 @@ async function boot(){
   await handleSession(session);
 }
 boot();
+// Offline shell + installability (PWA). Never blocks the app if it fails.
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=> navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+}
 </script>
 </body>
 </html>
