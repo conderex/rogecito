@@ -1045,11 +1045,11 @@ const COUNTERS_DEFAULT = [
   { id:'llantos',  label:'Llantos',  emoji:'😢', accent:'var(--lavender)', sort_order:2, archived:false },
 ];
 
-// Starter set seeded into a brand-new account on first login (Dientitos + Casa Limpia,
+// Starter set seeded into a brand-new account on first login (Estirarme + Casa Limpia,
 // counters Cafecito + Logros del día). Existing users keep whatever they already have.
 const NEW_USER_TABLITAS = [
-  { id:'dientitos',   title:'Dientitos',   accent:'var(--teal)',     sort_order:0, archived:false, subActivities:[
-    {id:'d_manana',label:'Mañana',sort_order:0,archived:false},{id:'d_tarde',label:'Tarde',sort_order:1,archived:false},{id:'d_noche',label:'Noche',sort_order:2,archived:false} ] },
+  { id:'estirar',     title:'Estirarme',   accent:'var(--teal)',     sort_order:0, archived:false, subActivities:[
+    {id:'e_manana',label:'Mañana',sort_order:0,archived:false},{id:'e_tarde',label:'Tarde',sort_order:1,archived:false},{id:'e_noche',label:'Noche',sort_order:2,archived:false} ] },
   { id:'casa_limpia', title:'Casa Limpia', accent:'var(--lavender)', sort_order:1, archived:false, subActivities:[
     {id:'c_cocina',label:'Cocina',sort_order:0,archived:false},{id:'c_cuarto',label:'Cuarto',sort_order:1,archived:false},{id:'c_bano',label:'Baño',sort_order:2,archived:false},{id:'c_oficina',label:'Oficina',sort_order:3,archived:false} ] },
 ];
@@ -1060,8 +1060,8 @@ const NEW_USER_COUNTERS = [
 // English starter set — same internal ids, English-facing titles/labels. Picked at
 // seed time for accounts created while the UI is in English (see seedSets()).
 const NEW_USER_TABLITAS_EN = [
-  { id:'dientitos',   title:'Teeth',       accent:'var(--teal)',     sort_order:0, archived:false, subActivities:[
-    {id:'d_manana',label:'Morning',sort_order:0,archived:false},{id:'d_tarde',label:'Afternoon',sort_order:1,archived:false},{id:'d_noche',label:'Night',sort_order:2,archived:false} ] },
+  { id:'estirar',     title:'Stretch',     accent:'var(--teal)',     sort_order:0, archived:false, subActivities:[
+    {id:'e_manana',label:'Morning',sort_order:0,archived:false},{id:'e_tarde',label:'Afternoon',sort_order:1,archived:false},{id:'e_noche',label:'Night',sort_order:2,archived:false} ] },
   { id:'casa_limpia', title:'Clean House', accent:'var(--lavender)', sort_order:1, archived:false, subActivities:[
     {id:'c_cocina',label:'Kitchen',sort_order:0,archived:false},{id:'c_cuarto',label:'Bedroom',sort_order:1,archived:false},{id:'c_bano',label:'Bathroom',sort_order:2,archived:false},{id:'c_oficina',label:'Office',sort_order:3,archived:false} ] },
 ];
