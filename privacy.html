@@ -13,6 +13,11 @@
   --orange-deep:#b04f22; --teal:#3f8a80; --line:#2a2118;
 }
 *{ box-sizing:border-box; }
+html{ scrollbar-color:var(--ink-soft) var(--sand); scrollbar-width:thin; }
+::-webkit-scrollbar{ width:10px; height:10px; }
+::-webkit-scrollbar-track{ background:var(--sand); }
+::-webkit-scrollbar-thumb{ background:var(--ink-soft); border-radius:999px; border:2.5px solid var(--sand); }
+::-webkit-scrollbar-thumb:hover{ background:var(--orange-deep); }
 body{
   margin:0; padding:28px 18px 60px; background:var(--sand); color:var(--ink);
   font-family:'Space Grotesk', system-ui, -apple-system, sans-serif; line-height:1.55;
