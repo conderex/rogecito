@@ -65,6 +65,12 @@
 
 *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 html,body{ margin:0; padding:0; }
+/* Branded scrollbar: soft-ink thumb on sand track (thin), warms up on hover */
+html{ scrollbar-color:var(--ink-soft) var(--sand); scrollbar-width:thin; }
+::-webkit-scrollbar{ width:10px; height:10px; }
+::-webkit-scrollbar-track{ background:var(--sand); }
+::-webkit-scrollbar-thumb{ background:var(--ink-soft); border-radius:999px; border:2.5px solid var(--sand); }
+::-webkit-scrollbar-thumb:hover{ background:var(--orange-deep); }
 body{
   font-family:var(--font-body);
   color:var(--ink);
