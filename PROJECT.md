@@ -1,205 +1,277 @@
-# DoingTheDoings — Project Overview & Technical Reference
+# DoingTheDoings — Documento Maestro / Master Doc
 
-*Context document for analysis and planning (Claude Projects / Cowork). Last updated: July 2026.*
+*Contexto para cualquier Claude (chat, design, Cowork, Claude Code). Última actualización:
+finales de julio 2026 (tras PR #17). Cambios recientes: brief de marca (Parte 1), Conteos
+ahora es timeline mensual, kit completo de Google Play.*
 
-- **Live app:** https://conderex.github.io/rogecito/
-- **Privacy policy:** https://conderex.github.io/rogecito/privacy.html
-- **Repo:** `conderex/rogecito` (GitHub Pages serves `main`)
-- **Owner:** Roge (rogerthatheart@gmail.com) — solo founder, building with Claude Code.
-- Companion docs in this repo: `POSITIONING.md` (product thesis & messaging), `PLAN-auth.md` / `QA-pre-auth.md` (historical auth-migration notes).
+- **App en vivo:** https://conderex.github.io/rogecito/
+- **Privacidad:** https://conderex.github.io/rogecito/privacy.html
+- **Repo:** `conderex/rogecito` (GitHub Pages sirve `main`)
+- **Fundadora:** Roge (rogerthatheart@gmail.com) — solo founder, construye con Claude Code.
+- Docs hermanos en el repo: `POSITIONING.md` (tesis y mensajes por canal),
+  `store/play-listing.md` (ficha de Play), `store/twa/README.md` (paquete Android).
 
 ---
 
-## 1. What the product is
+# PARTE 1 — Brief de producto y marca
 
-**DoingTheDoings** (formerly "Rogecito", repo name kept) is a warm, guilt-free, bilingual
-(ES/EN, Spanish-default) habit tracker built on **behavioral activation (AC)** — the
-third-wave, action-oriented therapy for depression. The app is the *activity scheduling*
-component of AC made tappable: small, meaningful daily activities, checked in seconds.
+## Concepto
 
-**Positioning (see POSITIONING.md for the full version):**
-- Productivity apps compete on features; DoingTheDoings competes on **friction**:
-  ~10 seconds a day, one tap, zero configuration — designed for the day the user has
-  no energy at all.
-- The user (or their therapist) defines what matters (**values focus**); the app never
-  imposes goals.
-- Honest clinical framing: the app is the **between-sessions tool**, not the treatment.
-  Functional analysis belongs to the therapist. **Never make medical claims.**
-- North Star metrics: time-to-check < 10 s; retention on low days. NOT session length.
+**DoingTheDoings** es un tracker de hábitos cálido y sin culpa, basado en la **activación
+conductual** (AC) — una terapia real, de tercera generación, nacida para tratar la
+depresión. La app convierte el *activity scheduling* de la AC en **"tablitas"**: pequeñas
+tablas de actividades diarias significativas que se marcan con un tap. En los días
+difíciles, primero actúas — y el ánimo llega después.
 
-**Tagline:** ES *"Constancia sin culpa, un día a la vez ✿"* · EN *"Build consistency one
-day at a time — no perfect streaks, no guilt."*
+## Objetivo
 
-## 2. Product features (current)
+Ayudar a construir **constancia sin culpa, un día a la vez** — especialmente a personas
+que atraviesan días grises y no tienen energía para apps exigentes.
 
-- **Tracker (home tab):** "tablitas" (little tables). Each tablita has sub-activities
-  (rows) × 7 day columns. Tap a cell to fill/unfill. Week runs **Thursday → Wednesday**
-  (a deliberate quirk from the owner's routine). Week navigation with prev/next/Hoy.
-  Days older than the start of last week are **locked** (read-only) so history can't be
-  edited by accident (~2 editable weeks).
-- **Counters:** tally-type trackers (e.g. Cafecito ☕): +/− taps per day, shown under the grid.
-- **Streaks:** per-tablita current & longest streak (consecutive days with ≥1 check;
-  a 1-day grace: yesterday counts if today is unmarked).
-- **Insights tab:** three cards —
-  1. **Constancia**: per-tablita completion with selector *Semana / Mes / Año*.
-     Week = 7 daily bars (zero days show as stubs — gaps pop). Month & Year = % line charts.
-     Reward headline per tablita: e.g. `86% · 18/21` (% + filled/possible fraction).
-  2. **Rachas máximas**: longest-streak pills per tablita.
-  3. **Conteos**: current-vs-previous comparison bars per counter with selector
-     *Ayer / Semana / Mes / Año*.
-- **Edit mode (✎):** create/rename/reorder/archive tablitas, sub-activities and counters
-  (archive, not delete — history preserved); restore archived; color accents from a
-  5-color palette; **account deletion** (danger zone, double confirm).
-- **Auth:** email+password, Google sign-in, magic link, password reset (Supabase, PKCE).
-- **i18n:** full ES/EN dictionaries; ES is default; toggle in header & login; choice in
-  localStorage; new-account starter content matches UI language at signup.
-- **Starter seed for new accounts:** ES *Estirarme* (Mañana/Tarde/Noche) + *Casa Limpia*
-  (Cocina/Cuarto/Baño/Oficina); counters *Cafecito* ☕ + *Logros del día* 🏆. EN equivalents:
-  *Stretch*, *Clean House*, *Coffee*, *Daily wins*.
-- **Owner-only Stats tab (📊):** visible only to the owner's email; server-verified RPC
-  `owner_stats()` returns aggregate user/activity metrics.
-- **PWA:** installable (manifest + icons incl. maskable), offline shell via service worker.
+**North Star (métricas que importan):**
+- Tiempo-hasta-marcar: **< 10 segundos** desde abrir la app.
+- **Retención en días de bajo uso** (que vuelvan aunque fallen).
+- NO minutos de sesión — queremos sesiones cortas.
 
-## 3. Architecture — how it's built
+**El trade-off que nos define:** las apps de productividad compiten en funciones;
+DoingTheDoings compite en **fricción**: 10 segundos, un tap, cero configuración.
 
-### 3.1 Frontend
-- **One file:** `index.html` (~2,400 lines, ~110 KB): inline CSS + vanilla JS.
-  **No framework, no build step, no dependencies** except `@supabase/supabase-js@2`
-  loaded from CDN (jsdelivr with unpkg fallback) *only for auth*.
-- **Design system "Golden Casket"** (CSS custom properties): sand `#e7d8b8` background,
-  paper `#f4ead0` cards, warm-brown ink `#2a2118`, ink-soft `#6b5d49`, teal `#3f8a80`,
-  burnt orange `#cf6a39`, orange-deep `#b04f22` (subtitles), gold `#d9a441`, lavender
-  `#8f82c2`, pink `#d98798`. Thick ink borders (2.5–3.5px), solid offset shadows (no blur),
-  slight rotations, flower ✿ motif. Fonts: **Fraunces** (display), **Space Grotesk** (body),
-  **Caveat** (handwritten), via Google Fonts. Branded thin scrollbar (ink-soft on sand).
-- **Rendering:** direct DOM manipulation; `renderTrackerArea()`, `renderCards()`,
-  `renderEditor()`, `renderInsights()`, etc. re-render sections from `state`.
-- **State (in-memory + localStorage mirror):**
-  ```js
-  state = { checks:Set, config:[tablitas], counters:[], mode:'local'|'supabase',
-            editing, weekOffset, tab, prevStreaks, prevCounts }
-  ```
-  localStorage keys: `roge_checks_v1`, `roge_config_v1`, `roge_counters_v1`, `roge_lang_v1`.
-- **Check key formats (the core data encoding):**
-  - Tablita check: `"<tablitaId>|<subId>|YYYY-MM-DD"` (one per filled cell).
-  - Counter tap: `"conteo|<counterId>#<token>|YYYY-MM-DD"` (one row per tap; token makes
-    each tap unique; `COUNTER_TABLITA='conteo'`).
-- **i18n:** `I18N.es` / `I18N.en` dictionaries (symmetric keys), `tr(key,...args)` helper
-  (named `tr` because `t` is taken by tablita variables), static HTML uses
-  `data-i18n` / `data-i18n-ph` / `data-i18n-title`; `LANG` defaults to `'es'`.
-- **Date helpers:** `iso()`, `addDays()`, `startOfToday()`, `weekStart()` (returns the
-  **Thursday** of the week), `weekDates(offset)`, `lockBeforeISO()`.
-- **Insights math:** `computeStreaks(id)`; `tablitaConsData(t, period)` buckets completion
-  (day buckets for week/month, month buckets for year; future buckets flagged; % =
-  filled/(nSubs×elapsed days) capped at 100); `counterPeriodCompare(period)` +
-  `periodRanges()` for current-vs-previous ranges; SVG line charts and CSS bar charts
-  are generated inline (no chart library).
+## Alcance
 
-### 3.2 Backend — Supabase (project `gqjpkftshxqeuigcrecc`)
-- **Auth:** Supabase Auth (email/password, Google OAuth, magic links; PKCE flow;
-  `persistSession`, `autoRefreshToken`).
-- **Database (Postgres, RLS on all tables, policies scope rows to `auth.uid()`):**
-  - `checks(id serial, tablita text, sub_activity text, check_date date, created_at, user_id uuid→auth.users)`
-  - `tablitas(id text, title, accent, sort_order, archived, created_at, user_id)` — PK (id, user_id)
-  - `sub_activities(id text, tablita_id, label, sort_order, archived, created_at, user_id)` — PK (id, user_id), FK → tablitas
-  - `counters(id text, label, emoji, accent, sort_order, archived, created_at, user_id)` — PK (id, user_id)
-  - `bak_*_pre_auth` tables: frozen pre-auth backups of the owner's original data.
-- **Data access:** raw REST (`fetch` to `/rest/v1/...`) with `apikey: <anon>` +
-  `Authorization: Bearer <user JWT>` headers (`authHeaders()`); helpers `sbFetchAll/
-  sbFetchConfig/sbFetchCounters/sbPost/sbInsert/sbDelete`. supabase-js is used for auth
-  only. Optimistic UI: local state updates immediately, then syncs; offline falls back
-  to localStorage (`mode:'local'`, "SYNC/LOCAL" pill in header).
-- **RPCs (both in `supabase/*.sql`, applied via migrations):**
-  - `owner_stats()` — SECURITY DEFINER; re-checks the caller's email server-side; returns
-    aggregate metrics for the owner-only Stats panel.
-  - `delete_user()` — SECURITY DEFINER, `authenticated` grant only; deletes the caller's
-    sub_activities/checks/counters/tablitas then their `auth.users` row (App Store /
-    Play requirement). UI wipes localStorage + signs out.
-- **Seeding:** `ensureSeed()` on first login inserts the language-appropriate starter set
-  (no-op if the account has tablitas).
+**Lo que ES hoy:** tracker semanal de tablitas + contadores (+/−) + rachas + Insights
+(constancia, rachas máximas, conteos mes a mes) + bilingüe ES/EN + PWA instalable y
+offline + borrado de cuenta in-app.
 
-### 3.3 PWA layer
-- `manifest.json`: standalone, portrait, sand theme, `short_name:"Doings"`, icons 192/512
-  + maskable 512 (`icon-1024.png` reserved for App Store).
-- `sw.js` (~70 lines): precached shell (`index.html`, manifest, icons); navigations
-  network-first with cached-shell offline fallback; Google Fonts + CDN libs
-  stale-while-revalidate; **`*.supabase.co` never cached** (auth/data always live).
-  Cache name `dtd-v1` (bump to invalidate). Registered on `load`, never blocks the app.
+**Lo que NO es (decisiones, no pendientes):**
+- No es red social — no hay feed, likes ni comparación con otros.
+- No es app médica — no diagnostica ni trata; "no sustituye terapia" siempre.
+- No castiga — sin rachas rotas en rojo, sin notificaciones culposas, sin anuncios.
+- No impone metas — cada quien (o su terapeuta) define sus tablitas.
 
-### 3.4 Hosting & deployment
-- GitHub Pages from `main` — no build, no CI. Deploys ~1–2 min after merge.
-- Workflow used throughout: work on branch `claude/roge-tracker-app-b3FPy` → PR →
-  **squash-merge** to `main` → hard-reset branch back onto `main` (force-with-lease).
-- Verification style: `node --check` on the extracted inline script; **jsdom harness
-  tests** that load the whole page, stub `fetch`/auth, drive real functions
-  (`renderInsights()`, `deleteAccount()`, i18n symmetry checks) and assert DOM output.
+**Roadmap corto:** ① Google Play (kit listo; faltan testers + cuenta de consola) →
+② iOS con Capacitor (requiere Mac y Sign in with Apple) → ③ comunidad fundadora de
+psicólogos hispanohablantes (gratis) → ④ tier Pro para terapeutas (panel de progreso de
+pacientes) como monetización futura. Sin anuncios, decidido.
 
-## 4. History (PR changelog, June–July 2026)
+## Valores
+
+1. **Sin culpa** — fallar un día es información, no fracaso.
+2. **Amabilidad** — la app le habla al usuario como a alguien querido.
+3. **Mínima fricción** — cada pantalla extra es una razón para abandonar; simplicidad
+   es la decisión clínicamente correcta.
+4. **Honestidad clínica** — la app es la *tarea entre sesiones*; el análisis funcional
+   es del terapeuta. Nunca claims médicos.
+5. **Privacidad real** — sin rastreadores, sin venta de datos, borrado total in-app.
+6. **Calidez artesanal** — hecho a mano, imperfecto a propósito, humano.
+
+## Audiencia
+
+- **Primaria:** personas hispanohablantes (México/LatAm primero) que quieren constancia
+  en lo pequeño, incluyendo quienes están en terapia o pasan por depresión/ansiedad.
+- **Secundaria (multiplicadores):** psicólogos y terapeutas que la recomiendan a
+  pacientes como tarea entre sesiones — cada terapeuta trae varios usuarios.
+- Bilingüe: default español; inglés a un tap.
+
+## Tono y voz
+
+- Cálido, honesto, cercano, un poquito juguetón. Diminutivos con cariño (tablitas,
+  cafecito). Firma: **un día a la vez ✿**
+- Celebra lo pequeño ("¡3 días seguidos!"), jamás regaña ("llevas 5 días sin…" ❌).
+- **Reglas duras:** nunca culpa, nunca presión, nunca claims médicos, nunca jerga
+  clínica en textos de consumidor (la jerga vive en el pitch a psicólogos).
+- Taglines oficiales: ES *"Constancia sin culpa, un día a la vez ✿"* ·
+  EN *"Guilt-free consistency, one day at a time ✿"*
+
+## Paleta de colores — "Golden Casket"
+
+*Desierto cálido: dorados polvorientos, naranjas quemados, teals apagados sobre arena.*
+
+| Nombre | Hex | Uso |
+|---|---|---|
+| Sand | `#e7d8b8` | Fondo base de todo |
+| Sand deep | `#d8c39a` | Degradados/washes del fondo |
+| Paper | `#f4ead0` | Superficie de tarjetas |
+| Ink | `#2a2118` | Texto principal, bordes, líneas (café casi negro) |
+| Ink soft | `#6b5d49` | Texto secundario, hints |
+| Gold | `#d9a441` | Acento (botón Hoy, contador Cafecito) |
+| Orange | `#cf6a39` | Acento quemado (LEDs, loader, avisos) |
+| Orange deep | `#b04f22` | Subtítulos manuscritos (mejor contraste) |
+| Teal | `#3f8a80` | Acento principal de tablitas |
+| Lavender | `#8f82c2` | Acento de tablitas |
+| Pink | `#d98798` | Acento cálido |
+| Shadow | `rgba(42,33,24,.28)` | Sombras sólidas desplazadas |
+
+Los acentos de tablitas/contadores se eligen de: teal, orange, lavender, gold, pink.
+
+## Tipografías
+
+| Fuente | Rol | Cómo se usa |
+|---|---|---|
+| **Fraunces** (800, opsz 144, SOFT alto) | Display | Títulos, números grandes, wordmark. Serif expresiva y suavecita |
+| **Space Grotesk** (400–700) | Cuerpo | UI, botones, texto corrido |
+| **Caveat** (500–700) | Manuscrita | Subtítulos, frases emotivas, captions — siempre con rotación −1° a −3° |
+
+Servidas por Google Fonts. Para gráficos generados: TTFs desde el repo google/fonts.
+
+## Elementos visuales (el "look" artesanal)
+
+- **Tarjetas papel:** fondo paper, borde tinta **2.5–3.5px**, radio 12–18px.
+- **Sombras SÓLIDAS desplazadas** (ej. `4px 4px 0 shadow`) — **nunca blur**; estética
+  sticker/recorte.
+- **Rotaciones sutiles** (±0.3° a ±2°) en tarjetas, captions y sellos — imperfección
+  a propósito.
+- **Pills** por todos lados: rachas (🔥 + número), toggle ES/EN, selector de periodo,
+  botones redondeados.
+- **Flor ✿** como firma de marca (footer, taglines, watermarks gigantes al 4–5% de
+  opacidad en material de marketing).
+- **Emojis con cariño:** ☕ 🏆 🔥 📊 ✨ 🤍 — parte del lenguaje, no decoración random.
+- **Scrollbar de marca:** pulgar ink-soft sobre riel sand, thin.
+- Gráficas propias (SVG/CSS inline, sin librerías): barras pastilla redondeadas y líneas
+  con puntos, siempre en los acentos de la paleta.
+
+---
+
+# PARTE 2 — Technical Reference (English)
+
+## 1. Product features (current)
+
+- **Tracker (home):** "tablitas" — sub-activities (rows) × 7 day columns; tap to
+  fill/unfill. Week runs **Thursday → Wednesday** (deliberate quirk). Prev/next/Hoy
+  navigation. Days before the start of last week are **locked** (~2 editable weeks).
+- **Counters:** tally trackers (+/− per day) under the grid.
+- **Streaks:** per-tablita current & longest (consecutive days with ≥1 check; 1-day
+  grace for today).
+- **Insights tab:**
+  1. **Constancia** — per-tablita completion, selector *Semana/Mes/Año*: week = 7 daily
+     bars (zero days pop as stubs), month & year = % line charts; reward headline
+     `86% · 18/21`.
+  2. **Rachas máximas** — longest-streak pills.
+  3. **Conteos** — **month-over-month timeline**: one line per counter (accent colors),
+     monthly totals from first month with data (last 12 max), clean y-axis (1/2/5×10ⁿ),
+     localized month labels, legend.
+- **Edit mode (✎):** create/rename/reorder/archive tablitas, subs, counters (archive
+  preserves history); color accents; **account deletion** (danger zone, double confirm).
+- **Auth:** Supabase — email+password, Google OAuth, magic link, reset; PKCE.
+- **i18n:** symmetric `I18N.es/en` dicts, `tr()` helper, `data-i18n*` attributes;
+  Spanish default; starter seed matches signup language (*Estirarme/Stretch* +
+  *Casa Limpia/Clean House* + counters ☕/🏆).
+- **Footer links:** `privacidad` (privacy.html) + `comentarios` (feedback mailto with
+  prefilled subject) — on the login gate and the Insights footer.
+- **Owner-only Stats tab (📊):** gated by owner email + server-verified `owner_stats()`.
+- **PWA:** manifest + icons (incl. maskable) + service worker (offline shell; Supabase
+  never cached).
+
+## 2. Architecture
+
+- **Frontend:** ONE file, `index.html` (~2,400 lines) — inline CSS + vanilla JS, no
+  framework, no build. supabase-js v2 from CDN (jsdelivr→unpkg fallback) for auth only.
+  Direct-DOM renders (`renderTrackerArea`, `renderInsights`, `renderEditor`…) off a
+  `state` object mirrored to localStorage (`roge_checks_v1`, `roge_config_v1`,
+  `roge_counters_v1`, `roge_lang_v1`). Offline falls back to local mode (SYNC/LOCAL pill;
+  the pill is `display:none` when not shown — it must never reserve header space).
+- **Check-key encoding (core data model):** tablita check = `"<tablitaId>|<subId>|YYYY-MM-DD"`;
+  counter tap = `"conteo|<counterId>#<token>|YYYY-MM-DD"` (one row per tap).
+- **Backend — Supabase** (project `gqjpkftshxqeuigcrecc`): Postgres with RLS scoping all
+  rows to `auth.uid()`. Tables: `checks`, `tablitas`, `sub_activities`, `counters`
+  (+ frozen `bak_*_pre_auth`). Data access via raw REST `fetch` with anon key + user JWT.
+  RPCs (SECURITY DEFINER, in `supabase/*.sql`): `owner_stats()` (owner metrics),
+  `delete_user()` (self-service deletion, `authenticated` grant only).
+- **Dates:** `iso/addDays/startOfToday/weekStart` (Thursday!), `lockBeforeISO`.
+- **Insights math:** `computeStreaks`, `tablitaConsData` (day/month buckets, future
+  flagged, % = filled/(nSubs×elapsed) capped 100), `counterMonthlyTimeline` + `niceMax`
+  + `countsLine` (multi-series SVG).
+- **Security hygiene:** accents stored as CSS-var strings whitelisted by `safeAccent()`;
+  `esc()` for HTML.
+- **Hosting/deploys:** GitHub Pages from `main`; no CI. Workflow: branch
+  `claude/roge-tracker-app-b3FPy` → PR → squash merge → hard-reset branch to main.
+  Verification style: `node --check` on the inline script + jsdom harness tests
+  (render functions driven with seeded state, DOM assertions, i18n symmetry).
+
+### 2.1 Visual/marketing asset inventory
+
+- In-repo: `icon.png` (1000² source) + `icon-192/512/maskable-512/1024`, `og-image.png`,
+  `store/feature-graphic.png` (1024×500), `store/screens/01–04` (1080×2340 framed
+  screenshots), `manifest.json`, branded scrollbar CSS.
+- Delivered as chat files (HTML sources in the session scratchpad, NOT in repo):
+  IG-story flyers ES/EN (1080×1920).
+- **Reproduction recipe:** marketing graphics are HTML pages using the app's exact CSS
+  variables/fonts, rendered with headless Chromium (Playwright) — fonts (Fraunces,
+  Caveat, Space Grotesk, Noto Color Emoji) installed from the google/fonts GitHub repo.
+  App screenshots: load `index.html` locally, stub network, inject demo state, render.
+
+## 3. Launch assets & store pipeline (status: late July 2026)
+
+- **Google Play — everything prepared, waiting on testers/console:**
+  - `store/play-listing.md`: paste-ready ES/EN listing (limits verified), Data Safety
+    answers, IARC content-rating answers, reviewer access instructions (test-account
+    credentials go ONLY in Play Console), 18+/no-ads declarations, launch-day checklist.
+  - `store/twa/twa-manifest.json` + `README.md`: Bubblewrap config (packageId
+    `com.doingthedoings.app`) and the exact build recipe. The `.aab` must be built on a
+    laptop (~15 min) — the cloud dev environment's proxy blocks Android SDK downloads.
+  - `.well-known/assetlinks.json`: placeholder awaiting the Play App Signing SHA-256
+    (note: for GitHub *project* pages, the live copy must sit in the
+    `conderex/conderex.github.io` root repo).
+  - **Closed-test requirement:** 12 testers opted-in for 14 continuous days (personal
+    account policy). Status: **~2 of 15 committed**; invitation copy (WhatsApp/LinkedIn/
+    short, ES+EN) already written.
+  - Roge's pending: Play Console account ($25 + ID verification), tester Gmails,
+    reviewer test account.
+- **iOS (phase 2, not started):** Capacitor with bundled HTML (Apple rejects thin
+  wrappers), local-notification reminders + haptics, **Sign in with Apple required**
+  (Google login exists) or hide Google on iOS; needs a Mac or cloud macOS build. $99/yr.
+- **Users:** ~8 registered (owner's network). No paid acquisition, no analytics beyond
+  owner Stats (privacy stance).
+
+## 4. History (PR changelog)
 
 | PR | What |
 |---|---|
 | #1 | Rebrand to **DoingTheDoings** (title, OG images, icon) |
-| #2 | Full **ES/EN i18n** + language toggle; ES default |
-| #3 | English starter tables for EN-language signups |
-| #4 | Owner-only **Stats panel** + `owner_stats()` RPC |
+| #2 | Full **ES/EN i18n** + toggle; Spanish default |
+| #3 | English starter tables for EN signups |
+| #4 | Owner-only **Stats panel** + `owner_stats()` |
 | #5 | Header polish (responsive title, darker tagline) |
-| #6–#8 | **Insights redesign**: heatmap experiment → period-selector counter comparison → **Constancia** card (bars + lines) |
+| #6–#8 | Insights redesign → **Constancia** card (bars + lines) |
 | #9 | Fix tracker cells collapsing (`.bar` CSS collision) |
-| #10 | Month as line chart; removed Quarter view |
-| #11 | **Phase 0 store-readiness**: PWA (manifest/SW/icons), in-app **account deletion** (`delete_user()`), **privacy.html** |
-| #12 | Starter table now **Estirarme/Stretch** (was Dientitos/Teeth) |
+| #10 | Constancia: Month as line, Quarter removed |
+| #11 | **Store-readiness**: PWA, in-app **account deletion**, **privacy.html** |
+| #12 | Starter table → **Estirarme/Stretch** |
 | #13 | `POSITIONING.md` |
 | #14 | Branded scrollbar |
+| #15 | `PROJECT.md` (this doc, v1) |
+| #16 | **Conteos → month-over-month timeline** (comparison view removed) |
+| #17 | **Play-launch prep kit** (listing, graphics, TWA scaffold, feedback link, 360px header fix) |
 
-Pre-history (before this cycle): original personal tracker for Roge; multi-user auth
-migration (see `PLAN-auth.md`), owner data preserved in `bak_*` tables.
+Pre-history: personal tracker for Roge → multi-user auth migration (`PLAN-auth.md`);
+owner's original data preserved in `bak_*` tables.
 
-## 5. Status & roadmap
+## 5. Known quirks & deliberate decisions
 
-- **Users:** ~8 registered (mid-June 2026); owner's personal network. First LinkedIn post
-  made; no paid acquisition. No analytics beyond the owner Stats panel (privacy stance:
-  no third-party trackers).
-- **App-store plan (agreed):**
-  - ✅ **Phase 0 done** (PR #11): PWA, deletion, privacy policy.
-  - **Next — Google Play first** (~$25 one-time): package as **TWA** (Bubblewrap/PWABuilder).
-    Blocker: personal Play accounts need a **closed test with 12 testers for 14 continuous
-    days** before production. Invitation copy (WhatsApp/LinkedIn/short, ES+EN) already
-    written in chat.
-  - **Then — iOS via Capacitor** ($99/yr): bundle the HTML in-app (Apple rejects thin
-    wrappers, rule 4.2) + native touches (local notification reminders, haptics).
-    ⚠️ Google sign-in exists → Apple will require **Sign in with Apple** (or hide Google
-    on iOS). Needs a Mac or cloud macOS build.
-  - Native Swift/Kotlin rewrite considered and **rejected for now** (three codebases,
-    kills iteration speed; wrapper is the bridge, nothing is thrown away later).
-- **Monetization stance:** no ads (decided). If ever: premium tier; and a future
-  **therapist Pro tier** (client progress dashboards, session exports) is the most
-  strategic option.
-- **Community strategy:** recruit Spanish-speaking psychologists as a **free founding
-  community** (the app as between-sessions homework; each therapist brings patients);
-  paid tier later. Nas.io evaluated for hosting this.
-- **Marketing assets made:** IG-story flyers (ES/EN, 1080×1920) matching the design
-  system; social-media strategy plan (faceless, TikTok/IG, Spanish LatAm first).
+- Week starts **Thursday** (day headers `J V S D L Ma Mi`).
+- Repo/URL still "rogecito"; product is DoingTheDoings.
+- `TABLITAS_DEFAULT`/`COUNTERS_DEFAULT` = owner's original offline-fallback config —
+  intentionally NOT the new-user seed (`NEW_USER_TABLITAS*`).
+- Editing lock: current + previous week only.
+- Language pref survives account deletion (only data keys wiped).
+- Privacy-policy contact = owner's personal Gmail (may swap for an alias later).
+- The Claude Code cloud env cannot reach `conderex.github.io` (network policy) — deploy
+  verification happens on Roge's phone.
 
-## 6. Known quirks & deliberate decisions
+## 6. Glossary
 
-- Week starts **Thursday** (owner preference; affects `weekStart`, day headers `J V S D L Ma Mi`).
-- Repo/URL still "rogecito"; product name is DoingTheDoings.
-- `TABLITAS_DEFAULT`/`COUNTERS_DEFAULT` in code are the owner's original offline-fallback
-  config (Dientitos/Salud/Casa Limpia; Stogies/Porritos/Llantos) — intentionally NOT the
-  new-user seed (`NEW_USER_TABLITAS*`).
-- Accent colors are stored as CSS-var strings (`var(--teal)`); `safeAccent()` whitelists
-  them before injecting into HTML/SVG (XSS hygiene).
-- Editing lock: only current + previous week editable.
-- Language preference survives account deletion (only data keys are wiped).
-- Contact email in privacy policy = owner's personal Gmail (flagged; may swap for an alias).
-- The environment building this (Claude Code cloud) cannot reach `conderex.github.io`
-  (network policy) — deploy verification happens on the owner's phone.
+- **Tablita** — a habit table (one tracker card) · **Sub-actividad** — a row in it
+- **Conteo** — tally counter (+/−) · **Racha** — streak
+- **AC** — activación conductual (behavioral activation)
+- **Golden Casket** — the design system name
 
-## 7. Glossary
+---
 
-- **Tablita** — a habit table (one card in the tracker).
-- **Sub-actividad** — a row within a tablita (e.g. Mañana/Tarde/Noche).
-- **Conteo / counter** — tally tracker with +/− (e.g. coffees today).
-- **Racha** — streak (consecutive days with ≥1 check in a tablita).
-- **AC** — activación conductual (behavioral activation).
-- **Golden Casket** — the app's design system/palette name.
+# Cómo usar este documento (para cualquier Claude)
+
+1. **Orden de verdad:** este doc → `POSITIONING.md` → el código (`index.html`). Si algo
+   contradice, gana lo más específico y reciente; pregunta a Roge ante dudas grandes.
+2. **Reglas innegociables en cualquier texto o diseño:** nunca culpa, nunca presión,
+   nunca claims médicos ("no sustituye terapia"), siempre bilingüe-ready (ES primero).
+3. **Para trabajo de diseño:** usa la Parte 1 (paleta exacta, tipografías, elementos
+   visuales). Sello de la casa: bordes tinta gruesos + sombras sólidas SIN blur +
+   rotaciones sutiles + ✿. Si un diseño se ve "corporativo y pulido", está mal.
