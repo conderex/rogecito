@@ -375,6 +375,7 @@ svg.consline .clab{ font-family:var(--font-body); font-size:8px; fill:var(--ink-
   border-radius:999px; opacity:0; transition:opacity .3s; line-height:1;
 }
 .modepill.show{ opacity:.85; }
+.modepill:not(.show){ display:none; }  /* invisible must not eat header space */
 .modepill .led{ width:7px; height:7px; border-radius:50%; background:var(--teal); }
 .modepill.local .led{ background:var(--orange); }
 
@@ -531,6 +532,11 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
   .rowlabel{ font-size:.82rem; }
   .grid{ gap:7px 4px; }
 }
+@media (max-width:380px){
+  .brand h1{ font-size:clamp(.92rem, 4.2vw, 1.32rem); }
+  .brand .sub{ font-size:.92rem; }
+  .modepill{ font-size:.56rem; padding:3px 5px; }
+}
 @media (min-width:900px){
   .app{ max-width:680px; }
   :root{ --bar-h:34px; }
@@ -654,7 +660,7 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
   <section class="panel" id="panel-insights">
     <p class="ins-intro" data-i18n="week_q">¿cómo va la semana?</p>
     <div id="insights"></div>
-    <footer><p data-i18n="one_day">un día a la vez ✿</p><a class="privacy-link" href="privacy.html" data-i18n="privacy_link">privacidad</a></footer>
+    <footer><p data-i18n="one_day">un día a la vez ✿</p><a class="privacy-link" href="privacy.html" data-i18n="privacy_link">privacidad</a> <a class="privacy-link" href="mailto:rogerthatheart@gmail.com?subject=DoingTheDoings%20feedback" data-i18n="feedback_link">comentarios</a></footer>
   </section>
 
   <!-- STATS (owner only) -->
@@ -702,7 +708,7 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
     <p class="gate-msg" id="gateMsg"></p>
   </div>
   <p class="gate-foot" data-i18n="one_day">un día a la vez ✿</p>
-  <p class="gate-foot"><a class="privacy-link" href="privacy.html" data-i18n="privacy_link">privacidad</a></p>
+  <p class="gate-foot"><a class="privacy-link" href="privacy.html" data-i18n="privacy_link">privacidad</a> <a class="privacy-link" href="mailto:rogerthatheart@gmail.com?subject=DoingTheDoings%20feedback" data-i18n="feedback_link">comentarios</a></p>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -755,6 +761,7 @@ const I18N = {
     archived_title: 'archivadas',
     account_title: 'cuenta',
     privacy_link: 'privacidad',
+    feedback_link: 'comentarios',
     delete_note: 'Borrar tu cuenta elimina para siempre tus tablas, marcas y conteos. No se puede deshacer.',
     delete_account: 'Borrar mi cuenta…',
     confirm_delete_1: '¿Borrar tu cuenta y todos tus datos para siempre?',
@@ -864,6 +871,7 @@ const I18N = {
     archived_title: 'archived',
     account_title: 'account',
     privacy_link: 'privacy',
+    feedback_link: 'feedback',
     delete_note: 'Deleting your account permanently removes your tables, checks and counts. This cannot be undone.',
     delete_account: 'Delete my account…',
     confirm_delete_1: 'Delete your account and all your data forever?',
