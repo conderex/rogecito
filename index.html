@@ -549,10 +549,18 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
 .editicon.logout{ color:var(--ink-soft); }
 .gate{
   position:fixed; inset:0; z-index:60;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:14px; padding:24px calc(18px + env(safe-area-inset-left)) calc(18px + env(safe-area-inset-bottom));
+  display:flex; flex-direction:column; align-items:center;
+  gap:14px;
+  padding:calc(24px + env(safe-area-inset-top)) calc(18px + env(safe-area-inset-left))
+          calc(18px + env(safe-area-inset-bottom));
+  overflow-y:auto; -webkit-overflow-scrolling:touch;
   background:radial-gradient(120% 90% at 50% 0%, var(--sand) 0%, var(--sand-deep) 100%);
 }
+/* Auto margins center the card when it fits and collapse to 0 when it doesn't,
+   so nothing is clipped on short screens. (justify-content:center would push the
+   overflow above the scroll origin, making the title unreachable.) */
+.gate > :first-child{ margin-top:auto; }
+.gate > :last-child{ margin-bottom:auto; }
 .gate[hidden]{ display:none; }
 .gate-card{
   width:100%; max-width:360px;
