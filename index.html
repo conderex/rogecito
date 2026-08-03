@@ -549,6 +549,11 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
 .editicon.logout{ color:var(--ink-soft); }
 .gate{
   position:fixed; inset:0; z-index:60;
+  /* inset:0 alone sizes to the LAYOUT viewport, which on iOS extends behind the
+     browser's top/bottom bars (worse in Chrome, which has both) — the card would
+     center inside that taller box and hide under the URL bar with nothing to
+     scroll. dvh sizes to what's actually visible. */
+  height:100vh; height:100dvh;
   display:flex; flex-direction:column; align-items:center;
   gap:14px;
   padding:calc(24px + env(safe-area-inset-top)) calc(18px + env(safe-area-inset-left))
