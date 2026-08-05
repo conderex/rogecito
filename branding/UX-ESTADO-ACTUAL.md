@@ -1,5 +1,11 @@
 # DoingTheDoings — Estado actual del UX/UI (producción)
 
+> **ACTUALIZACIÓN (ago 2026):** el sistema de color descrito aquí fue reemplazado
+> por el **sistema de temas v2** (Oat Milk default + Matcha + Lavanda + Cielo
+> Nocturno, tokens re-escopados por `data-theme`, selector en modo edición,
+> estrellas animadas en Nocturno). Este documento queda como snapshot del v1;
+> el lenguaje de formas (sombras sólidas, bordes tinta, rotaciones) sigue vigente.
+
 *Fotografía fiel de lo que está EN VIVO en https://conderex.github.io/rogecito/ a
 agosto 2026 (tras PR #23). Escrito para llevarse a herramientas de diseño (Claude
 design u otras) como base de un rediseño. Sin propuestas: solo lo que existe.*
