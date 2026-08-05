@@ -208,7 +208,7 @@ header{
 .streak{ cursor:pointer; }
 .streak .flame{ font-size:.95rem; filter:saturate(1.2); }
 .streak .num{ font-variant-numeric:tabular-nums; display:inline-block; }
-.streak .patch{ font-size:.82rem; opacity:.85; margin-left:1px; }
+.streak svg.patch{ width:.85em; height:.85em; color:var(--paper); opacity:.95; margin-left:1px; flex:0 0 auto; }
 .streak.pop .num{ animation:pop .45s var(--bounce); }
 @keyframes pop{ 0%{transform:scale(1);} 35%{transform:scale(1.7);} 100%{transform:scale(1);} }
 
@@ -227,8 +227,6 @@ header{
   display:none;
 }
 .dayhead.today .dot{ display:block; animation:pulse 1.8s ease-in-out infinite; }
-.dayhead .dpatch{ position:absolute; left:50%; bottom:-3px; transform:translateX(-50%);
-  font-size:.62rem; color:var(--teal); line-height:1; }
 @keyframes pulse{ 0%,100%{ transform:translateX(-50%) scale(1); opacity:1;} 50%{ transform:translateX(-50%) scale(1.5); opacity:.55;} }
 
 .rowlabel{
@@ -267,6 +265,11 @@ header{
   transform:translateX(-160%);
 }
 .cell.checked .fill{ transform:scaleX(1); }
+/* Forgiven day: the flower isotype sits inside the empty pill (fill covers it if checked) */
+.bar .bloom{
+  position:absolute; inset:0; margin:auto; width:17px; height:17px;
+  color:var(--accent); opacity:.55;
+}
 .cell.checked .fill::after{ animation:glint .7s var(--ease-out) .12s; }
 @keyframes glint{ to{ transform:translateX(320%);} }
 .cell.unfilling .fill{ transition:transform .2s ease-out; }
@@ -1440,9 +1443,7 @@ function renderCards(){
     DAY_HEADERS.forEach((h,i)=>{
       const dh = el('div','dayhead');
       if(isoDates[i] === todayIso) dh.classList.add('today');
-      const patched = sinfo.bridged.has(isoDates[i]);
-      if(patched) dh.classList.add('patched');
-      dh.innerHTML = `${h}<span class="dot"></span>` + (patched ? `<span class="dpatch" aria-hidden="true">✿</span>` : '');
+      dh.innerHTML = `${h}<span class="dot"></span>`;
       grid.appendChild(dh);
     });
 
@@ -1453,10 +1454,15 @@ function renderCards(){
         const cell = document.createElement('button');
         cell.className = 'cell';
         cell.setAttribute('aria-label', `${tab.title} · ${sub.label} · ${d}`);
-        if(state.checks.has(key(tab.id, sub.id, d))) cell.classList.add('checked');
+        const isChecked = state.checks.has(key(tab.id, sub.id, d));
+        if(isChecked) cell.classList.add('checked');
         const locked = isLocked(d);
         if(locked){ cell.classList.add('locked'); cell.setAttribute('aria-disabled','true'); }
-        cell.innerHTML = '<span class="bar"><span class="fill"></span></span>';
+        // Forgiven past day: the empty circle wears the flower isotype instead of a gap.
+        // (Today stays plain — it can still be marked.) The .fill paints on top when checked.
+        const patched = !isChecked && d !== todayIso && sinfo.bridged.has(d);
+        if(patched) cell.classList.add('patched');
+        cell.innerHTML = '<span class="bar">' + (patched ? FLOWER_SVG('bloom') : '') + '<span class="fill"></span></span>';
         cell.addEventListener('click', ()=> {
           if(locked){ showToast(tr('locked_toast')); return; }
           toggle(tab.id, sub.id, d, cell);
@@ -1477,7 +1483,7 @@ function paintStreak(tablitaId, animate){
   if(!badge) return;
   const { current, held } = computeStreaks(tablitaId);
   badge.innerHTML = `<span class="flame">🔥</span><span class="num">${current}</span>` +
-    (held ? `<span class="patch" aria-hidden="true">✿</span>` : '');
+    (held ? FLOWER_SVG('patch') : '');
   const prev = state.prevStreaks[tablitaId] || 0;
   if(animate && current > prev){
     badge.classList.remove('pop'); void badge.offsetWidth; badge.classList.add('pop');
@@ -1833,6 +1839,9 @@ function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&l
 // neutralizes any tampered accent value (matters once therapists view patient data).
 const ACCENT_RE = /^var\(--[a-z-]+\)$/;
 const safeAccent = (a) => ACCENT_RE.test(a) ? a : 'var(--teal)';
+// Brand flower isotype (5 round petals + hollow center) — drawn SVG, never an emoji,
+// so it always renders in-palette. Used for streak patches.
+const FLOWER_SVG = (cls) => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor"><circle cx="12" cy="5" r="4.3"/><circle cx="18.5" cy="9.7" r="4.3"/><circle cx="16" cy="17.3" r="4.3"/><circle cx="8" cy="17.3" r="4.3"/><circle cx="5.5" cy="9.7" r="4.3"/></g><circle cx="12" cy="11.8" r="2.9" fill="var(--paper)"/></svg>`;
 const genId = (prefix) => prefix + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
 const byOrder = (a,b) => a.sort_order - b.sort_order;
 
