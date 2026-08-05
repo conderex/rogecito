@@ -82,7 +82,24 @@ pacientes) como monetización futura. Sin anuncios, decidido.
 - Taglines oficiales: ES *"Constancia sin culpa, un día a la vez ✿"* ·
   EN *"Guilt-free consistency, one day at a time ✿"*
 
-## Paleta de colores — "Golden Casket"
+## Sistema de temas — v2 (agosto 2026)
+
+*Tokens semánticos re-escopados por tema via `html[data-theme]`. Los acentos se
+guardan en DB como `var(--teal)` etc., así que cambiar de tema re-pinta todas las
+tablitas sin migración. Elección por dispositivo (`roge_theme_v1`), selector en
+modo edición ("apariencia"). Detalle completo en `branding/UX-ESTADO-ACTUAL.md`.*
+
+| Tema | Fondo | Tarjetas | Nota |
+|---|---|---|---|
+| ☕ **Oat Milk** (default) | `#f9f8f6` | `#ffffff` | frambuesa `#ef476f` releva a la terracota |
+| 🍵 Matcha | `#eff4ec` | `#ffffff` | verdes al frente |
+| 🍇 Lavanda | `#f4f1f8` | `#ffffff` | corrido al frío |
+| 🌙 Cielo Nocturno | `#1d1d24` | `#5f6879` | estrellas CSS que respiran; lunita SVG; solo elección manual |
+
+Cada tema define sus PROPIOS 5 acentos (roles: teal/cálido/lavanda/oro/rosa),
+contraste AA verificado. La lunita y la florecita son isotipos SVG, jamás emoji.
+
+### Paleta histórica — "Golden Casket" (v1, retirada)
 
 *Desierto cálido: dorados polvorientos, naranjas quemados, teals apagados sobre arena.*
 

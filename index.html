@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#1f1a16">
+<meta name="theme-color" content="#f9f8f6">
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -27,27 +27,39 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..700&family=Space+Grotesk:wght@400;500;600;700&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
-   THE GOLDEN CASKET palette — dusty desert golds, burnt oranges,
-   muted teals, soft lavenders, warm pinks on sun-bleached sand.
-   Swap the 6 core values below to re-theme the whole app.
+   THEME TOKENS — semantic roles, re-scoped per theme:
+     --sand bg app · --paper card surface · --ink borders+text
+     --ink-soft secondary text · --shadow solid offset shadow
+     accents (--teal/--orange/--lavender/--gold/--pink) are the
+     5 tablita colors; DB stores 'var(--teal)' etc., so each
+     theme repaints every tablita by redefining these values.
+   Default theme: OAT MILK ☕ (raw off-white + warm accents).
+   Others via html[data-theme]: matcha · lavanda · nocturno.
    ============================================================ */
 :root{
-  --sand:        #e7d8b8;   /* warm background base */
-  --sand-deep:   #d8c39a;
-  --paper:       #f4ead0;   /* card surface */
-  --ink:         #2a2118;   /* near-black warm brown */
-  --gold:        #d9a441;   /* dusty desert gold */
-  --orange:      #cf6a39;   /* burnt orange */
-  --orange-deep: #b04f22;   /* deeper burnt orange — for subtitles (better contrast) */
-  --teal:        #3f8a80;   /* muted teal */
-  --lavender:    #8f82c2;   /* soft lavender */
-  --pink:        #d98798;   /* warm pink */
+  --sand:        #f9f8f6;   /* app background (raw off-white) */
+  --sand-deep:   #efece7;
+  --paper:       #ffffff;   /* card surface */
+  --ink:         #1a1a1a;   /* warm graphite */
+  --gold:        #e8b23a;
+  --orange:      #ef476f;   /* the warm accent — frambuesa took the terracota slot */
+  --orange-deep: #c02a52;   /* subtitles / danger */
+  --teal:        #3f8a80;
+  --lavender:    #8f82c2;
+  --pink:        #ea8fa8;
 
   /* derived */
-  --ink-soft:    #6b5d49;
-  --line:        #2a2118;
-  --shadow:      rgba(42,33,24,.28);
+  --ink-soft:    #6f6862;
+  --line:        var(--ink);
+  --shadow:      rgba(26,26,26,.16);
   --shine:       rgba(255,255,255,.55);
+  --scrim:       rgba(26,26,26,.45);
+  --card-hi:     rgba(255,255,255,.25);
+  --box-hi:      rgba(255,255,255,.28);
+  --on-gold:     #1a1a1a;   /* text on gold fills (gold is light in every theme) */
+  --wash1:       rgba(232,178,58,.14);
+  --wash2:       rgba(143,130,194,.12);
+  --wash3:       rgba(239,71,111,.05);
 
   --r-card: 18px;
   --r-bar: 999px;
@@ -62,6 +74,53 @@
 
   --col-template: 78px repeat(7, 1fr);
 }
+/* 🍵 MATCHA MORNING — ultra-pale sage, greens up front */
+html[data-theme="matcha"]{
+  --sand:#eff4ec; --sand-deep:#e2eadd; --paper:#ffffff;
+  --ink:#1e231d; --ink-soft:#67705f; --shadow:rgba(30,35,29,.16);
+  --teal:#2f8f7a; --orange:#7fb069; --lavender:#b5a4d6; --gold:#dcae3c; --pink:#e08f9d;
+  --orange-deep:#256e5e; --scrim:rgba(30,35,29,.45); --on-gold:#1e231d;
+  --wash1:rgba(127,176,105,.14); --wash2:rgba(47,143,122,.10); --wash3:rgba(220,174,60,.06);
+}
+/* 🍇 LAVANDA / TARDE — subtle mauve, shifted cool */
+html[data-theme="lavanda"]{
+  --sand:#f4f1f8; --sand-deep:#e9e3f1; --paper:#ffffff;
+  --ink:#221e28; --ink-soft:#6d6577; --shadow:rgba(34,30,40,.16);
+  --teal:#4a93a8; --orange:#d54f7d; --lavender:#8b7ad1; --gold:#d9a45b; --pink:#c495d6;
+  --orange-deep:#6e51c4; --scrim:rgba(34,30,40,.45); --on-gold:#221e28;
+  --wash1:rgba(139,122,209,.13); --wash2:rgba(212,79,125,.07); --wash3:rgba(217,164,91,.06);
+}
+/* 🌙 CIELO NOCTURNO — charcoal night sky, slate "moonstone" cards,
+   luminous pastels, solid black shadows. User-selected only. */
+html[data-theme="nocturno"]{
+  --sand:#1d1d24; --sand-deep:#16161c; --paper:#5f6879;
+  --ink:#f7f7fb; --ink-soft:#e8eaf1; --shadow:rgba(0,0,0,.85);
+  --teal:#7fd4c8; --orange:#f6a0b8; --lavender:#b7a9f0; --gold:#f2cf7e; --pink:#9cc8f0;
+  --orange-deep:#fde0e9; --scrim:rgba(0,0,0,.6); --on-gold:#1d1d24;
+  --shine:rgba(255,255,255,.35); --card-hi:rgba(255,255,255,.10); --box-hi:rgba(255,255,255,.08);
+  --wash1:transparent; --wash2:transparent; --wash3:transparent;
+}
+
+/* Night sky: a handful of stars that breathe slowly, one at a time.
+   Fixed behind the content (negative z-index paints above the body
+   background but under everything else). Nocturno only. */
+#nightsky{ display:none; position:fixed; inset:0; z-index:-1; pointer-events:none; }
+html[data-theme="nocturno"] #nightsky{ display:block; }
+#nightsky span{
+  position:absolute; border-radius:50%; background:#f7f4e4;
+  width:2px; height:2px; opacity:.2;
+  box-shadow:0 0 5px 1px rgba(247,244,228,.4);
+  animation:twinkle 7s ease-in-out infinite;
+}
+#nightsky span:nth-child(1){ top:8%;  left:14%; }
+#nightsky span:nth-child(2){ top:5%;  left:62%; width:3px; height:3px; animation-delay:2.6s; animation-duration:6s; }
+#nightsky span:nth-child(3){ top:14%; left:86%; animation-delay:4.8s; }
+#nightsky span:nth-child(4){ top:30%; left:38%; animation-delay:1.4s; animation-duration:8s; }
+#nightsky span:nth-child(5){ top:47%; left:90%; animation-delay:5.7s; }
+#nightsky span:nth-child(6){ top:58%; left:7%;  width:3px; height:3px; animation-delay:3.5s; }
+#nightsky span:nth-child(7){ top:76%; left:70%; animation-delay:.8s;  animation-duration:9s; }
+#nightsky span:nth-child(8){ top:88%; left:26%; animation-delay:6.2s; }
+@keyframes twinkle{ 0%,100%{ opacity:.12; } 50%{ opacity:.85; } }
 
 *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 html,body{ margin:0; padding:0; }
@@ -77,9 +136,9 @@ body{
   background-color:var(--sand);
   /* layered warm wash + grain */
   background-image:
-    radial-gradient(120% 80% at 80% -10%, rgba(217,164,65,.30), transparent 55%),
-    radial-gradient(110% 70% at -10% 110%, rgba(143,130,194,.28), transparent 55%),
-    radial-gradient(90% 60% at 50% 50%, rgba(207,106,57,.10), transparent 70%),
+    radial-gradient(120% 80% at 80% -10%, var(--wash1), transparent 55%),
+    radial-gradient(110% 70% at -10% 110%, var(--wash2), transparent 55%),
+    radial-gradient(90% 60% at 50% 50%, var(--wash3), transparent 70%),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
   background-attachment:fixed, fixed, fixed, fixed;
   min-height:100vh;
@@ -95,7 +154,7 @@ body{
 header{
   position:sticky; top:0; z-index:40;
   padding:calc(10px + env(safe-area-inset-top)) 0 6px;
-  background:linear-gradient(var(--sand) 72%, rgba(231,216,184,0));
+  background:linear-gradient(var(--sand) 72%, transparent);
 }
 .brand{
   display:flex; align-items:center; gap:6px; padding:0 4px 8px;
@@ -138,7 +197,7 @@ header{
   transition:color .25s var(--ease-out), background .25s var(--ease-out);
 }
 .tab.active{ color:var(--paper); background:var(--ink); }
-.tab:not(.active):active{ background:rgba(42,33,24,.08); }
+.tab:not(.active):active{ background:color-mix(in srgb, var(--ink) 8%, transparent); }
 
 /* ---------- Week nav ---------- */
 .weeknav{
@@ -163,7 +222,7 @@ header{
 .today-btn{
   font-family:var(--font-body); font-weight:700; font-size:.85rem;
   letter-spacing:.02em; padding:0 14px; min-width:auto;
-  background:var(--gold);
+  background:var(--gold); color:var(--on-gold);
 }
 .today-btn[disabled]{ opacity:.45; pointer-events:none; }
 
@@ -180,7 +239,7 @@ header{
   border-radius:var(--r-card);
   padding:14px 14px 16px;
   margin:16px 0;
-  box-shadow:6px 7px 0 var(--shadow), inset 0 0 0 1px rgba(255,255,255,.25);
+  box-shadow:6px 7px 0 var(--shadow), inset 0 0 0 1px var(--card-hi);
 }
 .card:nth-child(1){ transform:rotate(-0.4deg); }
 .card:nth-child(2){ transform:rotate(0.3deg); }
@@ -200,7 +259,7 @@ header{
 }
 .streak{
   display:inline-flex; align-items:center; gap:5px;
-  background:var(--accent); color:var(--paper);
+  background:var(--accent); color:var(--sand);
   border:2.5px solid var(--line); border-radius:999px;
   padding:4px 11px 4px 9px; font-weight:700; font-size:.82rem;
   box-shadow:2px 2px 0 var(--shadow); white-space:nowrap;
@@ -208,7 +267,7 @@ header{
 .streak{ cursor:pointer; }
 .streak .flame{ font-size:.95rem; filter:saturate(1.2); }
 .streak .num{ font-variant-numeric:tabular-nums; display:inline-block; }
-.streak svg.patch{ width:.85em; height:.85em; color:var(--paper); opacity:.95; margin-left:1px; flex:0 0 auto; }
+.streak svg.patch{ width:.85em; height:.85em; color:var(--sand); opacity:.95; margin-left:1px; flex:0 0 auto; }
 .streak.pop .num{ animation:pop .45s var(--bounce); }
 @keyframes pop{ 0%{transform:scale(1);} 35%{transform:scale(1.7);} 100%{transform:scale(1);} }
 
@@ -242,10 +301,10 @@ header{
 }
 .bar{
   position:relative; width:100%; height:var(--bar-h);
-  background:rgba(42,33,24,.07);
+  background:color-mix(in srgb, var(--ink) 7%, transparent);
   border:2.5px solid var(--line);
   border-radius:var(--r-bar); overflow:hidden;
-  box-shadow:inset 0 2px 4px rgba(42,33,24,.10);
+  box-shadow:inset 0 2px 4px color-mix(in srgb, var(--ink) 10%, transparent);
 }
 .fill{
   position:absolute; inset:0; transform-origin:left center;
@@ -296,8 +355,8 @@ header{
 .metric .top .k{ font-weight:600; font-size:.88rem; color:var(--ink-soft); letter-spacing:.02em; }
 .metric .top .v{ font-family:var(--font-display); font-weight:800; font-size:1.05rem; font-variant-numeric:tabular-nums; }
 .track{
-  height:18px; background:rgba(42,33,24,.08); border:2.5px solid var(--line);
-  border-radius:999px; overflow:hidden; box-shadow:inset 0 2px 3px rgba(42,33,24,.12);
+  height:18px; background:color-mix(in srgb, var(--ink) 8%, transparent); border:2.5px solid var(--line);
+  border-radius:999px; overflow:hidden; box-shadow:inset 0 2px 3px color-mix(in srgb, var(--ink) 12%, transparent);
 }
 .track > span{
   display:block; height:100%; width:0;
@@ -307,7 +366,7 @@ header{
 .streaks-row{ display:flex; gap:10px; margin-top:14px; }
 .streak-box{
   flex:1; text-align:center; border:2.5px solid var(--line); border-radius:12px;
-  padding:10px 6px; background:rgba(255,255,255,.28);
+  padding:10px 6px; background:var(--box-hi);
 }
 .streak-box .big{ font-family:var(--font-display); font-weight:900; font-size:1.7rem; line-height:1; }
 .streak-box .cap{ font-size:.68rem; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-soft); font-weight:600; margin-top:5px; }
@@ -359,7 +418,7 @@ svg.consline .clab{ font-family:var(--font-body); font-size:8px; fill:var(--ink-
 .toast{
   position:fixed; left:50%; bottom:calc(22px + env(safe-area-inset-bottom));
   transform:translateX(-50%) translateY(140%);
-  background:var(--ink); color:var(--paper);
+  background:var(--ink); color:var(--sand);
   border:2.5px solid var(--orange); border-radius:12px;
   padding:11px 18px; font-weight:600; font-size:.9rem; z-index:90;
   box-shadow:4px 4px 0 var(--shadow); max-width:90vw; text-align:center;
@@ -403,7 +462,7 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
   position:relative; background:var(--paper);
   border:3px solid var(--line); border-radius:var(--r-card);
   padding:13px 12px 15px; text-align:center;
-  box-shadow:5px 6px 0 var(--shadow), inset 0 0 0 1px rgba(255,255,255,.25);
+  box-shadow:5px 6px 0 var(--shadow), inset 0 0 0 1px var(--card-hi);
 }
 /* playful tilt that scales to any number of counters */
 .counter:nth-child(odd){ transform:rotate(-0.5deg); }
@@ -426,7 +485,7 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
 .cbtn{
   appearance:none; cursor:pointer; width:44px; height:44px; flex:0 0 44px;
   border:2.5px solid var(--line); border-radius:12px;
-  background:var(--accent); color:var(--paper);
+  background:var(--accent); color:var(--sand);
   font-size:1.5rem; font-weight:800; line-height:1;
   box-shadow:3px 3px 0 var(--shadow); display:grid; place-items:center;
   transition:transform .1s var(--ease-out), box-shadow .1s var(--ease-out), opacity .15s;
@@ -445,7 +504,7 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
   transition:transform .1s var(--ease-out), box-shadow .1s var(--ease-out), background .2s;
 }
 .editicon:active{ transform:translate(2px,2px); box-shadow:0 0 0 var(--shadow); }
-.editicon.on{ background:var(--gold); }
+.editicon.on{ background:var(--gold); color:var(--on-gold); }
 /* hide daily-tracking chrome while editing structure */
 .panel.editing > .weeknav,
 .panel.editing > .count-title,
@@ -469,7 +528,7 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
 .ebtn:disabled{ opacity:.3; pointer-events:none; box-shadow:none; }
 
 .edit-rows{ display:flex; flex-direction:column; gap:7px; }
-.edit-row{ display:flex; align-items:center; gap:8px; padding:5px 4px; border-bottom:1.5px dashed rgba(42,33,24,.18); }
+.edit-row{ display:flex; align-items:center; gap:8px; padding:5px 4px; border-bottom:1.5px dashed color-mix(in srgb, var(--ink) 18%, transparent); }
 .edit-row:last-of-type{ border-bottom:none; }
 .er-label{ flex:1; font-weight:600; font-size:.95rem; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .edit-row.archived{ opacity:.6; }
@@ -480,7 +539,7 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
   background:transparent; color:var(--ink); font-family:var(--font-body); font-weight:700;
   font-size:.85rem; padding:8px 12px; min-height:40px;
 }
-.tbtn:active{ background:rgba(42,33,24,.06); }
+.tbtn:active{ background:color-mix(in srgb, var(--ink) 6%, transparent); }
 .tbtn.addbtn{ width:100%; border-style:dashed; margin-top:9px; color:var(--ink-soft); }
 .tbtn.addbtn.big{
   margin:16px 0; border-style:solid; background:var(--paper); color:var(--ink);
@@ -488,12 +547,12 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
 }
 .dz-note{ font-family:var(--font-body); font-size:.82rem; line-height:1.45; color:var(--ink-soft); margin:0 0 10px; }
 .tbtn.dangerbtn{ width:100%; border-color:var(--orange-deep); color:var(--orange-deep); }
-.tbtn.dangerbtn:active{ background:rgba(176,79,34,.08); }
+.tbtn.dangerbtn:active{ background:color-mix(in srgb, var(--orange-deep) 8%, transparent); }
 
 /* ---------- Modal ---------- */
 .modal-ov{
   position:fixed; inset:0; z-index:120; display:grid; place-items:center;
-  background:rgba(42,33,24,.45); padding:22px; animation:fadein .2s var(--ease-out);
+  background:var(--scrim); padding:22px; animation:fadein .2s var(--ease-out);
 }
 .modal{
   width:100%; max-width:340px; background:var(--paper);
@@ -507,11 +566,11 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
 .modal-input{
   flex:1; width:100%; box-sizing:border-box; font-family:var(--font-body); font-size:1.05rem;
   padding:11px 12px; border:2.5px solid var(--line); border-radius:11px;
-  background:#fff8ea; color:var(--ink);
+  background:color-mix(in srgb, var(--paper) 86%, #fff); color:var(--ink);
 }
 .modal-emoji{
   flex:0 0 58px; width:58px; box-sizing:border-box; text-align:center; font-size:1.4rem;
-  padding:11px 4px; border:2.5px solid var(--line); border-radius:11px; background:#fff8ea; color:var(--ink);
+  padding:11px 4px; border:2.5px solid var(--line); border-radius:11px; background:color-mix(in srgb, var(--paper) 86%, #fff); color:var(--ink);
 }
 .modal-input:focus, .modal-emoji:focus{ outline:none; border-color:var(--accent); }
 .swatches{ display:flex; gap:9px; margin:2px 0 16px; }
@@ -520,6 +579,22 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
   border:2.5px solid var(--line); box-shadow:2px 2px 0 var(--shadow);
 }
 .sw.on{ outline:3px solid var(--ink); outline-offset:2px; }
+/* Theme picker chips (edit mode) */
+.themechips{ display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+.themechip{
+  appearance:none; cursor:pointer; display:flex; align-items:center; gap:9px;
+  border:2px solid var(--line); border-radius:12px; background:transparent;
+  color:var(--ink); font-family:var(--font-body); font-weight:700; font-size:.88rem;
+  padding:9px 12px; min-height:46px; text-align:left;
+}
+.themechip .tc-swatch{
+  width:24px; height:24px; flex:0 0 24px; border-radius:50%;
+  border:2px solid var(--line); display:grid; place-items:center;
+}
+.themechip .tc-swatch span{ width:11px; height:11px; border-radius:50%; display:block; }
+.themechip svg.tc-moon{ width:15px; height:15px; color:var(--gold); margin-left:auto; flex:0 0 auto; }
+.themechip.on{ outline:3px solid var(--ink); outline-offset:1.5px; background:color-mix(in srgb, var(--ink) 5%, transparent); }
+.themechip:active{ transform:translateY(1px); }
 .modal-actions{ display:flex; gap:10px; }
 .mbtn{
   flex:1; appearance:none; cursor:pointer; min-height:46px;
@@ -530,7 +605,7 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
 }
 .mbtn:active{ transform:translate(3px,3px); box-shadow:0 0 0 var(--shadow); }
 .mbtn.cancel{ background:var(--paper); color:var(--ink); }
-.mbtn.save{ background:var(--accent, var(--gold)); color:var(--paper); }
+.mbtn.save{ background:var(--accent, var(--gold)); color:var(--sand); }
 .modal-actions.one .mbtn.save{ background:var(--teal); }
 
 /* ---------- Welcome card (one-time, on account creation) ---------- */
@@ -543,7 +618,7 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
 .welcome-card p{ font-size:.95rem; line-height:1.45; color:var(--ink); margin:0 0 14px; }
 .welcome-card .wc-btn{
   appearance:none; cursor:pointer; border:2.5px solid var(--line); border-radius:12px;
-  background:var(--teal); color:var(--paper); font-family:var(--font-body); font-weight:700;
+  background:var(--teal); color:var(--sand); font-family:var(--font-body); font-weight:700;
   font-size:.92rem; padding:11px 24px; min-height:44px; box-shadow:3px 3px 0 var(--shadow);
   transition:transform .1s var(--ease-out), box-shadow .1s var(--ease-out);
 }
@@ -637,12 +712,12 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
 .gate-foot{ font-family:var(--font-hand); font-size:1.1rem; color:var(--ink-soft); }
 .gate-btn.google{
   display:flex; align-items:center; justify-content:center; gap:10px;
-  color:var(--ink); background:#fff; margin-bottom:10px;
+  color:#1a1a1a; background:#fff; margin-bottom:10px;
 }
 .gate-btn.google svg{ flex:0 0 auto; }
 /* ---------- Stats (owner-only dashboard) ---------- */
 .stat-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin:8px 0 6px; }
-.stat-card{ border:var(--border); box-shadow:4px 4px 0 var(--shadow); border-radius:14px; background:#fff; padding:12px 14px; }
+.stat-card{ border:2.5px solid var(--line); box-shadow:4px 4px 0 var(--shadow); border-radius:14px; background:var(--paper); padding:12px 14px; }
 .stat-card .big{ font-family:var(--font-display,inherit); font-weight:800; font-size:1.9rem; line-height:1; color:var(--ink); }
 .stat-card .lbl{ font-family:var(--font-body); font-size:.78rem; color:var(--ink-soft); margin-top:6px; }
 .stat-sub{ display:flex; gap:10px; margin-top:4px; font-family:var(--font-body); font-size:.74rem; color:var(--ink-soft); }
@@ -654,6 +729,8 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
 </style>
 </head>
 <body>
+
+<div id="nightsky" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
 
 <div class="loader" id="loader">
   <div class="dot"></div>
@@ -765,6 +842,7 @@ const LS_CONFIG = 'roge_config_v1';
 const LS_COUNTERS = 'roge_counters_v1';
 const LS_LANG = 'roge_lang_v1';
 const LS_WELCOME = 'roge_welcome_v1';   // one-time welcome shown on account creation
+const LS_THEME = 'roge_theme_v1';       // device-local theme choice (oat default)
 
 /* =====================================================================
    I18N  — Spanish / English. Stored choice wins; otherwise we guess
@@ -798,6 +876,7 @@ const I18N = {
     // editor
     edit_tables: 'editar tablas',
     counters_title: 'contadores',
+    theme_title: 'apariencia',
     archived_title: 'archivadas',
     account_title: 'cuenta',
     privacy_link: 'privacidad',
@@ -914,6 +993,7 @@ const I18N = {
     no_tables: 'No tables yet.<br>Tap ✎ Edit to create one.',
     edit_tables: 'edit tables',
     counters_title: 'counters',
+    theme_title: 'appearance',
     archived_title: 'archived',
     account_title: 'account',
     privacy_link: 'privacy',
@@ -1045,6 +1125,37 @@ function bindLangToggles(){
     tg.addEventListener('click', () => setLang(LANG === 'es' ? 'en' : 'es'));
   });
 }
+
+/* =====================================================================
+   THEMES — Oat Milk default; matcha / lavanda / nocturno via
+   html[data-theme]. Device-local like the language choice. The DB keeps
+   storing accents as 'var(--teal)' etc., so switching themes repaints
+   every tablita with that theme's own five colors — no migration.
+   ===================================================================== */
+const THEMES = ['oat','matcha','lavanda','nocturno'];
+const THEME_NAMES = { oat:'Oat Milk', matcha:'Matcha', lavanda:'Lavanda', nocturno:'Nocturno' };
+// browser-chrome color per theme (= that theme's --sand)
+const THEME_BAR = { oat:'#f9f8f6', matcha:'#eff4ec', lavanda:'#f4f1f8', nocturno:'#1d1d24' };
+// swatch colors for the picker chips: [bg, card]
+const THEME_SWATCH = { oat:['#f9f8f6','#ef476f'], matcha:['#eff4ec','#2f8f7a'], lavanda:['#f4f1f8','#8b7ad1'], nocturno:['#1d1d24','#f6a0b8'] };
+let THEME = (() => {
+  try { const s = localStorage.getItem(LS_THEME); if(THEMES.includes(s)) return s; } catch(e){}
+  return 'oat';
+})();
+function applyTheme(){
+  if(THEME === 'oat') delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme = THEME;
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.setAttribute('content', THEME_BAR[THEME]);
+}
+function setTheme(t){
+  if(!THEMES.includes(t)) return;
+  THEME = t;
+  try { localStorage.setItem(LS_THEME, t); } catch(e){}
+  applyTheme();
+  document.querySelectorAll('.themechip').forEach(ch => ch.classList.toggle('on', ch.dataset.t === THEME));
+}
+applyTheme(); // before first paint settles — no theme flash
 
 // Supabase Auth client — created in boot() once the library is loaded (with a
 // backup CDN so a single CDN hiccup can't lock everyone out of login).
@@ -1842,6 +1953,9 @@ const safeAccent = (a) => ACCENT_RE.test(a) ? a : 'var(--teal)';
 // Brand flower isotype (5 round petals + hollow center) — drawn SVG, never an emoji,
 // so it always renders in-palette. Used for streak patches.
 const FLOWER_SVG = (cls) => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor"><circle cx="12" cy="5" r="4.3"/><circle cx="18.5" cy="9.7" r="4.3"/><circle cx="16" cy="17.3" r="4.3"/><circle cx="8" cy="17.3" r="4.3"/><circle cx="5.5" cy="9.7" r="4.3"/></g><circle cx="12" cy="11.8" r="2.9" fill="var(--paper)"/></svg>`;
+// Crescent moon isotype (same drawn family as the flower — never an emoji).
+// Marks the Nocturno theme in the picker.
+const MOON_SVG = (cls) => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14.8 2.6a9.9 9.9 0 1 0 6.6 15.9A11.2 11.2 0 0 1 14.8 2.6z"/></svg>`;
 const genId = (prefix) => prefix + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
 const byOrder = (a,b) => a.sort_order - b.sort_order;
 
@@ -1999,6 +2113,21 @@ function renderEditor(){
   clist.appendChild(tbtn(tr('new_counter'), 'addbtn', ()=> addCounter()));
   ccard.appendChild(clist);
   cards.appendChild(ccard);
+
+  // ---- Appearance (theme picker; device-local) ----
+  cards.appendChild(el('p','count-title',tr('theme_title')));
+  const tcard = document.createElement('div');
+  tcard.className = 'card edit-card';
+  const trow = el('div','themechips');
+  trow.innerHTML = THEMES.map(t => {
+    const [bg, dot] = THEME_SWATCH[t];
+    return `<button class="themechip${t===THEME?' on':''}" data-t="${t}">` +
+      `<span class="tc-swatch" style="background:${bg}"><span style="background:${dot}"></span></span>` +
+      `${THEME_NAMES[t]}${t==='nocturno' ? MOON_SVG('tc-moon') : ''}</button>`;
+  }).join('');
+  trow.querySelectorAll('.themechip').forEach(ch => ch.addEventListener('click', ()=> setTheme(ch.dataset.t)));
+  tcard.appendChild(trow);
+  cards.appendChild(tcard);
 
   // ---- Archived ----
   const archT = state.config.filter(t => t.archived);
