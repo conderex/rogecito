@@ -77,8 +77,10 @@ a la vez ✿" en Caveat + links `privacidad` y `comentarios` (subrayado punteado
 - **Tarjeta de tablita**: papel, borde 3px, radio 18px, sombra `6px 7px 0`, rotación
   alternada ±0.4°; barrita vertical del acento a la izquierda; título Fraunces; pill
   de racha arriba-derecha (fondo acento, texto papel, 🔥 + número, anima "pop" al
-  crecer). Cuadrícula: fila de días `J V S D L Ma Mi` (hoy en negrita + puntito
-  naranja pulsante), filas por sub-actividad: etiqueta + 7 celdas.
+  crecer; **es tappable → abre explicación de rachas**; muestra ✿ cuando un parche la
+  sostiene). Racha amable: aguanta hasta 2 días sin marcar, se rompe al 3ro; los días
+  perdonados llevan ✿ bajo su letra. Cuadrícula: fila de días `J V S D L Ma Mi` (hoy en
+  negrita + puntito naranja pulsante), filas por sub-actividad: etiqueta + 7 celdas.
 - **Celda**: botón 44px min; dentro, "bar" pastilla (alto 30px, borde 2.5px, radio
   999px, fondo tinta al 7% + sombra interna). Al marcar: el relleno del acento entra
   con `scaleX` desde la izquierda + **glint** (destello que viaja, .7s). Al desmarcar

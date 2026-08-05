@@ -139,8 +139,11 @@ Servidas por Google Fonts. Para gráficos generados: TTFs desde el repo google/f
   fill/unfill. Week runs **Thursday → Wednesday** (deliberate quirk). Prev/next/Hoy
   navigation. Days before the start of last week are **locked** (~2 editable weeks).
 - **Counters:** tally trackers (+/− per day) under the grid.
-- **Streaks:** per-tablita current & longest (consecutive days with ≥1 check; 1-day
-  grace for today).
+- **Streaks:** per-tablita current & longest (counts days with ≥1 check). **Gentle
+  grace:** tolerates up to 2 consecutive missed days; only 3 in a row breaks it.
+  Forgiven days show as a patch ✿, not a gap; the pill shows ✿ when a patch is holding
+  the streak. Tapping the 🔥 pill opens a "how streaks work" explainer. A one-time
+  welcome card greets brand-new accounts.
 - **Insights tab:**
   1. **Constancia** — per-tablita completion, selector *Semana/Mes/Año*: week = 7 daily
      bars (zero days pop as stubs), month & year = % line charts; reward headline
