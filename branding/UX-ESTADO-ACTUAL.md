@@ -6,7 +6,7 @@
 > estrellas animadas en Nocturno). Este documento queda como snapshot del v1;
 > el lenguaje de formas (sombras sólidas, bordes tinta, rotaciones) sigue vigente.
 
-*Fotografía fiel de lo que está EN VIVO en https://conderex.github.io/rogecito/ a
+*Fotografía fiel de lo que está EN VIVO en https://doingthedoings.com/ a
 agosto 2026 (tras PR #23). Escrito para llevarse a herramientas de diseño (Claude
 design u otras) como base de un rediseño. Sin propuestas: solo lo que existe.*
 

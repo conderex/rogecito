@@ -134,7 +134,7 @@ del set de arranque (Dientitos + Casa Limpia, Cafecito + Logros del día) para c
 
 ## Pendientes manuales (panel Supabase / Roge)
 1. **Auth ▸ URL Configuration**: poner el **Site URL** = URL de GitHub Pages de la app
-   (p. ej. `https://conderex.github.io/rogecito/`) y agregarla a *Redirect URLs*, para que
+   (p. ej. `https://doingthedoings.com/`) y agregarla a *Redirect URLs*, para que
    los correos de **enlace mágico y reset** regresen a la app. (El login con contraseña ya
    funciona sin esto.)
 2. **Probar en el teléfono**: entrar con `rogerthatbunny@gmail.com`, ver datos intactos;

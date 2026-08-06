@@ -14,8 +14,8 @@
 | **Category** | Health & Fitness *(alt: Lifestyle)* |
 | **Tags** | Habit tracking, Self-care |
 | **Email** | rogerthatheart@gmail.com |
-| **Privacy policy URL** | https://conderex.github.io/rogecito/privacy.html |
-| **Website** | https://conderex.github.io/rogecito/ |
+| **Privacy policy URL** | https://doingthedoings.com/privacy.html |
+| **Website** | https://doingthedoings.com/ |
 | **Free/paid** | Free · **Contains ads: NO** · In-app purchases: NO |
 | **Target audience** | 18+ *(avoids Families policy; the app is general-audience but 18+ keeps review simple)* |
 
