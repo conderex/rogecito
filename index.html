@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#f9f8f6">
+<meta name="theme-color" content="#ffffff">
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -33,12 +33,14 @@
      accents (--teal/--orange/--lavender/--gold/--pink) are the
      5 tablita colors; DB stores 'var(--teal)' etc., so each
      theme repaints every tablita by redefining these values.
-   Default theme: OAT MILK ☕ (raw off-white + warm accents).
+   Default theme: OAT MILK ☕ (flat white canvas + warm accents).
+   The canvas is pure white on purpose: an off-white with a yellow-gray
+   cast reads as drained skin (pallor). No hue at all = no skin reading.
    Others via html[data-theme]: matcha · lavanda · nocturno.
    ============================================================ */
 :root{
-  --sand:        #f9f8f6;   /* app background (raw off-white) */
-  --sand-deep:   #efece7;
+  --sand:        #ffffff;   /* app background — flat white, zero hue */
+  --sand-deep:   #f7f7f7;
   --paper:       #ffffff;   /* card surface */
   --ink:         #1a1a1a;   /* warm graphite */
   --gold:        #e8b23a;
@@ -57,9 +59,11 @@
   --card-hi:     rgba(255,255,255,.25);
   --box-hi:      rgba(255,255,255,.28);
   --on-gold:     #1a1a1a;   /* text on gold fills (gold is light in every theme) */
-  --wash1:       rgba(232,178,58,.14);
-  --wash2:       rgba(143,130,194,.12);
-  --wash3:       rgba(239,71,111,.05);
+  /* No wash on the default theme: any tint here puts a cast back on the
+     white. Themes that want atmosphere set their own below. */
+  --wash1:       transparent;
+  --wash2:       transparent;
+  --wash3:       transparent;
 
   --r-card: 18px;
   --r-bar: 999px;
@@ -1145,9 +1149,9 @@ function bindLangToggles(){
 const THEMES = ['oat','matcha','lavanda','golden','nocturno'];
 const THEME_NAMES = { oat:'Oat Milk', matcha:'Matcha', lavanda:'Lavanda', golden:'Golden Casket', nocturno:'Nocturno' };
 // browser-chrome color per theme (= that theme's --sand)
-const THEME_BAR = { oat:'#f9f8f6', matcha:'#eff4ec', lavanda:'#f4f1f8', golden:'#e7d8b8', nocturno:'#1d1d24' };
+const THEME_BAR = { oat:'#ffffff', matcha:'#eff4ec', lavanda:'#f4f1f8', golden:'#e7d8b8', nocturno:'#1d1d24' };
 // swatch colors for the picker chips: [bg, card]
-const THEME_SWATCH = { oat:['#f9f8f6','#ef476f'], matcha:['#eff4ec','#2f8f7a'], lavanda:['#f4f1f8','#8b7ad1'], golden:['#e7d8b8','#cf6a39'], nocturno:['#1d1d24','#f6a0b8'] };
+const THEME_SWATCH = { oat:['#ffffff','#ef476f'], matcha:['#eff4ec','#2f8f7a'], lavanda:['#f4f1f8','#8b7ad1'], golden:['#e7d8b8','#cf6a39'], nocturno:['#1d1d24','#f6a0b8'] };
 let THEME = (() => {
   try { const s = localStorage.getItem(LS_THEME); if(THEMES.includes(s)) return s; } catch(e){}
   return 'oat';

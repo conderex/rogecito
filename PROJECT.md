@@ -91,7 +91,7 @@ modo edición ("apariencia"). Detalle completo en `branding/UX-ESTADO-ACTUAL.md`
 
 | Tema | Fondo | Tarjetas | Nota |
 |---|---|---|---|
-| ☕ **Oat Milk** (default) | `#f9f8f6` | `#ffffff` | frambuesa `#ef476f` releva a la terracota |
+| ☕ **Oat Milk** (default) | `#ffffff` | `#ffffff` | lienzo blanco plano (sin tinte: un off-white amarillento se lee como palidez); frambuesa `#ef476f` releva a la terracota |
 | 🍵 Matcha | `#eff4ec` | `#ffffff` | verdes al frente |
 | 🍇 Lavanda | `#f4f1f8` | `#ffffff` | corrido al frío |
 | 🌙 Cielo Nocturno | `#1d1d24` | `#5f6879` | estrellas CSS que respiran; lunita SVG; solo elección manual |
