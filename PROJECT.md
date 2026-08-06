@@ -95,11 +95,12 @@ modo edición ("apariencia"). Detalle completo en `branding/UX-ESTADO-ACTUAL.md`
 | 🍵 Matcha | `#eff4ec` | `#ffffff` | verdes al frente |
 | 🍇 Lavanda | `#f4f1f8` | `#ffffff` | corrido al frío |
 | 🌙 Cielo Nocturno | `#1d1d24` | `#5f6879` | estrellas CSS que respiran; lunita SVG; solo elección manual |
+| ✦ Golden Casket | `#e7d8b8` | `#f4ead0` | la paleta original, elegible para quien la extrañe |
 
 Cada tema define sus PROPIOS 5 acentos (roles: teal/cálido/lavanda/oro/rosa),
 contraste AA verificado. La lunita y la florecita son isotipos SVG, jamás emoji.
 
-### Paleta histórica — "Golden Casket" (v1, retirada)
+### Golden Casket — la paleta original (hoy un tema más)
 
 *Desierto cálido: dorados polvorientos, naranjas quemados, teals apagados sobre arena.*
 

@@ -90,6 +90,15 @@ html[data-theme="lavanda"]{
   --orange-deep:#6e51c4; --scrim:rgba(34,30,40,.45); --on-gold:#221e28;
   --wash1:rgba(139,122,209,.13); --wash2:rgba(212,79,125,.07); --wash3:rgba(217,164,91,.06);
 }
+/* ✦ GOLDEN CASKET — la paleta original: arena tostada, papel, terracota.
+   Se queda como tema elegible para quien la extrañe. */
+html[data-theme="golden"]{
+  --sand:#e7d8b8; --sand-deep:#d8c39a; --paper:#f4ead0;
+  --ink:#2a2118; --ink-soft:#6b5d49; --shadow:rgba(42,33,24,.28);
+  --teal:#3f8a80; --orange:#cf6a39; --lavender:#8f82c2; --gold:#d9a441; --pink:#d98798;
+  --orange-deep:#963f14; --scrim:rgba(42,33,24,.45); --on-gold:#2a2118;
+  --wash1:rgba(217,164,65,.30); --wash2:rgba(143,130,194,.28); --wash3:rgba(207,106,57,.10);
+}
 /* 🌙 CIELO NOCTURNO — charcoal night sky, slate "moonstone" cards,
    luminous pastels, solid black shadows. User-selected only. */
 html[data-theme="nocturno"]{
@@ -593,6 +602,7 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
 }
 .themechip .tc-swatch span{ width:11px; height:11px; border-radius:50%; display:block; }
 .themechip svg.tc-moon{ width:15px; height:15px; color:var(--gold); margin-left:auto; flex:0 0 auto; }
+.themechip:last-child:nth-child(odd){ grid-column:1 / -1; }
 .themechip.on{ outline:3px solid var(--ink); outline-offset:1.5px; background:color-mix(in srgb, var(--ink) 5%, transparent); }
 .themechip:active{ transform:translateY(1px); }
 .modal-actions{ display:flex; gap:10px; }
@@ -1132,12 +1142,12 @@ function bindLangToggles(){
    storing accents as 'var(--teal)' etc., so switching themes repaints
    every tablita with that theme's own five colors — no migration.
    ===================================================================== */
-const THEMES = ['oat','matcha','lavanda','nocturno'];
-const THEME_NAMES = { oat:'Oat Milk', matcha:'Matcha', lavanda:'Lavanda', nocturno:'Nocturno' };
+const THEMES = ['oat','matcha','lavanda','golden','nocturno'];
+const THEME_NAMES = { oat:'Oat Milk', matcha:'Matcha', lavanda:'Lavanda', golden:'Golden Casket', nocturno:'Nocturno' };
 // browser-chrome color per theme (= that theme's --sand)
-const THEME_BAR = { oat:'#f9f8f6', matcha:'#eff4ec', lavanda:'#f4f1f8', nocturno:'#1d1d24' };
+const THEME_BAR = { oat:'#f9f8f6', matcha:'#eff4ec', lavanda:'#f4f1f8', golden:'#e7d8b8', nocturno:'#1d1d24' };
 // swatch colors for the picker chips: [bg, card]
-const THEME_SWATCH = { oat:['#f9f8f6','#ef476f'], matcha:['#eff4ec','#2f8f7a'], lavanda:['#f4f1f8','#8b7ad1'], nocturno:['#1d1d24','#f6a0b8'] };
+const THEME_SWATCH = { oat:['#f9f8f6','#ef476f'], matcha:['#eff4ec','#2f8f7a'], lavanda:['#f4f1f8','#8b7ad1'], golden:['#e7d8b8','#cf6a39'], nocturno:['#1d1d24','#f6a0b8'] };
 let THEME = (() => {
   try { const s = localStorage.getItem(LS_THEME); if(THEMES.includes(s)) return s; } catch(e){}
   return 'oat';
@@ -2046,6 +2056,22 @@ function tbtn(text, cls, onClick){
 function renderEditor(){
   const cards = document.getElementById('cards');
   cards.innerHTML = '';
+
+  // ---- Appearance (theme picker; device-local) ----
+  cards.appendChild(el('p','count-title',tr('theme_title')));
+  const tcard = document.createElement('div');
+  tcard.className = 'card edit-card';
+  const trow = el('div','themechips');
+  trow.innerHTML = THEMES.map(t => {
+    const [bg, dot] = THEME_SWATCH[t];
+    return `<button class="themechip${t===THEME?' on':''}" data-t="${t}">` +
+      `<span class="tc-swatch" style="background:${bg}"><span style="background:${dot}"></span></span>` +
+      `${THEME_NAMES[t]}${t==='nocturno' ? MOON_SVG('tc-moon') : ''}</button>`;
+  }).join('');
+  trow.querySelectorAll('.themechip').forEach(ch => ch.addEventListener('click', ()=> setTheme(ch.dataset.t)));
+  tcard.appendChild(trow);
+  cards.appendChild(tcard);
+
   cards.appendChild(el('p','count-title',tr('edit_tables')));
 
   const tabs = state.config.filter(t => !t.archived).slice().sort(byOrder);
@@ -2113,21 +2139,6 @@ function renderEditor(){
   clist.appendChild(tbtn(tr('new_counter'), 'addbtn', ()=> addCounter()));
   ccard.appendChild(clist);
   cards.appendChild(ccard);
-
-  // ---- Appearance (theme picker; device-local) ----
-  cards.appendChild(el('p','count-title',tr('theme_title')));
-  const tcard = document.createElement('div');
-  tcard.className = 'card edit-card';
-  const trow = el('div','themechips');
-  trow.innerHTML = THEMES.map(t => {
-    const [bg, dot] = THEME_SWATCH[t];
-    return `<button class="themechip${t===THEME?' on':''}" data-t="${t}">` +
-      `<span class="tc-swatch" style="background:${bg}"><span style="background:${dot}"></span></span>` +
-      `${THEME_NAMES[t]}${t==='nocturno' ? MOON_SVG('tc-moon') : ''}</button>`;
-  }).join('');
-  trow.querySelectorAll('.themechip').forEach(ch => ch.addEventListener('click', ()=> setTheme(ch.dataset.t)));
-  tcard.appendChild(trow);
-  cards.appendChild(tcard);
 
   // ---- Archived ----
   const archT = state.config.filter(t => t.archived);
