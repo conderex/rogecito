@@ -1,7 +1,7 @@
 # Android package (TWA) — build & launch recipe
 
 The app ships to Google Play as a **Trusted Web Activity**: a thin, official Android
-wrapper around https://conderex.github.io/rogecito/ built with
+wrapper around https://doingthedoings.com/ built with
 [Bubblewrap](https://github.com/GoogleChromeLabs/bubblewrap). No app code is duplicated —
 the PWA (manifest + service worker, already live) IS the app.
 
@@ -39,9 +39,11 @@ bubblewrap build
      merge to `main`, wait for Pages to deploy.
    - Verify: https://conderex.github.io/.well-known/assetlinks.json must serve it.
      ⚠️ **GitHub Pages note:** for a *project* site, `/.well-known/` must live at the
-     **user-site root**, i.e. the `conderex/conderex.github.io` repo — not this one.
+     **domain root** — which, with the custom domain, is THIS repo. The file at
+     `/.well-known/assetlinks.json` serves directly at
+     https://doingthedoings.com/.well-known/assetlinks.json (no second repo needed).
      If that repo doesn't exist, create it with just this file. (Keep the copy here as
-     the source of truth; the TWA's `fullScopeUrl` is the /rogecito/ path.)
+     the source of truth; the TWA's `fullScopeUrl` is now the domain root.)
 6. After 14 continuous days with 12+ testers → **Apply for production** (dashboard shows
    the button) → answer the questionnaire honestly (what was tested, feedback, fixes).
 

@@ -4,9 +4,10 @@
 finales de julio 2026 (tras PR #17). Cambios recientes: brief de marca (Parte 1), Conteos
 ahora es timeline mensual, kit completo de Google Play.*
 
-- **App en vivo:** https://conderex.github.io/rogecito/
-- **Privacidad:** https://conderex.github.io/rogecito/privacy.html
-- **Repo:** `conderex/rogecito` (GitHub Pages sirve `main`)
+- **App en vivo:** https://doingthedoings.com/
+- **Privacidad:** https://doingthedoings.com/privacy.html
+- **Repo:** `conderex/rogecito` (GitHub Pages sirve `main` en el dominio propio
+  `doingthedoings.com`; el viejo `conderex.github.io/rogecito/` redirige solo)
 - **Fundadora:** Roge (rogerthatheart@gmail.com) — solo founder, construye con Claude Code.
 - Docs hermanos en el repo: `POSITIONING.md` (tesis y mensajes por canal),
   `store/play-listing.md` (ficha de Play), `store/twa/README.md` (paquete Android).
@@ -229,9 +230,10 @@ Servidas por Google Fonts. Para gráficos generados: TTFs desde el repo google/f
   - `store/twa/twa-manifest.json` + `README.md`: Bubblewrap config (packageId
     `com.doingthedoings.app`) and the exact build recipe. The `.aab` must be built on a
     laptop (~15 min) — the cloud dev environment's proxy blocks Android SDK downloads.
-  - `.well-known/assetlinks.json`: placeholder awaiting the Play App Signing SHA-256
-    (note: for GitHub *project* pages, the live copy must sit in the
-    `conderex/conderex.github.io` root repo).
+  - `.well-known/assetlinks.json`: placeholder awaiting the Play App Signing SHA-256.
+    With the custom apex domain this repo is the site root, so the file serves
+    directly at https://doingthedoings.com/.well-known/assetlinks.json — the old
+    workaround of hosting it from the user-site repo no longer applies.
   - **Closed-test requirement:** 12 testers opted-in for 14 continuous days (personal
     account policy). Status: **~2 of 15 committed**; invitation copy (WhatsApp/LinkedIn/
     short, ES+EN) already written.
