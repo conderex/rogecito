@@ -1,10 +1,10 @@
 # DoingTheDoings — Estado actual del UX/UI (producción)
 
-> **ACTUALIZACIÓN (ago 2026):** el sistema de color descrito aquí fue reemplazado
-> por el **sistema de temas v2** (Oat Milk default + Matcha + Lavanda + Cielo
-> Nocturno, tokens re-escopados por `data-theme`, selector en modo edición,
-> estrellas animadas en Nocturno). Este documento queda como snapshot del v1;
-> el lenguaje de formas (sombras sólidas, bordes tinta, rotaciones) sigue vigente.
+> **📌 DOCUMENTO HISTÓRICO (snapshot v1, jul–ago 2026).**
+> La referencia viva del diseño es **[`UX-UI.md`](UX-UI.md)** — ve ahí para el estado
+> actual. Este archivo retrata cómo se veía la app cuando Golden Casket era el único
+> tema, antes del sistema de temas v2. Se conserva porque el lenguaje de formas
+> (sombras sólidas, bordes de tinta, rotaciones) no cambió y aquí está bien descrito.
 
 *Fotografía fiel de lo que está EN VIVO en https://doingthedoings.com/ a
 agosto 2026 (tras PR #23). Escrito para llevarse a herramientas de diseño (Claude
