@@ -6,8 +6,10 @@ ahora es timeline mensual, kit completo de Google Play.*
 
 - **App en vivo:** https://doingthedoings.com/
 - **Privacidad:** https://doingthedoings.com/privacy.html
-- **Repo:** `conderex/rogecito` (GitHub Pages sirve `main` en el dominio propio
-  `doingthedoings.com`; el viejo `conderex.github.io/rogecito/` redirige solo)
+- **Repo:** `conderex/rogecito`. **Producción = Vercel** (integración Git, rama `main`,
+  auto-deploy en cada merge) sirviendo `doingthedoings.com`. El viejo
+  `conderex.github.io/rogecito/` sigue encendido en GitHub Pages **solo** como
+  salvavidas de las usuarias ya instaladas — Pages NO tiene el dominio custom.
 - **Fundadora:** Roge (rogerthatheart@gmail.com) — solo founder, construye con Claude Code.
 - Docs hermanos en el repo: `POSITIONING.md` (tesis y mensajes por canal),
   `store/play-listing.md` (ficha de Play), `store/twa/README.md` (paquete Android).
@@ -204,8 +206,13 @@ Servidas por Google Fonts. Para gráficos generados: TTFs desde el repo google/f
   + `countsLine` (multi-series SVG).
 - **Security hygiene:** accents stored as CSS-var strings whitelisted by `safeAccent()`;
   `esc()` for HTML.
-- **Hosting/deploys:** GitHub Pages from `main`; no CI. Workflow: branch
-  `claude/roge-tracker-app-b3FPy` → PR → squash merge → hard-reset branch to main.
+- **Hosting/deploys:** **Vercel** (Git integration, project `doingthedoings`, root `./`,
+  Framework=Other, no build — static). Production branch = `main`; every merge to `main`
+  auto-deploys to `doingthedoings.com`. No `vercel.json` in the repo. DNS lives at
+  **Squarespace** (`A @ 216.198.79.1`, `CNAME www cname.vercel-dns.com`); Vercel issues
+  and forces HTTPS. GitHub Pages is still on for the legacy `github.io/rogecito/` origin
+  only — do **not** add a custom domain there (the CNAME would fight Vercel). Workflow:
+  branch `claude/roge-tracker-app-b3FPy` → PR → squash merge → hard-reset branch to main.
   Verification style: `node --check` on the inline script + jsdom harness tests
   (render functions driven with seeded state, DOM assertions, i18n symmetry).
 
