@@ -235,17 +235,17 @@ Todo existe en ES y EN, uno a uno, en la tabla `I18N`.
 
 **Deuda conocida** (nada de esto está resuelto todavía):
 
-| Pendiente | Impacto |
-|---|---|
-| `maximum-scale=1.0` en el viewport bloquea el zoom con dos dedos | alto |
-| Sin `:focus-visible` propio; algunos inputs hacen `outline:none` | alto |
-| Modales sin `role="dialog"`, sin trampa de foco, sin cerrar con Escape | medio |
-| El toast no es `aria-live` → los avisos de "sin conexión" y "bloqueado" no se anuncian | medio |
-| `aria-label` de los botones ± del contador está **hardcodeado en español** | medio |
-| Las tabs no usan `role="tablist"` / `aria-selected` | medio |
-| `prefers-reduced-motion` no detiene los bucles infinitos (solo los acelera) | bajo |
-| Cromo pequeño bajo 44px: `.ebtn` 38 · `.editicon` 34 · `.segbtn` 34 | bajo |
-| `outline` se usa como decoración de selección, puede confundirse con foco | bajo |
+| Pendiente | Impacto | Estado |
+|---|---|---|
+| `maximum-scale=1.0` bloqueaba el zoom con dos dedos | alto | ✅ resuelto (ago 2026) |
+| Sin `:focus-visible` propio | alto | ✅ resuelto — anillo teal 3px |
+| Modales sin `role="dialog"` ni Escape | medio | ✅ resuelto (sin trampa de foco completa aún) |
+| Toast sin `aria-live` | medio | ✅ resuelto — `role="status"` |
+| aria de los ± del contador hardcodeada en español | medio | ✅ resuelto — vía `tr()` |
+| Las tabs no usan `role="tablist"` / `aria-selected` | medio | ⬜ pendiente |
+| reduced-motion no detenía bucles infinitos | bajo | ✅ resuelto — `animation-iteration-count:1` |
+| Cromo pequeño bajo 44px: `.ebtn` 38 · `.editicon` 34 · `.segbtn` 34 | bajo | ⬜ pendiente (decisión de diseño) |
+| `outline` como decoración de selección | bajo | ✅ mitigado — el foco es teal, la selección tinta |
 
 ---
 

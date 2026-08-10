@@ -1,0 +1,7 @@
+# Internal docs and assets that the browser never needs.
+# (index/privacy/terminos, manifest, sw, icons, og-image and .well-known all ship.)
+*.md
+branding/
+store/
+supabase/
+test/

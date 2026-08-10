@@ -1,0 +1,6 @@
+{
+  "name": "dtd-tests",
+  "private": true,
+  "description": "jsdom harness for DoingTheDoings. Run: npm i && node app.test.js",
+  "dependencies": { "jsdom": "^24.0.0" }
+}
