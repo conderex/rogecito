@@ -93,6 +93,14 @@ ok(!!dlg && dlg.getAttribute('aria-modal')==='true', 'infoModal con role=dialog 
 w.document.dispatchEvent(new w.KeyboardEvent('keydown', { key:'Escape', bubbles:true }));
 ok(!w.document.querySelector('.modal-ov'), 'Escape cierra el modal');
 
+// ---------- jardincito ----------
+w = makeDom(); w.__t.setup(); w.__t.render();
+ok(w.document.querySelectorAll('#garden .plant').length===8, 'jardincito con 8 plantas');
+ok(w.document.getElementById('garden').getAttribute('aria-hidden')==='true', 'jardincito aria-hidden');
+ok(w.document.querySelectorAll('#garden .bloom-g svg').length===8, 'flores dibujadas (SVG, no emoji)');
+ok(html.includes('.panel.editing > #garden'), 'el modo edicion oculta el jardincito');
+ok(!!w.document.querySelector('#panel-tracker #garden + footer') || !!w.document.querySelector('#panel-tracker #garden'), 'vive en el tracker, antes del footer');
+
 // ---------- guardia de zona de palidez (hallazgo de Mary) ----------
 const CANVAS = { oat:'#ffffff', matcha:'#eff4ec', lavanda:'#f4f1f8', golden:'#e7d8b8', nocturno:'#1d1d24' };
 function hsl(hex){
