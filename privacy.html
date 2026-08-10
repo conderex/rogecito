@@ -3,46 +3,74 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#e7d8b8">
+<meta name="theme-color" content="#ffffff">
 <link rel="icon" type="image/png" href="icon.png">
 <title>Privacidad · DoingTheDoings</title>
 <meta name="robots" content="index,follow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,800&family=Space+Grotesk:wght@400;600;700&family=Caveat:wght@600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --sand:#e7d8b8; --paper:#f4ead0; --ink:#2a2118; --ink-soft:#6b5d49;
-  --orange-deep:#b04f22; --teal:#3f8a80; --line:#2a2118;
+  --sand:#ffffff; --paper:#ffffff; --ink:#1a1a1a; --ink-soft:#6f6862;
+  --orange-deep:#c02a52; --teal:#3f8a80; --line:#1a1a1a;
+  --shadow:rgba(26,26,26,.16);
+  --font-display:'Fraunces', Georgia, serif;
+  --font-body:'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --font-hand:'Caveat', cursive;
 }
-*{ box-sizing:border-box; }
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 html{ scrollbar-color:var(--ink-soft) var(--sand); scrollbar-width:thin; }
 ::-webkit-scrollbar{ width:10px; height:10px; }
 ::-webkit-scrollbar-track{ background:var(--sand); }
 ::-webkit-scrollbar-thumb{ background:var(--ink-soft); border-radius:999px; border:2.5px solid var(--sand); }
 ::-webkit-scrollbar-thumb:hover{ background:var(--orange-deep); }
 body{
-  margin:0; padding:28px 18px 60px; background:var(--sand); color:var(--ink);
-  font-family:'Space Grotesk', system-ui, -apple-system, sans-serif; line-height:1.55;
+  margin:0; padding:24px 18px 60px; background:var(--sand); color:var(--ink);
+  font-family:var(--font-body); line-height:1.55; -webkit-font-smoothing:antialiased;
 }
 main{ max-width:640px; margin:0 auto; }
-.card{
-  background:var(--paper); border:2.5px solid var(--line); border-radius:16px;
-  box-shadow:6px 7px 0 rgba(42,33,24,.28); padding:22px 20px; margin-bottom:22px;
+.topbar{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; }
+.back{ font-size:.85rem; color:var(--teal); font-weight:600; text-decoration:none; }
+.back:hover{ text-decoration:underline; }
+/* ES/EN toggle — mismo componente que la app */
+.langtoggle{
+  appearance:none; cursor:pointer; flex:0 0 auto;
+  display:inline-flex; align-items:center; gap:3px;
+  border:2px solid var(--ink-soft); border-radius:999px;
+  background:transparent; padding:4px 8px; line-height:1;
+  font-family:var(--font-body); font-weight:700; font-size:.6rem; letter-spacing:.05em;
+  color:var(--ink-soft);
 }
-h1{ font-family:Georgia, 'Fraunces', serif; font-weight:800; font-size:1.5rem; margin:0 0 2px; letter-spacing:-.02em; }
-h2{ font-family:Georgia, 'Fraunces', serif; font-weight:800; font-size:1.08rem; margin:20px 0 6px; }
+.langtoggle [data-l]{ opacity:.45; transition:opacity .15s; }
+.langtoggle [data-l].on{ opacity:1; color:var(--ink); }
+.langtoggle .sep{ opacity:.35; font-weight:400; }
+.langtoggle:active{ transform:translateY(1px); }
+.card{
+  background:var(--paper); border:3px solid var(--line); border-radius:18px;
+  box-shadow:6px 7px 0 var(--shadow); padding:22px 20px; margin-bottom:22px;
+  transform:rotate(-.3deg);
+}
+h1{ font-family:var(--font-display); font-weight:800; font-size:1.55rem; margin:0 0 2px; letter-spacing:-.02em; }
+h2{ font-family:var(--font-display); font-weight:800; font-size:1.1rem; margin:20px 0 6px; letter-spacing:-.01em; }
 p, li{ font-size:.92rem; color:var(--ink); }
 ul{ padding-left:20px; margin:6px 0; }
-.sub{ color:var(--orange-deep); font-style:italic; margin:0 0 14px; }
-.muted{ color:var(--ink-soft); font-size:.8rem; }
+.sub{ color:var(--orange-deep); font-family:var(--font-hand); font-size:1.15rem; margin:0 0 14px; }
+.muted{ color:var(--ink-soft); font-family:var(--font-hand); font-size:1.15rem; text-align:center; margin-top:6px; }
+.muted svg{ width:.85em; height:.85em; vertical-align:-.08em; color:var(--orange-deep); }
 a{ color:var(--teal); font-weight:600; }
-hr{ border:none; border-top:2px dashed rgba(42,33,24,.25); margin:26px 0; }
-.back{ display:inline-block; margin-bottom:16px; font-size:.85rem; }
+[data-lang][hidden]{ display:none; }
 </style>
 </head>
 <body>
 <main>
-<a class="back" href="./">← DoingTheDoings</a>
+<div class="topbar">
+  <a class="back" href="./">← DoingTheDoings</a>
+  <button class="langtoggle" type="button" aria-label="Language / Idioma" title="Language / Idioma"><span data-l="es">ES</span><span class="sep">/</span><span data-l="en">EN</span></button>
+</div>
 
-<div class="card">
+<!-- ESPAÑOL -->
+<div class="card" data-lang="es">
   <h1>Política de privacidad</h1>
   <p class="sub">DoingTheDoings · vigente desde el 8 de julio de 2026</p>
 
@@ -52,7 +80,7 @@ hr{ border:none; border-top:2px dashed rgba(42,33,24,.25); margin:26px 0; }
   <ul>
     <li><strong>Tu email y contraseña</strong> (la contraseña se guarda cifrada; nunca podemos verla). Si entras con Google, recibimos únicamente tu email.</li>
     <li><strong>Tu contenido en la app:</strong> tus tablas, actividades, marcas diarias y conteos.</li>
-    <li><strong>Tu preferencia de idioma</strong>, guardada solo en tu dispositivo.</li>
+    <li><strong>Tu preferencia de idioma y de tema</strong>, guardadas solo en tu dispositivo.</li>
   </ul>
 
   <h2>Qué NO hacemos</h2>
@@ -75,7 +103,8 @@ hr{ border:none; border-top:2px dashed rgba(42,33,24,.25); margin:26px 0; }
   <p>¿Dudas sobre tus datos? Escríbenos: <a href="mailto:rogerthatheart@gmail.com">rogerthatheart@gmail.com</a></p>
 </div>
 
-<div class="card" lang="en">
+<!-- ENGLISH -->
+<div class="card" data-lang="en" lang="en" hidden>
   <h1>Privacy Policy</h1>
   <p class="sub">DoingTheDoings · effective July 8, 2026</p>
 
@@ -85,7 +114,7 @@ hr{ border:none; border-top:2px dashed rgba(42,33,24,.25); margin:26px 0; }
   <ul>
     <li><strong>Your email and password</strong> (the password is stored encrypted; we can never see it). If you sign in with Google, we only receive your email.</li>
     <li><strong>Your in-app content:</strong> your tables, activities, daily checks and counts.</li>
-    <li><strong>Your language preference</strong>, stored only on your device.</li>
+    <li><strong>Your language and theme preference</strong>, stored only on your device.</li>
   </ul>
 
   <h2>What we do NOT do</h2>
@@ -108,7 +137,35 @@ hr{ border:none; border-top:2px dashed rgba(42,33,24,.25); margin:26px 0; }
   <p>Questions about your data? Write to <a href="mailto:rogerthatheart@gmail.com">rogerthatheart@gmail.com</a></p>
 </div>
 
-<p class="muted">DoingTheDoings ✿ un día a la vez · one day at a time</p>
+<p class="muted">DoingTheDoings <svg viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor"><circle cx="12" cy="5" r="4.3"/><circle cx="18.5" cy="9.7" r="4.3"/><circle cx="16" cy="17.3" r="4.3"/><circle cx="8" cy="17.3" r="4.3"/><circle cx="5.5" cy="9.7" r="4.3"/></g><circle cx="12" cy="11.8" r="2.9" fill="var(--paper)"/></svg> <span data-lang="es">un día a la vez</span><span data-lang="en" hidden>one day at a time</span></p>
 </main>
+
+<script>
+/* Toggle ES/EN — comparte la llave roge_lang_v1 con la app, así van sincronizados. */
+(function(){
+  var LS_LANG = 'roge_lang_v1';
+  var lang = (function(){
+    try { var s = localStorage.getItem(LS_LANG); if(s === 'es' || s === 'en') return s; } catch(e){}
+    return (navigator.language || '').toLowerCase().indexOf('en') === 0 ? 'en' : 'es';
+  })();
+  function apply(){
+    document.documentElement.lang = lang;
+    document.querySelectorAll('[data-lang]').forEach(function(el){
+      el.hidden = (el.getAttribute('data-lang') !== lang);
+    });
+    document.querySelectorAll('.langtoggle [data-l]').forEach(function(s){
+      s.classList.toggle('on', s.getAttribute('data-l') === lang);
+    });
+  }
+  document.querySelectorAll('.langtoggle').forEach(function(tg){
+    tg.addEventListener('click', function(){
+      lang = (lang === 'es') ? 'en' : 'es';
+      try { localStorage.setItem(LS_LANG, lang); } catch(e){}
+      apply();
+    });
+  });
+  apply();
+})();
+</script>
 </body>
 </html>
