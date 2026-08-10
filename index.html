@@ -135,21 +135,6 @@ html[data-theme="nocturno"] #nightsky{ display:block; }
 #nightsky span:nth-child(8){ top:88%; left:26%; animation-delay:6.2s; }
 @keyframes twinkle{ 0%,100%{ opacity:.12; } 50%{ opacity:.85; } }
 
-/* The garden at the end of the tracker: drawn flowers in the theme's own
-   accents, swaying gently. Decorative — hidden from screen readers and
-   from edit mode; reduced-motion stops the sway via the global rule. */
-#garden{ position:relative; height:64px; margin:6px 0 -12px; pointer-events:none; }
-#garden .plant{
-  position:absolute; bottom:0; transform:rotate(var(--rot)); transform-origin:bottom center;
-  animation:sway var(--sway) ease-in-out var(--delay) infinite alternate;
-}
-#garden .stem{ display:block; width:2.5px; height:calc(var(--sz) * .7); margin:0 auto;
-  background:#7fb069; border-radius:2px; }
-#garden .bloom-g{ position:absolute; bottom:calc(var(--sz) * .55); left:50%;
-  transform:translateX(-50%); width:var(--sz); height:var(--sz); opacity:.8; }
-#garden .bloom-g svg{ width:100%; height:100%; display:block; }
-@keyframes sway{ from{ transform:rotate(calc(var(--rot) - 2deg)); } to{ transform:rotate(calc(var(--rot) + 2deg)); } }
-
 *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 /* Keyboard focus ring — teal so it never reads as the ink "selected" outline */
 :focus-visible{ outline:3px solid var(--teal); outline-offset:2px; }
@@ -539,7 +524,6 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
 .panel.editing > .weeknav,
 .panel.editing > .count-title,
 .panel.editing > #counters,
-.panel.editing > #garden,
 .panel.editing > footer{ display:none; }
 
 .empty-note{ text-align:center; font-family:var(--font-hand); font-size:1.5rem; color:var(--ink-soft); line-height:1.4; margin:40px 8px; }
@@ -804,18 +788,6 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
     <div id="cards"></div>
     <p class="count-title" id="countTitle" data-i18n="count_today">conteo de hoy</p>
     <div id="counters" class="counters"></div>
-
-    <!-- Al final de tus doings, crece un jardincito ✿ (decorativo; acentos del tema) -->
-    <div id="garden" aria-hidden="true">
-      <div class="plant" style="left:8%;--sz:34px;--rot:-6deg;--sway:5.5s;--delay:0.0s"><span class="stem"></span><span class="bloom-g" style="color:var(--orange)"><svg viewBox="0 0 24 24"><g fill="currentColor"><circle cx="12" cy="5" r="4.3"/><circle cx="18.5" cy="9.7" r="4.3"/><circle cx="16" cy="17.3" r="4.3"/><circle cx="8" cy="17.3" r="4.3"/><circle cx="5.5" cy="9.7" r="4.3"/></g><circle cx="12" cy="11.8" r="2.9" fill="var(--sand)"/></svg></span></div>
-      <div class="plant" style="left:20%;--sz:22px;--rot:8deg;--sway:6.4s;--delay:0.7s"><span class="stem"></span><span class="bloom-g" style="color:var(--teal)"><svg viewBox="0 0 24 24"><g fill="currentColor"><circle cx="12" cy="5" r="4.3"/><circle cx="18.5" cy="9.7" r="4.3"/><circle cx="16" cy="17.3" r="4.3"/><circle cx="8" cy="17.3" r="4.3"/><circle cx="5.5" cy="9.7" r="4.3"/></g><circle cx="12" cy="11.8" r="2.9" fill="var(--sand)"/></svg></span></div>
-      <div class="plant" style="left:31%;--sz:42px;--rot:-10deg;--sway:7.3s;--delay:1.4s"><span class="stem"></span><span class="bloom-g" style="color:var(--gold)"><svg viewBox="0 0 24 24"><g fill="currentColor"><circle cx="12" cy="5" r="4.3"/><circle cx="18.5" cy="9.7" r="4.3"/><circle cx="16" cy="17.3" r="4.3"/><circle cx="8" cy="17.3" r="4.3"/><circle cx="5.5" cy="9.7" r="4.3"/></g><circle cx="12" cy="11.8" r="2.9" fill="var(--sand)"/></svg></span></div>
-      <div class="plant" style="left:45%;--sz:28px;--rot:5deg;--sway:8.2s;--delay:2.0999999999999996s"><span class="stem"></span><span class="bloom-g" style="color:var(--lavender)"><svg viewBox="0 0 24 24"><g fill="currentColor"><circle cx="12" cy="5" r="4.3"/><circle cx="18.5" cy="9.7" r="4.3"/><circle cx="16" cy="17.3" r="4.3"/><circle cx="8" cy="17.3" r="4.3"/><circle cx="5.5" cy="9.7" r="4.3"/></g><circle cx="12" cy="11.8" r="2.9" fill="var(--sand)"/></svg></span></div>
-      <div class="plant" style="left:58%;--sz:38px;--rot:-4deg;--sway:5.5s;--delay:2.8s"><span class="stem"></span><span class="bloom-g" style="color:var(--pink)"><svg viewBox="0 0 24 24"><g fill="currentColor"><circle cx="12" cy="5" r="4.3"/><circle cx="18.5" cy="9.7" r="4.3"/><circle cx="16" cy="17.3" r="4.3"/><circle cx="8" cy="17.3" r="4.3"/><circle cx="5.5" cy="9.7" r="4.3"/></g><circle cx="12" cy="11.8" r="2.9" fill="var(--sand)"/></svg></span></div>
-      <div class="plant" style="left:70%;--sz:24px;--rot:12deg;--sway:6.4s;--delay:3.5s"><span class="stem"></span><span class="bloom-g" style="color:var(--teal)"><svg viewBox="0 0 24 24"><g fill="currentColor"><circle cx="12" cy="5" r="4.3"/><circle cx="18.5" cy="9.7" r="4.3"/><circle cx="16" cy="17.3" r="4.3"/><circle cx="8" cy="17.3" r="4.3"/><circle cx="5.5" cy="9.7" r="4.3"/></g><circle cx="12" cy="11.8" r="2.9" fill="var(--sand)"/></svg></span></div>
-      <div class="plant" style="left:81%;--sz:44px;--rot:-8deg;--sway:7.3s;--delay:4.199999999999999s"><span class="stem"></span><span class="bloom-g" style="color:var(--orange)"><svg viewBox="0 0 24 24"><g fill="currentColor"><circle cx="12" cy="5" r="4.3"/><circle cx="18.5" cy="9.7" r="4.3"/><circle cx="16" cy="17.3" r="4.3"/><circle cx="8" cy="17.3" r="4.3"/><circle cx="5.5" cy="9.7" r="4.3"/></g><circle cx="12" cy="11.8" r="2.9" fill="var(--sand)"/></svg></span></div>
-      <div class="plant" style="left:92%;--sz:30px;--rot:6deg;--sway:8.2s;--delay:4.8999999999999995s"><span class="stem"></span><span class="bloom-g" style="color:var(--gold)"><svg viewBox="0 0 24 24"><g fill="currentColor"><circle cx="12" cy="5" r="4.3"/><circle cx="18.5" cy="9.7" r="4.3"/><circle cx="16" cy="17.3" r="4.3"/><circle cx="8" cy="17.3" r="4.3"/><circle cx="5.5" cy="9.7" r="4.3"/></g><circle cx="12" cy="11.8" r="2.9" fill="var(--sand)"/></svg></span></div>
-    </div>
     <footer><p data-i18n="tap_hint">tap para llenar · tap para vaciar</p></footer>
   </section>
 
