@@ -213,6 +213,10 @@ Servidas por Google Fonts. Para gráficos generados: TTFs desde el repo google/f
   and forces HTTPS. GitHub Pages is still on for the legacy `github.io/rogecito/` origin
   only — do **not** add a custom domain there (the CNAME would fight Vercel). Workflow:
   branch `claude/roge-tracker-app-b3FPy` → PR → squash merge → hard-reset branch to main.
+  `vercel.json` sets Cache-Control:no-cache on sw.js (deploys reach users without the
+  double-reload dance); `.vercelignore` keeps internal docs/branding/store/supabase/test
+  out of the public site. Tests live in `test/` (jsdom; `cd test && npm i && node
+  app.test.js`). Future idea borrowed from Mary's cycle tracker: CSV/report export.
   Verification style: `node --check` on the inline script + jsdom harness tests
   (render functions driven with seeded state, DOM assertions, i18n symmetry).
 

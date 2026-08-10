@@ -1,6 +1,6 @@
 /* DoingTheDoings service worker — offline shell + cached static assets.
    Bump CACHE on releases that must invalidate old assets. */
-const CACHE = 'dtd-v6';
+const CACHE = 'dtd-v7';
 const SHELL = ['./', './index.html', './manifest.json', './icon.png', './icon-192.png', './icon-512.png'];
 
 // Hosts that must NEVER be cached (live data + auth)

@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -136,6 +136,8 @@ html[data-theme="nocturno"] #nightsky{ display:block; }
 @keyframes twinkle{ 0%,100%{ opacity:.12; } 50%{ opacity:.85; } }
 
 *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+/* Keyboard focus ring — teal so it never reads as the ink "selected" outline */
+:focus-visible{ outline:3px solid var(--teal); outline-offset:2px; }
 html,body{ margin:0; padding:0; }
 /* Branded scrollbar: soft-ink thumb on sand track (thin), warms up on hover */
 html{ scrollbar-color:var(--ink-soft) var(--sand); scrollbar-width:thin; }
@@ -586,6 +588,7 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
   padding:11px 4px; border:2.5px solid var(--line); border-radius:11px; background:color-mix(in srgb, var(--paper) 86%, #fff); color:var(--ink);
 }
 .modal-input:focus, .modal-emoji:focus{ outline:none; border-color:var(--accent); }
+.modal-input:focus-visible, .modal-emoji:focus-visible{ outline:3px solid var(--teal); outline-offset:2px; }
 .swatches{ display:flex; gap:9px; margin:2px 0 16px; }
 .sw{
   appearance:none; cursor:pointer; width:38px; height:38px; border-radius:50%;
@@ -655,7 +658,8 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
   :root{ --bar-h:34px; }
 }
 @media (prefers-reduced-motion:reduce){
-  *{ animation-duration:.001ms !important; transition-duration:.05ms !important; }
+  *{ animation-duration:.001ms !important; transition-duration:.05ms !important;
+     animation-iteration-count:1 !important; }
 }
 
 /* ---------- Auth gate ---------- */
@@ -702,6 +706,7 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
 }
 .gate-input::placeholder{ color:var(--ink-soft); }
 .gate-input:focus{ outline:none; box-shadow:3px 3px 0 var(--shadow); }
+.gate-input:focus-visible{ outline:3px solid var(--teal); outline-offset:2px; }
 .gate-btn{
   appearance:none; cursor:pointer; width:100%;
   font-family:var(--font-body); font-weight:700; font-size:1rem; color:var(--paper);
@@ -841,7 +846,7 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
   <p class="gate-foot"><a class="privacy-link" href="privacy.html" data-i18n="privacy_link">privacidad</a> <a class="privacy-link" href="mailto:rogerthatheart@gmail.com?subject=DoingTheDoings%20feedback" data-i18n="feedback_link">comentarios</a></p>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 /* =====================================================================
@@ -891,6 +896,8 @@ const I18N = {
     edit_tables: 'editar tablas',
     counters_title: 'contadores',
     theme_title: 'apariencia',
+    cnt_minus: x => `Restar ${x}`,
+    cnt_plus: x => `Sumar ${x}`,
     archived_title: 'archivadas',
     account_title: 'cuenta',
     privacy_link: 'privacidad',
@@ -1008,6 +1015,8 @@ const I18N = {
     edit_tables: 'edit tables',
     counters_title: 'counters',
     theme_title: 'appearance',
+    cnt_minus: x => `Decrease ${x}`,
+    cnt_plus: x => `Increase ${x}`,
     archived_title: 'archived',
     account_title: 'account',
     privacy_link: 'privacy',
@@ -1681,9 +1690,9 @@ function renderCounters(){
     box.innerHTML = `
       <div class="c-top"><span class="c-emoji">${esc(c.emoji)}</span><span class="c-name">${esc(c.label)}</span></div>
       <div class="c-controls">
-        <button class="cbtn minus" aria-label="Restar ${esc(c.label)}" ${n===0?'disabled':''}>−</button>
+        <button class="cbtn minus" aria-label="${esc(tr('cnt_minus', c.label))}" ${n===0?'disabled':''}>−</button>
         <span class="count" id="count-${c.id}">${n}</span>
-        <button class="cbtn plus" aria-label="Sumar ${esc(c.label)}">+</button>
+        <button class="cbtn plus" aria-label="${esc(tr('cnt_plus', c.label))}">+</button>
       </div>`;
     box.querySelector('.plus').addEventListener('click', ()=> counterInc(c.id));
     box.querySelector('.minus').addEventListener('click', ()=> counterDec(c.id));
@@ -2317,7 +2326,7 @@ function promptModal({ heading, name='', showColor=false, accent=PALETTE[0], sho
     const ov = document.createElement('div');
     ov.className = 'modal-ov';
     ov.innerHTML = `
-      <div class="modal" style="--accent:${safeAccent(chosen)}">
+      <div class="modal" role="dialog" aria-modal="true" aria-label="${esc(heading)}" style="--accent:${safeAccent(chosen)}">
         <h3>${esc(heading)}</h3>
         <div class="modal-fields">
           ${showEmoji ? `<input class="modal-emoji" type="text" value="${esc(emoji)}" placeholder="🙂" maxlength="2" aria-label="emoji">` : ''}
@@ -2342,7 +2351,9 @@ function promptModal({ heading, name='', showColor=false, accent=PALETTE[0], sho
         modal.style.setProperty('--accent', chosen);
       }));
     }
-    const close = (val) => { ov.remove(); resolve(val); };
+    const onKey = e => { if(e.key === 'Escape') close(null); };
+    document.addEventListener('keydown', onKey);
+    const close = (val) => { document.removeEventListener('keydown', onKey); ov.remove(); resolve(val); };
     const save = () => {
       const v = input.value.trim(); if(!v){ input.focus(); return; }
       const em = emojiInput ? (emojiInput.value.trim() || '•') : undefined;
@@ -2359,7 +2370,7 @@ function confirmModal(msg, confirmLabel){
     const ov = document.createElement('div');
     ov.className = 'modal-ov';
     ov.innerHTML = `
-      <div class="modal">
+      <div class="modal" role="dialog" aria-modal="true" aria-label="${esc(msg)}">
         <p class="modal-msg">${esc(msg)}</p>
         <div class="modal-actions">
           <button class="mbtn cancel">${tr('cancel')}</button>
@@ -2367,7 +2378,10 @@ function confirmModal(msg, confirmLabel){
         </div>
       </div>`;
     document.body.appendChild(ov);
-    const close = (v) => { ov.remove(); resolve(v); };
+    const onKey = e => { if(e.key === 'Escape') close(false); };
+    document.addEventListener('keydown', onKey);
+    const close = (v) => { document.removeEventListener('keydown', onKey); ov.remove(); resolve(v); };
+    setTimeout(()=> ov.querySelector('.cancel').focus(), 60);
     ov.querySelector('.cancel').addEventListener('click', ()=> close(false));
     ov.querySelector('.save').addEventListener('click', ()=> close(true));
     ov.addEventListener('click', e => { if(e.target === ov) close(false); });
@@ -2379,7 +2393,7 @@ function infoModal(title, body, cta){
   const ov = document.createElement('div');
   ov.className = 'modal-ov';
   ov.innerHTML = `
-    <div class="modal info-modal">
+    <div class="modal info-modal" role="dialog" aria-modal="true" aria-label="${esc(title)}">
       <h3 class="modal-title">${esc(title)}</h3>
       <p class="modal-msg">${esc(body)}</p>
       <div class="modal-actions one">
@@ -2387,7 +2401,10 @@ function infoModal(title, body, cta){
       </div>
     </div>`;
   document.body.appendChild(ov);
-  const close = () => ov.remove();
+  const onKey = e => { if(e.key === 'Escape') close(); };
+  document.addEventListener('keydown', onKey);
+  const close = () => { document.removeEventListener('keydown', onKey); ov.remove(); };
+  setTimeout(()=> ov.querySelector('.save').focus(), 60);
   ov.querySelector('.save').addEventListener('click', close);
   ov.addEventListener('click', e => { if(e.target === ov) close(); });
 }
