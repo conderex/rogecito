@@ -1497,17 +1497,21 @@ function computeStreaks(tablitaId){
     longest = Math.max(longest, run);
   }
 
-  // current run: alive if the most recent mark is within 2 days of today
+  // Current run. The tail uses the SAME tolerance as the middle of the run
+  // (STREAK_GAP): today is still in progress, so it is not a missed day yet.
+  // With <=2 here, missing two full days killed a streak that the same two-day
+  // gap would have survived mid-run — and the tips copy promises otherwise.
   const today = startOfToday(), tISO = iso(today);
   const last = sorted[sorted.length-1];
   let current = 0;
   const bridged = new Set();
-  if(daysBetween(last, tISO) <= 2){
+  if(daysBetween(last, tISO) <= STREAK_GAP){
     let i = sorted.length - 1;
     current = 1;
     while(i > 0 && daysBetween(sorted[i-1], sorted[i]) <= STREAK_GAP){ current++; i--; }
-    // forgiven blank days from the run's first day up to today
-    for(let c = new Date(sorted[i] + 'T00:00:00'); iso(c) <= tISO; c = addDays(c,1)){
+    // Forgiven blank days inside the live run. Today is excluded: it is not a
+    // missed day, it is a day still open.
+    for(let c = new Date(sorted[i] + 'T00:00:00'); iso(c) < tISO; c = addDays(c,1)){
       if(!days.has(iso(c))) bridged.add(iso(c));
     }
   }
@@ -1587,6 +1591,7 @@ function renderCards(){
       isoDates.forEach(d => {
         const cell = document.createElement('button');
         cell.className = 'cell';
+        cell.dataset.d = d;
         cell.setAttribute('aria-label', `${tab.title} · ${sub.label} · ${d}`);
         const isChecked = state.checks.has(key(tab.id, sub.id, d));
         if(isChecked) cell.classList.add('checked');
@@ -1594,7 +1599,7 @@ function renderCards(){
         if(locked){ cell.classList.add('locked'); cell.setAttribute('aria-disabled','true'); }
         // Forgiven past day: the empty circle wears the flower isotype instead of a gap.
         // (Today stays plain — it can still be marked.) The .fill paints on top when checked.
-        const patched = !isChecked && d !== todayIso && sinfo.bridged.has(d);
+        const patched = !isChecked && sinfo.bridged.has(d);
         if(patched) cell.classList.add('patched');
         cell.innerHTML = '<span class="bar">' + (patched ? FLOWER_SVG('bloom') : '') + '<span class="fill"></span></span>';
         cell.addEventListener('click', ()=> {
@@ -1606,6 +1611,7 @@ function renderCards(){
     });
 
     card.appendChild(grid);
+    card.dataset.tid = tab.id;
     cards.appendChild(card);
 
     paintStreak(tab.id, false);
@@ -1626,7 +1632,27 @@ function paintStreak(tablitaId, animate){
 }
 function refreshStreak(tablitaId){
   paintStreak(tablitaId, true);
+  paintPatches(tablitaId);
   if(state.tab === 'insights') renderInsights();
+}
+// Which days are forgiven changes every time a cell is toggled, so the ✿ has to
+// be re-evaluated too — in place, so the cell that was just tapped keeps its
+// fill animation instead of being rebuilt.
+function paintPatches(tablitaId){
+  // Match on the property, not a built selector: tablita ids come from the DB and
+  // would otherwise need escaping (and CSS.escape is not everywhere).
+  const card = [...document.querySelectorAll('#cards .card')].find(c => c.dataset.tid === tablitaId);
+  if(!card) return;
+  const bridged = computeStreaks(tablitaId).bridged;
+  card.querySelectorAll('.cell').forEach(cell => {
+    const want = !cell.classList.contains('checked') && bridged.has(cell.dataset.d);
+    if(want === cell.classList.contains('patched')) return;
+    cell.classList.toggle('patched', want);
+    const bar = cell.querySelector('.bar');
+    const bloom = bar.querySelector('.bloom');
+    if(want && !bloom) bar.insertAdjacentHTML('afterbegin', FLOWER_SVG('bloom'));
+    else if(!want && bloom) bloom.remove();
+  });
 }
 
 /* =====================================================================
