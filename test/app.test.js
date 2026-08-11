@@ -11,6 +11,7 @@ sc += `
 window.__t = {
   theme: () => THEME, themes: () => THEMES, i18n: () => I18N,
   edit(){ state.editing = true; renderEditor(); },
+  offline(){ state.mode = 'local'; },
   week(n){ state.weekOffset = n; renderTrackerArea(); },
   checks(arr){ state.checks = new Set(arr); renderTrackerArea(); },
   render(){ renderTrackerArea(); },
@@ -65,6 +66,44 @@ w.__t.week(0);
 ok(!!w.document.querySelector('.streak svg.patch'), 'pastilla con florecita cuando held');
 w.__t.checks(['t1|a|'+D(-4),'t1|a|'+D(-5),'t1|a|'+D(-6),'t1|a|'+D(-7)]);
 ok(w.computeStreaks('t1').current===0, '3 días en blanco rompen la racha');
+
+// ---------- simetria de la gracia: mismo hueco, mismo resultado ----------
+// El medio de la racha y la cola deben perdonar igual. Antes la cola usaba <=2
+// y mataba rachas que el mismo hueco sobrevivia a la mitad.
+function streakOf(checks){
+  const win = makeDom(); win.__t.setup();
+  win.__t.checks(checks.map(d => 't1|a|'+d));
+  return win.computeStreaks('t1');
+}
+ok(streakOf([D(-3)]).current > 0, 'cola: 2 dias completos perdidos NO rompen la racha');
+ok(streakOf([D(-4)]).current === 0, 'cola: 3 dias completos perdidos SI rompen la racha');
+{
+  const mid = streakOf([D(-8),D(-7),D(-6),D(-3),D(-2),D(-1)]);
+  ok(mid.current === 6, 'medio: hueco de 2 dias mantiene la racha (6)');
+}
+{
+  const tail = streakOf([D(-8),D(-7),D(-6),D(-5),D(-4),D(-3)]);
+  ok(tail.current === 6, 'cola: hueco de 2 dias mantiene la misma racha (6) — simetrico');
+}
+ok(!streakOf([D(-2)]).bridged.has(D(0)), 'hoy no cuenta como dia perdonado');
+ok(streakOf([D(-3)]).bridged.has(D(-1)) && streakOf([D(-3)]).bridged.has(D(-2)),
+   'los dias perdonados de la cola llevan flor');
+
+// ---------- las flores se actualizan al marcar/desmarcar ----------
+{
+  const win = makeDom(); win.__t.setup(); win.__t.offline();
+  win.__t.checks(['t1|a|'+D(-3), 't1|a|'+D(0)]);   // -2 y -1 quedan perdonados
+  const cellAt = d => win.document.querySelector(`#cards .cell[data-d="${d}"]`);
+  ok(!!cellAt(D(-1)) && cellAt(D(-1)).classList.contains('patched'), 'flor visible en el dia perdonado');
+  // desmarcar el ancla: la racha se acorta y esos dias dejan de estar perdonados
+  cellAt(D(-3)).click();
+  ok(!cellAt(D(-1)).classList.contains('patched'), 'al desmarcar, la flor desaparece sin recargar');
+  ok(!cellAt(D(-1)).querySelector('.bloom'), 'y el SVG de la flor se retira del DOM');
+  // volver a marcarlo: las flores regresan
+  cellAt(D(-3)).click();
+  ok(cellAt(D(-1)).classList.contains('patched') && !!cellAt(D(-1)).querySelector('.bloom'),
+     'al re-marcar, la flor vuelve sola');
+}
 
 // ---------- i18n ----------
 w = makeDom();
