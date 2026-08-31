@@ -129,7 +129,7 @@ Los acentos de tablitas/contadores se eligen de: teal, orange, lavender, gold, p
 | Fuente | Rol | Cómo se usa |
 |---|---|---|
 | **Fraunces** (800, opsz 144, SOFT alto) | Display | Títulos, números grandes, wordmark. Serif expresiva y suavecita |
-| **Space Grotesk** (400–700) | Cuerpo | UI, botones, texto corrido |
+| **Nunito Sans** (400–800) | Cuerpo | UI, botones, texto corrido *(desde ago 2026; antes Space Grotesk)* |
 | **Caveat** (500–700) | Manuscrita | Subtítulos, frases emotivas, captions — siempre con rotación −1° a −3° |
 
 Servidas por Google Fonts. Para gráficos generados: TTFs desde el repo google/fonts.
@@ -229,7 +229,7 @@ Servidas por Google Fonts. Para gráficos generados: TTFs desde el repo google/f
   IG-story flyers ES/EN (1080×1920).
 - **Reproduction recipe:** marketing graphics are HTML pages using the app's exact CSS
   variables/fonts, rendered with headless Chromium (Playwright) — fonts (Fraunces,
-  Caveat, Space Grotesk, Noto Color Emoji) installed from the google/fonts GitHub repo.
+  Caveat, Nunito Sans, Noto Color Emoji) installed from the google/fonts GitHub repo.
   App screenshots: load `index.html` locally, stub network, inject demo state, render.
 
 ## 3. Launch assets & store pipeline (status: late July 2026)

@@ -116,7 +116,7 @@ el contraste entre cromo rígido y contenido chueco es lo que da el efecto de li
 | Rol | Familia | Uso |
 |---|---|---|
 | Display | **Fraunces** 800 | títulos, números grandes, nombres de tablita |
-| UI | **Space Grotesk** | todo el texto de interfaz, botones, etiquetas |
+| UI | **Nunito Sans** *(desde ago 2026; antes Space Grotesk)* | todo el texto de interfaz, botones, etiquetas |
 | Emocional | **Caveat** | asides manuscritos, siempre en minúsculas y rotados |
 
 **Isotipos dibujados, nunca emoji.** La florecita (5 pétalos + centro hueco) y la lunita
