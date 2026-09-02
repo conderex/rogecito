@@ -15,6 +15,8 @@ window.__t = {
   week(n){ state.weekOffset = n; renderTrackerArea(); },
   checks(arr){ state.checks = new Set(arr); renderTrackerArea(); },
   render(){ renderTrackerArea(); },
+  tasks(arr){ state.tasks = arr.slice(); if(state.tab==='todo') renderTodo(); },
+  patchTask(i, patch){ Object.assign(state.tasks[i], patch); if(state.tab==='todo') renderTodo(); },
   setup(){
     state.config=[{id:'t1',title:'Estirarme',accent:'var(--teal)',sort_order:0,archived:false,
       subActivities:[{id:'a',label:'AM',sort_order:0,archived:false}]}];
@@ -131,6 +133,44 @@ const dlg = w.document.querySelector('.modal[role="dialog"]');
 ok(!!dlg && dlg.getAttribute('aria-modal')==='true', 'infoModal con role=dialog + aria-modal');
 w.document.dispatchEvent(new w.KeyboardEvent('keydown', { key:'Escape', bubbles:true }));
 ok(!w.document.querySelector('.modal-ov'), 'Escape cierra el modal');
+
+// ---------- To Do (matriz de Eisenhower) ----------
+w = makeDom(); w.__t.setup();
+// Tab exists, panel exists, FAB exists
+ok(!!w.document.querySelector('.tab[data-tab="todo"]'), 'pestaña To Do presente');
+ok(!!w.document.getElementById('panel-todo'), 'panel-todo presente');
+ok(!!w.document.getElementById('todoAddBtn'), 'FAB de agregar tarea presente');
+// Seed tasks directly on state (skip network)
+w.switchTab('todo');
+w.__t.tasks([
+  { id:'t1', quadrant:'do',       text:'Apagar incendio', done_at:null, sort_order:1, created_at:'', updated_at:'' },
+  { id:'t2', quadrant:'do',       text:'Otro incendio',    done_at:null, sort_order:2, created_at:'', updated_at:'' },
+  { id:'t3', quadrant:'schedule', text:'Planear mes',      done_at:null, sort_order:3, created_at:'', updated_at:'' },
+]);
+ok(w.document.getElementById('panel-todo').classList.contains('active'), 'switchTab(todo) activa el panel');
+ok(w.document.body.classList.contains('tab-todo'), 'body.tab-todo se enciende al entrar');
+const todoChipEls = w.document.querySelectorAll('#todoChips .todo-chip');
+ok(todoChipEls.length === 4, 'cuatro chips (uno por cuadrante)');
+const doChipCount = todoChipEls[0].querySelector('.cnum');
+ok(doChipCount && doChipCount.textContent === '2', 'chip HAZLO YA muestra 2 abiertas');
+const doCol = w.document.getElementById('todoCol-do');
+ok(doCol && doCol.querySelectorAll('.todo-card').length === 2, 'columna HAZLO YA renderiza 2 cards');
+// Card altura fija
+const card = doCol.querySelector('.todo-card');
+ok(/height:64px/.test(w.getComputedStyle(card).cssText) || html.includes('.todo-card{') && html.includes('height:64px'),
+   'card usa height fijo (64px)');
+// Marca hecha → card sale de "open" y baja al toggle "Hecho hoy"
+w.__t.patchTask(0, { done_at: new Date().toISOString() });
+const openAfter = w.document.getElementById('todoCol-do').querySelectorAll('.todo-list .todo-card');
+ok(openAfter.length >= 1, 'al marcar una, quedan cards visibles');
+ok(!!w.document.querySelector('#todoCol-do .todo-done-toggle'), 'aparece el toggle "Hecho hoy"');
+// Reasignar cuadrante en memoria + re-render coloca la card en la nueva columna
+w.__t.patchTask(1, { quadrant: 'delegate' });
+ok(w.document.querySelectorAll('#todoCol-delegate .todo-card').length === 1, 'reasignar mueve la card al nuevo cuadrante');
+// Cambiar idioma re-renderiza el To Do
+w.setLang('en');
+ok(/Do it now/.test(w.document.querySelector('#todoCol-do .todo-col-title').textContent), 'i18n en re-render del To Do');
+w.setLang('es');
 
 // ---------- guardia de zona de palidez (hallazgo de Mary) ----------
 const CANVAS = { oat:'#ffffff', matcha:'#eff4ec', lavanda:'#f4f1f8', golden:'#e7d8b8', nocturno:'#1d1d24' };
