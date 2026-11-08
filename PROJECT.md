@@ -1,8 +1,9 @@
 # DoingTheDoings — Documento Maestro / Master Doc
 
 *Contexto para cualquier Claude (chat, design, Cowork, Claude Code). Última actualización:
-finales de julio 2026 (tras PR #17). Cambios recientes: brief de marca (Parte 1), Conteos
-ahora es timeline mensual, kit completo de Google Play.*
+noviembre 2026 (tras PR #38). Cambios recientes: sistema de temas v2 (Oat Milk default +
+5 temas), rachas amables con parche ✿, UI pasa a Nunito Sans, página de términos, pass de
+a11y + tests commiteados. La referencia viva de diseño es `branding/UX-UI.md`.*
 
 - **App en vivo:** https://doingthedoings.com/
 - **Privacidad:** https://doingthedoings.com/privacy.html
@@ -180,14 +181,15 @@ Servidas por Google Fonts. Para gráficos generados: TTFs desde el repo google/f
   Spanish default; starter seed matches signup language (*Estirarme/Stretch* +
   *Casa Limpia/Clean House* + counters ☕/🏆).
 - **Footer links:** `privacidad` (privacy.html) + `comentarios` (feedback mailto with
-  prefilled subject) — on the login gate and the Insights footer.
+  prefilled subject) — on the login gate and the Insights footer. Separate
+  `terminos.html` (terms of service, ES/EN, same Oat Milk skin) cross-links privacy.
 - **Owner-only Stats tab (📊):** gated by owner email + server-verified `owner_stats()`.
 - **PWA:** manifest + icons (incl. maskable) + service worker (offline shell; Supabase
   never cached).
 
 ## 2. Architecture
 
-- **Frontend:** ONE file, `index.html` (~2,400 lines) — inline CSS + vanilla JS, no
+- **Frontend:** ONE file, `index.html` (~2,700 lines) — inline CSS + vanilla JS, no
   framework, no build. supabase-js v2 from CDN (jsdelivr→unpkg fallback) for auth only.
   Direct-DOM renders (`renderTrackerArea`, `renderInsights`, `renderEditor`…) off a
   `state` object mirrored to localStorage (`roge_checks_v1`, `roge_config_v1`,
@@ -232,7 +234,7 @@ Servidas por Google Fonts. Para gráficos generados: TTFs desde el repo google/f
   Caveat, Nunito Sans, Noto Color Emoji) installed from the google/fonts GitHub repo.
   App screenshots: load `index.html` locally, stub network, inject demo state, render.
 
-## 3. Launch assets & store pipeline (status: late July 2026)
+## 3. Launch assets & store pipeline (status: late July 2026; recheck tester count)
 
 - **Google Play — everything prepared, waiting on testers/console:**
   - `store/play-listing.md`: paste-ready ES/EN listing (limits verified), Data Safety
@@ -275,6 +277,25 @@ Servidas por Google Fonts. Para gráficos generados: TTFs desde el repo google/f
 | #15 | `PROJECT.md` (this doc, v1) |
 | #16 | **Conteos → month-over-month timeline** (comparison view removed) |
 | #17 | **Play-launch prep kit** (listing, graphics, TWA scaffold, feedback link, 360px header fix) |
+| #18 | PROJECT.md v2: brand brief + refreshed technical reference |
+| #19 | Branding proposal MX: name + color directions |
+| #20 | Only the brand header stays pinned; tabs scroll away |
+| #21–#22 | Fix login clipped on short viewports / Chrome iOS (dvh sizing) |
+| #23 | Color system v2 proposal: light background + themes |
+| #24 | `UX-ESTADO-ACTUAL.md`: production UX/UI snapshot |
+| #25 | **Gentle streaks**: 2-day grace, flower ✿ patches, welcome card |
+| #26 | **Theme system v2**: Oat Milk default + Matcha, Lavanda, Cielo Nocturno |
+| #27 | Theme picker to top of edit mode; Golden Casket returns as 5th theme |
+| #28 | Oat Milk canvas goes flat white (Duolingo Snow) + pallor-zone guard |
+| #29 | Point everything at doingthedoings.com |
+| #30 | `LANZAMIENTO.md` — step-by-step launch guide |
+| #31 | `branding/UX-UI.md` as the living design reference |
+| #32 | Docs: production is Vercel + Squarespace, not GitHub Pages |
+| #33 | Reskin privacy page to Oat Milk + ES/EN toggle |
+| #34 | Add **terms of service** page (`terminos.html`) + cross-links |
+| #35 | Deploy hygiene, a11y pass, committed tests (lessons from Mary's tracker) |
+| #37 | Fix flower-patch logic: symmetric grace, patches repaint live |
+| #38 | Swap UI typeface: Space Grotesk → **Nunito Sans** |
 
 Pre-history: personal tracker for Roge → multi-user auth migration (`PLAN-auth.md`);
 owner's original data preserved in `bak_*` tables.
