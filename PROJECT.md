@@ -306,6 +306,13 @@ owner's original data preserved in `bak_*` tables.
 - Repo/URL still "rogecito"; product is DoingTheDoings.
 - `TABLITAS_DEFAULT`/`COUNTERS_DEFAULT` = owner's original offline-fallback config —
   intentionally NOT the new-user seed (`NEW_USER_TABLITAS*`).
+- **Plain JavaScript on purpose** — no TypeScript, no build step. The type-safety net
+  isn't worth losing the "one file, zero build" simplicity at this size. Reconsider only
+  if the codebase grows complex enough that silent type bugs become a real, recurring cost.
+- **Single `index.html` on purpose** — HTML + CSS + JS in one file, no bundler. If the app
+  over-complicates, or more people start collaborating, it can be split into `index.html`
+  + `styles.css` + `app.js` (still static, still no build) — the service worker's cache
+  list and the test harness would need updating to match.
 - Editing lock: current + previous week only.
 - Language pref survives account deletion (only data keys wiped).
 - Privacy-policy contact = owner's personal Gmail (may swap for an alias later).

@@ -771,14 +771,14 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
   </header>
 
   <!-- Tabs scroll away with the content; only the brand header stays pinned. -->
-  <div class="tabs">
-    <button class="tab active" data-tab="tracker">Tracker</button>
-    <button class="tab" data-tab="insights">Insights</button>
-    <button class="tab" data-tab="stats" id="statsTab" hidden title="Stats">📊</button>
+  <div class="tabs" role="tablist" aria-label="Vistas">
+    <button class="tab active" data-tab="tracker" role="tab" id="tab-tracker" aria-controls="panel-tracker" aria-selected="true">Tracker</button>
+    <button class="tab" data-tab="insights" role="tab" id="tab-insights" aria-controls="panel-insights" aria-selected="false">Insights</button>
+    <button class="tab" data-tab="stats" id="statsTab" role="tab" aria-controls="panel-stats" aria-selected="false" hidden title="Stats">📊</button>
   </div>
 
   <!-- TRACKER -->
-  <section class="panel active" id="panel-tracker">
+  <section class="panel active" id="panel-tracker" role="tabpanel" aria-labelledby="tab-tracker">
     <div class="weeknav">
       <button class="navbtn" id="prevWeek" data-i18n-title="prev_week" aria-label="Semana anterior">‹</button>
       <div class="label" id="weekLabel">—<small id="weekRange"></small></div>
@@ -792,14 +792,14 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
   </section>
 
   <!-- INSIGHTS -->
-  <section class="panel" id="panel-insights">
+  <section class="panel" id="panel-insights" role="tabpanel" aria-labelledby="tab-insights">
     <p class="ins-intro" data-i18n="week_q">¿cómo va la semana?</p>
     <div id="insights"></div>
     <footer><p data-i18n="one_day">un día a la vez ✿</p><a class="privacy-link" href="privacy.html" data-i18n="privacy_link">privacidad</a> <a class="privacy-link" href="mailto:rogerthatheart@gmail.com?subject=DoingTheDoings%20feedback" data-i18n="feedback_link">comentarios</a></footer>
   </section>
 
   <!-- STATS (owner only) -->
-  <section class="panel" id="panel-stats">
+  <section class="panel" id="panel-stats" role="tabpanel" aria-labelledby="statsTab">
     <p class="ins-intro" data-i18n="stats_title">Métricas</p>
     <div id="stats"></div>
   </section>
@@ -856,6 +856,8 @@ const SUPABASE_URL  = 'https://gqjpkftshxqeuigcrecc.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdxanBrZnRzaHhxZXVpZ2NyZWNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMDgzOTEsImV4cCI6MjA5NTc4NDM5MX0.8W5g0zmppJGqL992kojb-Bgc9MxEjpqXzpTS3bgXvNU';
 const REST_BASE = SUPABASE_URL + '/rest/v1/';
 const REST = REST_BASE + 'checks';
+// Only this account sees the owner-only Stats panel; owner_stats() also re-checks server-side.
+const OWNER_EMAIL = 'rogerthatheart@gmail.com';
 const LS_KEY = 'roge_checks_v1';
 const LS_CONFIG = 'roge_config_v1';
 const LS_COUNTERS = 'roge_counters_v1';
@@ -2026,7 +2028,7 @@ function updateModePill(){
 
 function switchTab(name){
   state.tab = name;
-  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  document.querySelectorAll('.tab').forEach(b => { const on = b.dataset.tab === name; b.classList.toggle('active', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
   document.getElementById('panel-tracker').classList.toggle('active', name==='tracker');
   document.getElementById('panel-insights').classList.toggle('active', name==='insights');
   document.getElementById('panel-stats').classList.toggle('active', name==='stats');
@@ -2445,8 +2447,7 @@ let authMode = 'login';      // 'login' | 'signup'
 let currentUserId = null;    // logged-in user's uuid (also used to scope seed inserts)
 let currentUserEmail = null; // logged-in user's email (gates the owner-only Stats panel)
 let appLoaded = false;       // guards against reloading data on repeated auth events
-// Only this account sees the Stats panel; owner_stats() also re-checks server-side.
-const OWNER_EMAIL = 'rogerthatheart@gmail.com';
+// OWNER_EMAIL lives in the CONFIG block at the top of this script.
 const isOwner = () => (currentUserEmail || '').toLowerCase() === OWNER_EMAIL;
 const redirectTo = () => location.origin + location.pathname;
 const gateEl = () => document.getElementById('gate');
