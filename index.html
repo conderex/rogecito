@@ -662,6 +662,24 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
      animation-iteration-count:1 !important; }
 }
 
+/* ---------- Landing demo tablita (login-gate preview, nothing saved) ---------- */
+.demo{ width:100%; max-width:360px; margin:4px 0 2px; }
+.demo-cap{ font-family:'Caveat',cursive; color:var(--orange-deep); font-size:1.08rem;
+  text-align:center; transform:rotate(-1.5deg); margin:0 0 6px; }
+.demo-tablita{ background:var(--paper); border:2.5px solid var(--ink); border-radius:14px;
+  box-shadow:4px 4px 0 var(--shadow); padding:10px 12px; transform:rotate(-.4deg); }
+.demo-title{ font-family:'Fraunces',serif; font-weight:800; font-size:1.02rem; color:var(--ink); }
+.demo-grid{ display:grid; grid-template-columns:58px repeat(7,1fr); gap:4px;
+  margin-top:8px; align-items:center; }
+.demo-dh{ font-size:.6rem; font-weight:700; text-align:center; color:var(--ink-soft); }
+.demo-rl{ font-size:.72rem; color:var(--ink); white-space:nowrap; }
+.demo-cell{ appearance:none; border:2px solid var(--ink); border-radius:999px; height:26px;
+  min-width:0; padding:0; cursor:pointer; background:color-mix(in srgb, var(--ink) 7%, transparent);
+  transition:background .2s var(--ease-out); }
+.demo-cell.on{ background:var(--accent); }
+.demo-cell:active{ transform:translateY(1px); }
+.demo-note{ font-size:.68rem; color:var(--ink-soft); text-align:center; margin:6px 0 0; }
+
 /* ---------- Auth gate ---------- */
 .editicon.logout{ color:var(--ink-soft); }
 .gate{
@@ -817,6 +835,15 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
     </div>
     <p class="gate-tag" id="gateTag">entra para ver tu progreso</p>
 
+    <div class="demo" id="demoCard">
+      <p class="demo-cap" data-i18n="demo_cap">así se ve — pruébalo ✿</p>
+      <div class="demo-tablita" style="--accent:var(--teal)">
+        <span class="demo-title" data-i18n="demo_title">Estirarme</span>
+        <div class="demo-grid" id="demoGrid"></div>
+      </div>
+      <p class="demo-note" data-i18n="demo_note">nada se guarda aquí · solo para ver</p>
+    </div>
+
     <form id="authForm" class="gate-form" autocomplete="on">
       <input type="email" id="authEmail" class="gate-input" placeholder="tu correo" data-i18n-ph="ph_email" autocomplete="email" required>
       <input type="password" id="authPass" class="gate-input" placeholder="contraseña" data-i18n-ph="ph_pass" autocomplete="current-password" required>
@@ -893,6 +920,11 @@ const I18N = {
     read_only: 'solo lectura',
     locked_toast: '🔒 Bloqueado · más de dos semanas',
     offline_local: 'Sin conexión — guardado local',
+    demo_cap: 'así se ve — pruébalo ✿',
+    demo_title: 'Estirarme',
+    demo_m: 'Mañana',
+    demo_n: 'Noche',
+    demo_note: 'nada se guarda aquí · solo para ver',
     no_tables: 'No hay tablas todavía.<br>Toca ✎ Editar para crear una.',
     // editor
     edit_tables: 'editar tablas',
@@ -1013,6 +1045,11 @@ const I18N = {
     read_only: 'read only',
     locked_toast: '🔒 Locked · more than two weeks',
     offline_local: 'Offline — saved locally',
+    demo_cap: 'this is it — give it a tap ✿',
+    demo_title: 'Stretch',
+    demo_m: 'Morning',
+    demo_n: 'Night',
+    demo_note: 'nothing is saved here · just a peek',
     no_tables: 'No tables yet.<br>Tap ✎ Edit to create one.',
     edit_tables: 'edit tables',
     counters_title: 'counters',
@@ -1117,6 +1154,30 @@ function tr(key, ...args){
   if(v == null) return key;
   return (typeof v === 'function') ? v(...args) : v;
 }
+/* Landing demo tablita — interactive preview on the login gate.
+   In-memory only: nothing is read from or written to state, localStorage or Supabase. */
+const DEMO_SEED = [[1,1,0,1,1,0,0],[0,1,1,0,1,1,0]];
+const demoState = DEMO_SEED.map(r => r.map(Boolean));
+function renderDemo(){
+  const g = document.getElementById('demoGrid');
+  if(!g) return;
+  const days = (typeof DAY_HEADERS !== 'undefined' && DAY_HEADERS) ? DAY_HEADERS : ['J','V','S','D','L','Ma','Mi'];
+  const subs = [tr('demo_m'), tr('demo_n')];
+  let html = '<span></span>' + days.map(d => `<span class="demo-dh">${esc(d)}</span>`).join('');
+  demoState.forEach((row, r) => {
+    html += `<span class="demo-rl">${esc(subs[r] || '')}</span>`;
+    row.forEach((on, c) => {
+      html += `<button type="button" class="demo-cell${on ? ' on' : ''}" data-r="${r}" data-c="${c}" aria-pressed="${on ? 'true' : 'false'}" aria-label="${esc(subs[r] || '')} · ${esc(days[c] || '')}"></button>`;
+    });
+  });
+  g.innerHTML = html;
+  g.querySelectorAll('.demo-cell').forEach(b => b.addEventListener('click', () => {
+    const r = +b.dataset.r, c = +b.dataset.c;
+    demoState[r][c] = !demoState[r][c];
+    b.classList.toggle('on', demoState[r][c]);
+    b.setAttribute('aria-pressed', demoState[r][c] ? 'true' : 'false');
+  }));
+}
 function setLang(l){
   LANG = l;
   try { localStorage.setItem(LS_LANG, l); } catch(e){}
@@ -1134,6 +1195,7 @@ function applyLang(){
   if(typeof applyAuthModeTexts === 'function') applyAuthModeTexts();
   if(typeof updateModePill === 'function') updateModePill();
   updateLangToggles();
+  if(typeof renderDemo === 'function') renderDemo();
   if(typeof appLoaded !== 'undefined' && appLoaded){
     if(state.editing) renderEditor(); else { renderWeekNav(); renderCards(); renderCounters(); }
     if(state.tab === 'insights') renderInsights();
