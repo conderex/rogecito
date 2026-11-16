@@ -16,8 +16,8 @@ cómo quedó armado el despliegue y lo único que falta para llegar a Google Pla
 | Repo | `conderex/rogecito` (público; **no privatizar ni renombrar** hasta migrar a todas) |
 | Origen viejo | `conderex.github.io/rogecito/` — GitHub Pages, salvavidas de las usuarias instaladas |
 | Supabase — proyecto / ref | **DoingTheDoings** / `gqjpkftshxqeuigcrecc` (el MISMO — 17 usuarias intactas) |
-| Google Cloud — nº proyecto | `77738106335` (ID `my-first-sanbox-project-360917`), cuenta `rogerthatheart@gmail.com` |
-| Google — Client ID | `77738106335-mchl8982p0mmo29fbblg3ldl1hfmobj8.apps.googleusercontent.com` |
+| Google Cloud — nº proyecto | `<GCP_PROJECT_NUMBER>` (ID `<GCP_PROJECT_ID>`), cuenta de la dueña |
+| Google — Client ID | `<GOOGLE_OAUTH_CLIENT_ID>` |
 | Paquete Android (TWA) | `com.doingthedoings.app` |
 
 ## Cómo fluye todo hoy
@@ -72,7 +72,7 @@ enlace mágico ✨ · botón de Google. La config los soporta; falta el chequeo 
 ### 2. Verificar el dominio en Google + terminar la pantalla de consentimiento
 La app OAuth sigue en estado **"Testing"**. Para quitar el ref feo de la pantalla de
 Google y poder publicar:
-1. `https://console.cloud.google.com/auth/branding?project=77738106335`
+1. `https://console.cloud.google.com/auth/branding?project=<GCP_PROJECT_NUMBER>`
 2. Verificar `doingthedoings.com` (Google manda a Search Console; se comprueba con un
    registro TXT en el DNS de Squarespace).
 3. Ya verificado: subir logo (`icon-512.png`), poner home `https://doingthedoings.com`,
