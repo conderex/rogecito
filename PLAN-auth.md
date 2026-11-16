@@ -6,7 +6,7 @@
 > - **Privacidad v1 = RLS** (cada quien ve lo suyo). E2E queda para cuando se publique al mercado.
 > - **Login**: Email+contraseña+reset · Magic link · Google.
 > - **Onboarding nuevo**: arranca con tablitas **Dientitos** y **Casa Limpia**; contadores **Cafecito** y **Logros del día**.
-> - **Datos actuales** se atan a la cuenta **rogerthatbunny@gmail.com**.
+> - **Datos actuales** se atan a la cuenta **<OWNER_ACCOUNT_EMAIL>**.
 
 ## Arquitectura actual (lo que hay que tocar)
 - `index.html` (1 archivo, 1572 líneas) habla por **REST crudo** con la **llave anónima** fija en los headers (`authHeaders()`, líneas 678/725/735/746). No usa `supabase-js`.
@@ -21,7 +21,7 @@
 El backfill necesita el `user_id` de Roge, que solo existe **después** de que cree su cuenta. Por eso el orden es:
 
 1. **Esquema** (columnas `user_id` nullable) — la app sigue viva en modo anónimo.
-2. **Deploy del frontend con login**, pero RLS todavía en `allow_all`. Roge entra y crea su cuenta con `rogerthatbunny@gmail.com`. (En esta ventana solo existe su cuenta, así que "todo compartido" = solo sus datos.)
+2. **Deploy del frontend con login**, pero RLS todavía en `allow_all`. Roge entra y crea su cuenta con `<OWNER_ACCOUNT_EMAIL>`. (En esta ventana solo existe su cuenta, así que "todo compartido" = solo sus datos.)
 3. **Backfill** de todas las filas existentes → su `user_id`; `NOT NULL`; PKs por-usuario.
 4. **Flip de RLS** a por-usuario (`auth.uid() = user_id`) + quitar `allow_all`.
 5. **Verificación** con una 2ª cuenta de prueba (aislamiento).
@@ -48,7 +48,7 @@ create index on counters(user_id); create index on checks(user_id);
 
 ## Fase 2 — (tras login de Roge) Backfill + PKs por-usuario
 ```sql
--- backfill: <ROGE_UID> = id de auth.users de rogerthatbunny@gmail.com
+-- backfill: <ROGE_UID> = id de auth.users de <OWNER_ACCOUNT_EMAIL>
 update tablitas       set user_id='<ROGE_UID>' where user_id is null;
 update sub_activities set user_id='<ROGE_UID>' where user_id is null;
 update counters       set user_id='<ROGE_UID>' where user_id is null;
@@ -109,7 +109,7 @@ grant select,insert,update,delete on checks to authenticated;
 ## Riesgos / decisiones abiertas
 - **Google OAuth** necesita credenciales de Google Cloud (paso manual). Si no las tienes a mano, arrancamos con Email + Magic link y sumamos Google después.
 - **Ventana de corte**: las Fases 2–4 deben ir juntas y rápido; ~minutos de "mantenimiento" si algo se desfasa.
-- **Confirmar** que la cuenta dueña es `rogerthatbunny@gmail.com` (distinta del correo del perfil `rogerthatheart@gmail.com`).
+- **Confirmar** que la cuenta dueña es `<OWNER_ACCOUNT_EMAIL>` (distinta del correo del perfil `rogerthatheart@gmail.com`).
 
 ---
 
@@ -120,7 +120,7 @@ grant select,insert,update,delete on checks to authenticated;
 - `multiuser_phase2_per_user_keys` — `user_id NOT NULL DEFAULT auth.uid()`, PKs `(user_id, id)`, FK compuesta, unicidad de checks por usuario.
 - `multiuser_phase3_per_user_rls` — fuera `allow_all`; políticas `own_rows` (`auth.uid() = user_id`) para `authenticated`; `anon` revocado.
 
-**Cuenta dueña:** `rogerthatbunny@gmail.com` (confirmada, contraseña la fijó Roge).
+**Cuenta dueña:** `<OWNER_ACCOUNT_EMAIL>` (confirmada, contraseña la fijó Roge).
 uid `17681eed-0893-43c8-8856-80d403a371ec` — sus 90 checks / 3 tablitas / 4 contadores / 12 subs.
 
 **Frontend** (`index.html`, desplegado a `main`): `supabase-js` para sesión; gate de acceso
@@ -137,7 +137,7 @@ del set de arranque (Dientitos + Casa Limpia, Cafecito + Logros del día) para c
    (p. ej. `https://doingthedoings.com/`) y agregarla a *Redirect URLs*, para que
    los correos de **enlace mágico y reset** regresen a la app. (El login con contraseña ya
    funciona sin esto.)
-2. **Probar en el teléfono**: entrar con `rogerthatbunny@gmail.com`, ver datos intactos;
+2. **Probar en el teléfono**: entrar con `<OWNER_ACCOUNT_EMAIL>`, ver datos intactos;
    crear una 2ª cuenta y confirmar que arranca con el set nuevo y **no** ve lo de Roge.
 3. *(Opcional)* Activar "Leaked password protection" (Auth ▸ Policies).
 4. **Google**: pendiente para una iteración futura (credenciales de Google Cloud).
