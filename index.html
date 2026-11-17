@@ -662,6 +662,26 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
      animation-iteration-count:1 !important; }
 }
 
+/* ---------- Landing demo tablita (login-gate preview, nothing saved) ---------- */
+.demo{ width:100%; max-width:360px; margin:4px 0 2px; }
+.demo-cap{ font-family:'Caveat',cursive; color:var(--orange-deep); font-size:1.08rem;
+  text-align:center; transform:rotate(-1.5deg); margin:0 0 6px; }
+.demo-tablita{ background:var(--paper); border:2.5px solid var(--ink); border-radius:14px;
+  box-shadow:4px 4px 0 var(--shadow); padding:10px 12px; transform:rotate(-.4deg); }
+.demo-title{ font-family:'Fraunces',serif; font-weight:800; font-size:1.02rem; color:var(--ink); }
+.demo-grid{ display:grid; grid-template-columns:58px repeat(7,1fr); gap:4px;
+  margin-top:8px; align-items:center; }
+.demo-dh{ font-size:.6rem; font-weight:700; text-align:center; color:var(--ink-soft); }
+.demo-rl{ font-size:.72rem; color:var(--ink); white-space:nowrap; }
+.demo-cell{ appearance:none; border:2px solid var(--ink); border-radius:999px; height:26px;
+  min-width:0; padding:0; cursor:pointer; background:color-mix(in srgb, var(--ink) 7%, transparent);
+  transition:background .2s var(--ease-out); }
+.demo-cell.on{ background:var(--accent); }
+.demo-cell:active{ transform:translateY(1px); }
+.demo-note{ font-size:.68rem; color:var(--ink-soft); text-align:center; margin:6px 0 0; }
+.sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
+  clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+
 /* ---------- Auth gate ---------- */
 .editicon.logout{ color:var(--ink-soft); }
 .gate{
@@ -771,14 +791,14 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
   </header>
 
   <!-- Tabs scroll away with the content; only the brand header stays pinned. -->
-  <div class="tabs">
-    <button class="tab active" data-tab="tracker">Tracker</button>
-    <button class="tab" data-tab="insights">Insights</button>
-    <button class="tab" data-tab="stats" id="statsTab" hidden title="Stats">📊</button>
+  <div class="tabs" role="tablist" aria-label="Vistas">
+    <button class="tab active" data-tab="tracker" role="tab" id="tab-tracker" aria-controls="panel-tracker" aria-selected="true">Tracker</button>
+    <button class="tab" data-tab="insights" role="tab" id="tab-insights" aria-controls="panel-insights" aria-selected="false">Insights</button>
+    <button class="tab" data-tab="stats" id="statsTab" role="tab" aria-controls="panel-stats" aria-selected="false" hidden title="Stats">📊</button>
   </div>
 
   <!-- TRACKER -->
-  <section class="panel active" id="panel-tracker">
+  <section class="panel active" id="panel-tracker" role="tabpanel" aria-labelledby="tab-tracker">
     <div class="weeknav">
       <button class="navbtn" id="prevWeek" data-i18n-title="prev_week" aria-label="Semana anterior">‹</button>
       <div class="label" id="weekLabel">—<small id="weekRange"></small></div>
@@ -792,14 +812,14 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
   </section>
 
   <!-- INSIGHTS -->
-  <section class="panel" id="panel-insights">
+  <section class="panel" id="panel-insights" role="tabpanel" aria-labelledby="tab-insights">
     <p class="ins-intro" data-i18n="week_q">¿cómo va la semana?</p>
     <div id="insights"></div>
     <footer><p data-i18n="one_day">un día a la vez ✿</p><a class="privacy-link" href="privacy.html" data-i18n="privacy_link">privacidad</a> <a class="privacy-link" href="mailto:rogerthatheart@gmail.com?subject=DoingTheDoings%20feedback" data-i18n="feedback_link">comentarios</a></footer>
   </section>
 
   <!-- STATS (owner only) -->
-  <section class="panel" id="panel-stats">
+  <section class="panel" id="panel-stats" role="tabpanel" aria-labelledby="statsTab">
     <p class="ins-intro" data-i18n="stats_title">Métricas</p>
     <div id="stats"></div>
   </section>
@@ -817,8 +837,19 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
     </div>
     <p class="gate-tag" id="gateTag">entra para ver tu progreso</p>
 
+    <div class="demo" id="demoCard">
+      <p class="demo-cap" data-i18n="demo_cap">así se ve — pruébalo ✿</p>
+      <div class="demo-tablita" style="--accent:var(--teal)">
+        <span class="demo-title" data-i18n="demo_title">Estirarme</span>
+        <div class="demo-grid" id="demoGrid"></div>
+      </div>
+      <p class="demo-note" data-i18n="demo_note">nada se guarda aquí · solo para ver</p>
+    </div>
+
     <form id="authForm" class="gate-form" autocomplete="on">
+      <label class="sr-only" for="authEmail" data-i18n="lbl_email">Correo electrónico</label>
       <input type="email" id="authEmail" class="gate-input" placeholder="tu correo" data-i18n-ph="ph_email" autocomplete="email" required>
+      <label class="sr-only" for="authPass" data-i18n="lbl_pass">Contraseña</label>
       <input type="password" id="authPass" class="gate-input" placeholder="contraseña" data-i18n-ph="ph_pass" autocomplete="current-password" required>
       <button type="submit" class="gate-btn" id="authSubmit">Entrar</button>
     </form>
@@ -856,6 +887,8 @@ const SUPABASE_URL  = 'https://gqjpkftshxqeuigcrecc.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdxanBrZnRzaHhxZXVpZ2NyZWNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMDgzOTEsImV4cCI6MjA5NTc4NDM5MX0.8W5g0zmppJGqL992kojb-Bgc9MxEjpqXzpTS3bgXvNU';
 const REST_BASE = SUPABASE_URL + '/rest/v1/';
 const REST = REST_BASE + 'checks';
+// Only this account sees the owner-only Stats panel; owner_stats() also re-checks server-side.
+const OWNER_EMAIL = 'rogerthatheart@gmail.com';
 const LS_KEY = 'roge_checks_v1';
 const LS_CONFIG = 'roge_config_v1';
 const LS_COUNTERS = 'roge_counters_v1';
@@ -870,7 +903,7 @@ const LS_THEME = 'roge_theme_v1';       // device-local theme choice (oat defaul
 const I18N = {
   es: {
     months: ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'],
-    dayHeaders: ['J','V','S','D','L','Ma','Mi'],
+    dayHeaders: ['L','Ma','Mi','J','V','S','D'],
     loading: 'cargando…',
     brand_sub: 'activación conductual',
     today_btn: 'Hoy',
@@ -891,6 +924,14 @@ const I18N = {
     read_only: 'solo lectura',
     locked_toast: '🔒 Bloqueado · más de dos semanas',
     offline_local: 'Sin conexión — guardado local',
+    demo_cap: 'así se ve — pruébalo ✿',
+    demo_title: 'Estirarme',
+    demo_m: 'Mañana',
+    demo_n: 'Noche',
+    demo_note: 'nada se guarda aquí · solo para ver',
+    lbl_email: 'Correo electrónico',
+    lbl_pass: 'Contraseña',
+    save_failed: 'No se pudo guardar — revisa tu conexión e inténtalo otra vez.',
     no_tables: 'No hay tablas todavía.<br>Toca ✎ Editar para crear una.',
     // editor
     edit_tables: 'editar tablas',
@@ -991,7 +1032,7 @@ const I18N = {
   },
   en: {
     months: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
-    dayHeaders: ['Th','F','Sa','Su','M','Tu','W'],
+    dayHeaders: ['M','Tu','W','Th','F','Sa','Su'],
     loading: 'loading…',
     brand_sub: 'behavioral activation',
     today_btn: 'Today',
@@ -1011,6 +1052,14 @@ const I18N = {
     read_only: 'read only',
     locked_toast: '🔒 Locked · more than two weeks',
     offline_local: 'Offline — saved locally',
+    demo_cap: 'this is it — give it a tap ✿',
+    demo_title: 'Stretch',
+    demo_m: 'Morning',
+    demo_n: 'Night',
+    demo_note: 'nothing is saved here · just a peek',
+    lbl_email: 'Email',
+    lbl_pass: 'Password',
+    save_failed: 'Could not save — check your connection and try again.',
     no_tables: 'No tables yet.<br>Tap ✎ Edit to create one.',
     edit_tables: 'edit tables',
     counters_title: 'counters',
@@ -1115,6 +1164,30 @@ function tr(key, ...args){
   if(v == null) return key;
   return (typeof v === 'function') ? v(...args) : v;
 }
+/* Landing demo tablita — interactive preview on the login gate.
+   In-memory only: nothing is read from or written to state, localStorage or Supabase. */
+const DEMO_SEED = [[1,1,0,1,1,0,0],[0,1,1,0,1,1,0]];
+const demoState = DEMO_SEED.map(r => r.map(Boolean));
+function renderDemo(){
+  const g = document.getElementById('demoGrid');
+  if(!g) return;
+  const days = (typeof DAY_HEADERS !== 'undefined' && DAY_HEADERS) ? DAY_HEADERS : ['L','Ma','Mi','J','V','S','D'];
+  const subs = [tr('demo_m'), tr('demo_n')];
+  let html = '<span></span>' + days.map(d => `<span class="demo-dh">${esc(d)}</span>`).join('');
+  demoState.forEach((row, r) => {
+    html += `<span class="demo-rl">${esc(subs[r] || '')}</span>`;
+    row.forEach((on, c) => {
+      html += `<button type="button" class="demo-cell${on ? ' on' : ''}" data-r="${r}" data-c="${c}" aria-pressed="${on ? 'true' : 'false'}" aria-label="${esc(subs[r] || '')} · ${esc(days[c] || '')}"></button>`;
+    });
+  });
+  g.innerHTML = html;
+  g.querySelectorAll('.demo-cell').forEach(b => b.addEventListener('click', () => {
+    const r = +b.dataset.r, c = +b.dataset.c;
+    demoState[r][c] = !demoState[r][c];
+    b.classList.toggle('on', demoState[r][c]);
+    b.setAttribute('aria-pressed', demoState[r][c] ? 'true' : 'false');
+  }));
+}
 function setLang(l){
   LANG = l;
   try { localStorage.setItem(LS_LANG, l); } catch(e){}
@@ -1132,6 +1205,7 @@ function applyLang(){
   if(typeof applyAuthModeTexts === 'function') applyAuthModeTexts();
   if(typeof updateModePill === 'function') updateModePill();
   updateLangToggles();
+  if(typeof renderDemo === 'function') renderDemo();
   if(typeof appLoaded !== 'undefined' && appLoaded){
     if(state.editing) renderEditor(); else { renderWeekNav(); renderCards(); renderCounters(); }
     if(state.tab === 'insights') renderInsights();
@@ -1255,11 +1329,11 @@ function seedSets(){
     : { tablitas: NEW_USER_TABLITAS,    counters: NEW_USER_COUNTERS };
 }
 
-let DAY_HEADERS = I18N[LANG].dayHeaders; // Thu → Wed
+let DAY_HEADERS = I18N[LANG].dayHeaders; // Mon → Sun
 let MONTHS = I18N[LANG].months;
 
 /* =====================================================================
-   DATE HELPERS  (local-time, week = Thursday → Wednesday)
+   DATE HELPERS  (local-time, week = Monday → Sunday)
    ===================================================================== */
 function iso(d){
   return d.getFullYear() + '-' +
@@ -1269,10 +1343,10 @@ function iso(d){
 function addDays(d, n){ const x = new Date(d); x.setDate(x.getDate()+n); return x; }
 function startOfToday(){ const n = new Date(); n.setHours(0,0,0,0); return n; }
 
-// Thursday that begins the week containing date `d`.
+// Monday that begins the week containing date `d`.
 function weekStart(d){
-  const day = d.getDay();              // Sun=0..Sat=6, Thu=4
-  const back = (day - 4 + 7) % 7;      // days since Thursday
+  const day = d.getDay();              // Sun=0..Sat=6, Mon=1
+  const back = (day - 1 + 7) % 7;      // days since Monday
   return addDays(d, -back);
 }
 // 7 Date objects Thu..Wed for the displayed week (offset in weeks from current)
@@ -1460,7 +1534,7 @@ async function toggle(t, s, d, cellEl){
     refreshStreak(t);
     // a hard failure mid-session means we lost the connection
     state.mode = 'local'; updateModePill();
-    showToast(tr('offline_local'));
+    showToast(tr('save_failed'));
   }
 }
 
@@ -2026,7 +2100,7 @@ function updateModePill(){
 
 function switchTab(name){
   state.tab = name;
-  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  document.querySelectorAll('.tab').forEach(b => { const on = b.dataset.tab === name; b.classList.toggle('active', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
   document.getElementById('panel-tracker').classList.toggle('active', name==='tracker');
   document.getElementById('panel-insights').classList.toggle('active', name==='insights');
   document.getElementById('panel-stats').classList.toggle('active', name==='stats');
@@ -2445,8 +2519,7 @@ let authMode = 'login';      // 'login' | 'signup'
 let currentUserId = null;    // logged-in user's uuid (also used to scope seed inserts)
 let currentUserEmail = null; // logged-in user's email (gates the owner-only Stats panel)
 let appLoaded = false;       // guards against reloading data on repeated auth events
-// Only this account sees the Stats panel; owner_stats() also re-checks server-side.
-const OWNER_EMAIL = 'rogerthatheart@gmail.com';
+// OWNER_EMAIL lives in the CONFIG block at the top of this script.
 const isOwner = () => (currentUserEmail || '').toLowerCase() === OWNER_EMAIL;
 const redirectTo = () => location.origin + location.pathname;
 const gateEl = () => document.getElementById('gate');
