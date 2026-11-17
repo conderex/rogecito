@@ -127,6 +127,15 @@ ven igual en todos los sistemas.
 
 ## 4. Pantallas
 
+### Landing (`.landing`, pre-auth)
+Lo primero que ve quien no ha entrado (antes era el gate directo). Overlay scrollable, tema
+Oat Milk, con el mismo lenguaje de formas (tarjetas papel, bordes tinta, sombras sólidas,
+rotaciones ±0.5°, ✿). De arriba abajo: hero (wordmark + tagline manuscrita + subheadline +
+**el demo tocable** reubicado aquí + CTA "Crear mi primera tablita" + link "inicia sesión")
+· tarjeta de empatía · cómo funciona (3 pasos numerados) · carta del creador (Caveat) · FAQ
+corto · CTA final · footer. Los CTAs abren el gate en modo registro/login; el gate tiene un
+"← volver". Hay **tres vistas excluyentes**: landing → gate → app.
+
 ### Puerta de acceso (`.gate`)
 Overlay a pantalla completa (`100dvh`, degradado radial `--sand → --sand-deep`), con la
 tarjeta centrada por `margin:auto` para que nunca se recorte en pantallas cortas. De

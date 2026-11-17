@@ -163,6 +163,35 @@ for(const [name,hex] of Object.entries(CANVAS)){
 }
 { const [H,S,L]=hsl('#f9f8f6'); ok(L>93 && S<35 && H>=33 && H<=58, 'la guardia SÍ detecta #f9f8f6 (control)'); }
 
+// ---------- landing pre-auth ----------
+{
+  const win = makeDom();
+  win.bindAuthUI();          // wire the landing CTAs (boot() is stripped in tests)
+  win.renderDemo();          // populate the demo grid (normally done via applyLang on boot)
+  const L = () => win.document.getElementById('landing');
+  const G = () => win.document.getElementById('gate');
+  const A = () => win.document.querySelector('.app');
+  // logged-out view
+  win.showLanding();
+  ok(!L().hidden && G().hidden && A().style.display === 'none', 'logout → landing visible, gate y app ocultos');
+  // the demo moved into the landing and still renders (in-memory only)
+  ok(!!win.document.querySelector('#landing #demoGrid .demo-cell'), 'demo tocable vive dentro de la landing');
+  ok(!win.document.querySelector('#gate #demoGrid'), 'el demo ya no está en el gate');
+  // primary CTA → gate in signup mode
+  win.document.getElementById('landCta').click();
+  ok(!G().hidden && L().hidden, 'CTA "crear mi primera tablita" abre el gate');
+  ok(win.document.getElementById('authSubmit').textContent === win.__t.i18n().es.signup_submit, 'gate abre en modo registro');
+  // "already have an account" → gate in login mode
+  win.showLanding();
+  win.document.getElementById('landLogin').click();
+  ok(win.document.getElementById('authSubmit').textContent === win.__t.i18n().es.login_submit, 'link "inicia sesión" → modo login');
+  // back link → landing
+  win.document.getElementById('gateBack').click();
+  ok(!L().hidden && G().hidden, '"volver" regresa a la landing');
+  // the landing demo persists nothing
+  ok(!win.localStorage.getItem('roge_checks_v1'), 'el demo de la landing no persiste nada');
+}
+
 // ---------- fechas: semana lunes→domingo + invariantes ----------
 {
   const isoL = x => x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');

@@ -177,6 +177,10 @@ Servidas por Google Fonts. Para gráficos generados: TTFs desde el repo google/f
      localized month labels, legend.
 - **Edit mode (✎):** create/rename/reorder/archive tablitas, subs, counters (archive
   preserves history); color accents; **account deletion** (danger zone, double confirm).
+- **Landing (pre-auth):** logged-out visitors see a marketing landing (`#landing`) — hero
+  with the tagline + the interactive demo tablita, empathy card, how-it-works (3 steps),
+  creator letter, short FAQ, CTA. Three mutually-exclusive views now: landing → gate → app
+  (`showLanding/showGate/showApp`). CTAs open the gate (signup/login); a "← volver" returns.
 - **Auth:** Supabase — email+password, Google OAuth, magic link, reset; PKCE.
 - **i18n:** symmetric `I18N.es/en` dicts, `tr()` helper, `data-i18n*` attributes;
   Spanish default; starter seed matches signup language (*Estirarme/Stretch* +
