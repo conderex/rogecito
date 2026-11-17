@@ -89,20 +89,33 @@ ok(!streakOf([D(-2)]).bridged.has(D(0)), 'hoy no cuenta como dia perdonado');
 ok(streakOf([D(-3)]).bridged.has(D(-1)) && streakOf([D(-3)]).bridged.has(D(-2)),
    'los dias perdonados de la cola llevan flor');
 
-// ---------- las flores se actualizan al marcar/desmarcar ----------
+// ---------- las flores se actualizan al marcar/desmarcar (sin recargar) ----------
+// La racha viva (y sus flores) está cerca de HOY, y ese tramo cruza el límite de
+// semana (lunes) según el día. Cuando el hueco cabe en la semana visible probamos
+// el DOM en vivo; a principio de semana verificamos la misma lógica a nivel de estado.
 {
   const win = makeDom(); win.__t.setup(); win.__t.offline();
-  win.__t.checks(['t1|a|'+D(-3), 't1|a|'+D(0)]);   // -2 y -1 quedan perdonados
-  const cellAt = d => win.document.querySelector(`#cards .cell[data-d="${d}"]`);
-  ok(!!cellAt(D(-1)) && cellAt(D(-1)).classList.contains('patched'), 'flor visible en el dia perdonado');
-  // desmarcar el ancla: la racha se acorta y esos dias dejan de estar perdonados
-  cellAt(D(-3)).click();
-  ok(!cellAt(D(-1)).classList.contains('patched'), 'al desmarcar, la flor desaparece sin recargar');
-  ok(!cellAt(D(-1)).querySelector('.bloom'), 'y el SVG de la flor se retira del DOM');
-  // volver a marcarlo: las flores regresan
-  cellAt(D(-3)).click();
-  ok(cellAt(D(-1)).classList.contains('patched') && !!cellAt(D(-1)).querySelector('.bloom'),
-     'al re-marcar, la flor vuelve sola');
+  const mon = win.weekStart(win.startOfToday());
+  const todayN = Math.round((win.startOfToday() - mon) / 86400000); // 0=lunes … 6=domingo
+  if(todayN >= 2){
+    win.__t.checks(['t1|a|'+D(-2), 't1|a|'+D(0)]);   // -1 queda perdonado, mismo (esta) semana
+    win.__t.week(0);
+    const cellAt = d => win.document.querySelector(`#cards .cell[data-d="${d}"]`);
+    ok(!!cellAt(D(-1)) && cellAt(D(-1)).classList.contains('patched'), 'flor visible en el día perdonado');
+    cellAt(D(-2)).click();
+    ok(!cellAt(D(-1)).classList.contains('patched'), 'al desmarcar, la flor desaparece sin recargar');
+    ok(!cellAt(D(-1)).querySelector('.bloom'), 'y el SVG de la flor se retira del DOM');
+    cellAt(D(-2)).click();
+    ok(cellAt(D(-1)).classList.contains('patched') && !!cellAt(D(-1)).querySelector('.bloom'),
+       'al re-marcar, la flor vuelve sola');
+  } else {
+    win.__t.checks(['t1|a|'+D(-2), 't1|a|'+D(0)]);
+    ok(win.computeStreaks('t1').bridged.has(D(-1)), 'estado: el día perdonado lleva flor');
+    win.__t.checks(['t1|a|'+D(0)]);
+    ok(win.computeStreaks('t1').bridged.size === 0, 'estado: al quitar el ancla, se van las flores');
+    win.__t.checks(['t1|a|'+D(-2), 't1|a|'+D(0)]);
+    ok(win.computeStreaks('t1').bridged.has(D(-1)), 'estado: al re-marcar, la flor vuelve');
+  }
 }
 
 // ---------- i18n ----------
@@ -149,5 +162,34 @@ for(const [name,hex] of Object.entries(CANVAS)){
   ok(!(L>93 && S<35 && H>=33 && H<=58), `canvas ${name} fuera de la zona de palidez`);
 }
 { const [H,S,L]=hsl('#f9f8f6'); ok(L>93 && S<35 && H>=33 && H<=58, 'la guardia SÍ detecta #f9f8f6 (control)'); }
+
+// ---------- fechas: semana lunes→domingo + invariantes ----------
+{
+  const isoL = x => x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');
+  ok(w.__t.i18n().es.dayHeaders[0]==='L' && w.__t.i18n().es.dayHeaders[6]==='D', 'ES: semana L…D (lunes a domingo)');
+  ok(w.__t.i18n().en.dayHeaders[0]==='M' && w.__t.i18n().en.dayHeaders[6]==='Su', 'EN: semana M…Su (Monday to Sunday)');
+  // weekStart siempre cae en lunes, 800 días seguidos (cruza meses, años y DST)
+  let allMon=true, allWithin=true;
+  const base=new Date(2025,0,1);
+  for(let i=0;i<800;i++){
+    const d=new Date(base); d.setDate(d.getDate()+i);
+    const ws=w.weekStart(d);
+    if(ws.getDay()!==1) allMon=false;
+    const diff=Math.round((d - ws)/86400000);
+    if(diff<0 || diff>6) allWithin=false;
+  }
+  ok(allMon, 'weekStart siempre cae en lunes (800 días: cruza meses, años y DST)');
+  ok(allWithin, 'weekStart nunca queda a más de 6 días del día dado');
+  // weekDates(0): 7 días consecutivos, lunes primero, domingo último
+  const wd=w.weekDates(0);
+  ok(wd.length===7 && wd[0].getDay()===1 && wd[6].getDay()===0, 'weekDates(0): lunes→domingo, 7 días');
+  let consec=true; for(let i=1;i<7;i++){ if(Math.round((wd[i]-wd[i-1])/86400000)!==1) consec=false; }
+  ok(consec, 'weekDates(0): días consecutivos');
+  // candado: esta semana y la pasada editables; dos semanas atrás, bloqueada
+  const mondayThis = w.weekStart(w.startOfToday());
+  ok(!w.isLocked(isoL(mondayThis)), 'lunes de esta semana: editable');
+  ok(!w.isLocked(isoL(w.addDays(mondayThis,-7))), 'semana pasada: editable');
+  ok(w.isLocked(isoL(w.addDays(mondayThis,-8))), 'hace 8 días (semana -2): bloqueado');
+}
 
 console.log(pass?'\nALL PASS':'\nFAILED'); process.exit(pass?0:1);

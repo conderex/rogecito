@@ -139,7 +139,7 @@ estado. Los cuatro flujos comparten una sola tarjeta.
 Header pegajoso (solo la marca; se desvanece con `mask` de gradiente, sin depender de
 ningún color) → tabs → navegación de semana → tarjetas de tablita → contadores → footer.
 
-**La semana corre jueves → miércoles.** Etiquetas: *Esta semana* / *Semana pasada* /
+**La semana corre lunes → domingo.** Etiquetas: *Esta semana* / *Semana pasada* /
 *Próxima semana* / *N semanas atrás*. Solo **esta semana y la pasada** son editables;
 más atrás queda en solo lectura.
 

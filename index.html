@@ -903,7 +903,7 @@ const LS_THEME = 'roge_theme_v1';       // device-local theme choice (oat defaul
 const I18N = {
   es: {
     months: ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'],
-    dayHeaders: ['J','V','S','D','L','Ma','Mi'],
+    dayHeaders: ['L','Ma','Mi','J','V','S','D'],
     loading: 'cargando…',
     brand_sub: 'activación conductual',
     today_btn: 'Hoy',
@@ -1032,7 +1032,7 @@ const I18N = {
   },
   en: {
     months: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
-    dayHeaders: ['Th','F','Sa','Su','M','Tu','W'],
+    dayHeaders: ['M','Tu','W','Th','F','Sa','Su'],
     loading: 'loading…',
     brand_sub: 'behavioral activation',
     today_btn: 'Today',
@@ -1171,7 +1171,7 @@ const demoState = DEMO_SEED.map(r => r.map(Boolean));
 function renderDemo(){
   const g = document.getElementById('demoGrid');
   if(!g) return;
-  const days = (typeof DAY_HEADERS !== 'undefined' && DAY_HEADERS) ? DAY_HEADERS : ['J','V','S','D','L','Ma','Mi'];
+  const days = (typeof DAY_HEADERS !== 'undefined' && DAY_HEADERS) ? DAY_HEADERS : ['L','Ma','Mi','J','V','S','D'];
   const subs = [tr('demo_m'), tr('demo_n')];
   let html = '<span></span>' + days.map(d => `<span class="demo-dh">${esc(d)}</span>`).join('');
   demoState.forEach((row, r) => {
@@ -1329,11 +1329,11 @@ function seedSets(){
     : { tablitas: NEW_USER_TABLITAS,    counters: NEW_USER_COUNTERS };
 }
 
-let DAY_HEADERS = I18N[LANG].dayHeaders; // Thu → Wed
+let DAY_HEADERS = I18N[LANG].dayHeaders; // Mon → Sun
 let MONTHS = I18N[LANG].months;
 
 /* =====================================================================
-   DATE HELPERS  (local-time, week = Thursday → Wednesday)
+   DATE HELPERS  (local-time, week = Monday → Sunday)
    ===================================================================== */
 function iso(d){
   return d.getFullYear() + '-' +
@@ -1343,10 +1343,10 @@ function iso(d){
 function addDays(d, n){ const x = new Date(d); x.setDate(x.getDate()+n); return x; }
 function startOfToday(){ const n = new Date(); n.setHours(0,0,0,0); return n; }
 
-// Thursday that begins the week containing date `d`.
+// Monday that begins the week containing date `d`.
 function weekStart(d){
-  const day = d.getDay();              // Sun=0..Sat=6, Thu=4
-  const back = (day - 4 + 7) % 7;      // days since Thursday
+  const day = d.getDay();              // Sun=0..Sat=6, Mon=1
+  const back = (day - 1 + 7) % 7;      // days since Monday
   return addDays(d, -back);
 }
 // 7 Date objects Thu..Wed for the displayed week (offset in weeks from current)

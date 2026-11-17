@@ -158,7 +158,8 @@ Servidas por Google Fonts. Para gráficos generados: TTFs desde el repo google/f
 ## 1. Product features (current)
 
 - **Tracker (home):** "tablitas" — sub-activities (rows) × 7 day columns; tap to
-  fill/unfill. Week runs **Thursday → Wednesday** (deliberate quirk). Prev/next/Hoy
+  fill/unfill. Week runs **Monday → Sunday** (was Thursday→Wednesday until Nov 2026).
+  Prev/next/Hoy
   navigation. Days before the start of last week are **locked** (~2 editable weeks).
 - **Counters:** tally trackers (+/− per day) under the grid.
 - **Streaks:** per-tablita current & longest (counts days with ≥1 check). **Gentle
@@ -202,7 +203,7 @@ Servidas por Google Fonts. Para gráficos generados: TTFs desde el repo google/f
   (+ frozen `bak_*_pre_auth`). Data access via raw REST `fetch` with anon key + user JWT.
   RPCs (SECURITY DEFINER, in `supabase/*.sql`): `owner_stats()` (owner metrics),
   `delete_user()` (self-service deletion, `authenticated` grant only).
-- **Dates:** `iso/addDays/startOfToday/weekStart` (Thursday!), `lockBeforeISO`.
+- **Dates:** `iso/addDays/startOfToday/weekStart` (Monday-start), `lockBeforeISO`.
 - **Insights math:** `computeStreaks`, `tablitaConsData` (day/month buckets, future
   flagged, % = filled/(nSubs×elapsed) capped 100), `counterMonthlyTimeline` + `niceMax`
   + `countsLine` (multi-series SVG).
@@ -302,7 +303,9 @@ owner's original data preserved in `bak_*` tables.
 
 ## 5. Known quirks & deliberate decisions
 
-- Week starts **Thursday** (day headers `J V S D L Ma Mi`).
+- Week starts **Monday** (day headers `L Ma Mi J V S D` / `M Tu W Th F Sa Su`). Changed
+  from Thursday-start in Nov 2026; no data migration (checks store absolute dates, only
+  the weekly grouping changed).
 - Repo/URL still "rogecito"; product is DoingTheDoings.
 - `TABLITAS_DEFAULT`/`COUNTERS_DEFAULT` = owner's original offline-fallback config —
   intentionally NOT the new-user seed (`NEW_USER_TABLITAS*`).
