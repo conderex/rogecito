@@ -679,6 +679,8 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
 .demo-cell.on{ background:var(--accent); }
 .demo-cell:active{ transform:translateY(1px); }
 .demo-note{ font-size:.68rem; color:var(--ink-soft); text-align:center; margin:6px 0 0; }
+.sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
+  clip:rect(0 0 0 0); white-space:nowrap; border:0; }
 
 /* ---------- Auth gate ---------- */
 .editicon.logout{ color:var(--ink-soft); }
@@ -845,7 +847,9 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
     </div>
 
     <form id="authForm" class="gate-form" autocomplete="on">
+      <label class="sr-only" for="authEmail" data-i18n="lbl_email">Correo electrónico</label>
       <input type="email" id="authEmail" class="gate-input" placeholder="tu correo" data-i18n-ph="ph_email" autocomplete="email" required>
+      <label class="sr-only" for="authPass" data-i18n="lbl_pass">Contraseña</label>
       <input type="password" id="authPass" class="gate-input" placeholder="contraseña" data-i18n-ph="ph_pass" autocomplete="current-password" required>
       <button type="submit" class="gate-btn" id="authSubmit">Entrar</button>
     </form>
@@ -925,6 +929,9 @@ const I18N = {
     demo_m: 'Mañana',
     demo_n: 'Noche',
     demo_note: 'nada se guarda aquí · solo para ver',
+    lbl_email: 'Correo electrónico',
+    lbl_pass: 'Contraseña',
+    save_failed: 'No se pudo guardar — revisa tu conexión e inténtalo otra vez.',
     no_tables: 'No hay tablas todavía.<br>Toca ✎ Editar para crear una.',
     // editor
     edit_tables: 'editar tablas',
@@ -1050,6 +1057,9 @@ const I18N = {
     demo_m: 'Morning',
     demo_n: 'Night',
     demo_note: 'nothing is saved here · just a peek',
+    lbl_email: 'Email',
+    lbl_pass: 'Password',
+    save_failed: 'Could not save — check your connection and try again.',
     no_tables: 'No tables yet.<br>Tap ✎ Edit to create one.',
     edit_tables: 'edit tables',
     counters_title: 'counters',
@@ -1524,7 +1534,7 @@ async function toggle(t, s, d, cellEl){
     refreshStreak(t);
     // a hard failure mid-session means we lost the connection
     state.mode = 'local'; updateModePill();
-    showToast(tr('offline_local'));
+    showToast(tr('save_failed'));
   }
 }
 
