@@ -196,7 +196,7 @@ header{
 .langtoggle [data-l].on{ opacity:1; color:var(--ink); }
 .langtoggle .sep{ opacity:.35; font-weight:400; }
 .langtoggle:active{ transform:translateY(1px); }
-.gate-langrow{ display:flex; justify-content:flex-end; margin:-6px -4px 8px; }
+.gate-langrow{ display:flex; justify-content:space-between; align-items:center; margin:-6px -4px 8px; }
 .tabs{
   display:flex; gap:8px; padding:6px; margin-bottom:8px;
   background:var(--paper);
@@ -682,6 +682,46 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
 .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
   clip:rect(0 0 0 0); white-space:nowrap; border:0; }
 
+/* ---------- Landing (pre-auth marketing page) ---------- */
+.landing{ position:fixed; inset:0; z-index:55; overflow-y:auto; -webkit-overflow-scrolling:touch;
+  background:radial-gradient(120% 90% at 50% 0%, var(--sand), var(--sand-deep)); }
+.landing[hidden]{ display:none; }
+.land-wrap{ max-width:560px; margin:0 auto; padding:20px 18px 44px;
+  display:flex; flex-direction:column; gap:28px; }
+.land-langrow{ display:flex; justify-content:flex-end; }
+.land-hero{ text-align:center; display:flex; flex-direction:column; align-items:center; gap:12px; }
+.land-hero h1{ font-family:var(--font-display); font-weight:800; font-size:clamp(1.9rem,8vw,2.7rem);
+  color:var(--ink); line-height:1.0; margin:0; letter-spacing:-.5px; }
+.land-head{ font-family:var(--font-hand); color:var(--orange-deep);
+  font-size:clamp(1.3rem,5.6vw,1.75rem); transform:rotate(-2deg); margin:0; }
+.land-sub{ font-family:var(--font-body); color:var(--ink-soft); font-size:1rem; line-height:1.45;
+  max-width:36ch; margin:0 auto; }
+.land-cta{ font-family:var(--font-body); font-weight:800; font-size:1.05rem; color:var(--paper);
+  background:var(--ink); border:2.5px solid var(--line); border-radius:12px;
+  box-shadow:4px 4px 0 var(--shadow); padding:14px 24px; cursor:pointer; margin-top:2px; }
+.land-cta:active{ transform:translate(4px,4px); box-shadow:0 0 0; }
+.land-login{ background:none; border:none; color:var(--teal); font-family:var(--font-body);
+  font-weight:600; text-decoration:underline; text-underline-offset:3px; cursor:pointer; font-size:.95rem; }
+.land-card{ background:var(--paper); border:3px solid var(--line); border-radius:var(--r-card);
+  box-shadow:6px 7px 0 var(--shadow); padding:20px 18px; }
+.land-card.tilt{ transform:rotate(-.5deg); }
+.land-card.tilt-r{ transform:rotate(.5deg); }
+.land-h2{ font-family:var(--font-display); font-weight:800; font-size:1.28rem; color:var(--ink); margin:0 0 8px; }
+.land-p{ font-family:var(--font-body); color:var(--ink); font-size:.98rem; line-height:1.5; margin:0; }
+.land-steps{ display:flex; flex-direction:column; gap:14px; margin-top:4px; }
+.land-step{ display:flex; gap:12px; align-items:center; }
+.land-step .n{ flex:0 0 auto; width:34px; height:34px; display:grid; place-items:center;
+  font-family:var(--font-display); font-weight:800; color:var(--paper); background:var(--teal);
+  border:2.5px solid var(--line); border-radius:999px; box-shadow:2px 2px 0 var(--shadow); }
+.land-letter .land-p{ font-family:var(--font-hand); font-size:1.18rem; line-height:1.45; }
+.land-faq dt{ font-family:var(--font-display); font-weight:800; color:var(--ink); margin-top:12px; font-size:1rem; }
+.land-faq dt:first-child{ margin-top:0; }
+.land-faq dd{ font-family:var(--font-body); color:var(--ink-soft); margin:3px 0 0; font-size:.92rem; line-height:1.45; }
+.land-foot{ text-align:center; font-family:var(--font-hand); color:var(--ink-soft);
+  display:flex; flex-direction:column; gap:6px; font-size:1.05rem; }
+.gate-back{ background:none; border:none; color:var(--ink-soft); font-family:var(--font-body);
+  font-size:.85rem; cursor:pointer; padding:4px 2px; }
+
 /* ---------- Auth gate ---------- */
 .editicon.logout{ color:var(--ink-soft); }
 .gate{
@@ -765,6 +805,106 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
 .spark .bar{ flex:1; min-height:3px; background:var(--teal); border:1.5px solid var(--ink); border-radius:4px 4px 0 0; }
 .spark-row .lbl{ font-family:var(--font-body); font-size:.78rem; color:var(--ink-soft); margin-top:8px; }
 .stats-note{ font-family:var(--font-body); font-size:.85rem; line-height:1.4; color:var(--orange); margin:8px 2px; }
+
+/* =====================================================================
+   DESKTOP / LAPTOP LAYER (≥860px) — additive only.
+   Nothing above this line changes; phones never match these queries.
+   Same tokens, same borders, same solid shadows, same rotations.
+   ===================================================================== */
+/* FAQ pairs are wrapped in .faq-item (for the 2-column grid below); this keeps
+   the phone spacing identical to the unwrapped version. */
+.land-faq .faq-item + .faq-item dt{ margin-top:12px; }
+
+@media (min-width:860px){
+
+  /* ---------- Landing ---------- */
+  .land-wrap{ max-width:1080px; padding:28px 40px 64px; gap:44px; }
+
+  /* Hero: two columns. Left = words + CTA, right = the demo tablita. */
+  .land-hero-main{
+    display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);
+    grid-template-areas:"title demo" "head demo" "sub demo" "cta demo" "login demo";
+    grid-template-rows:auto auto auto auto auto;
+    column-gap:56px; row-gap:14px; text-align:left; align-items:start; align-content:center;
+    padding:24px 0 12px;
+  }
+  .land-hero-main h1{ grid-area:title; font-size:clamp(3rem,5.4vw,4.1rem); letter-spacing:-1.5px; align-self:end; }
+  .land-hero-main .land-head{ grid-area:head; font-size:2rem; transform:rotate(-2deg); transform-origin:left center; }
+  .land-hero-main .land-sub{ grid-area:sub; font-size:1.15rem; max-width:40ch; margin:4px 0 6px; }
+  .land-hero-main .land-cta{ grid-area:cta; justify-self:start; font-size:1.12rem; padding:16px 28px; }
+  .land-hero-main .land-login{ grid-area:login; justify-self:start; padding:4px 0; min-height:44px; }
+  .land-hero-main .demo{ grid-area:demo; align-self:center; justify-self:center; max-width:470px; margin:0; }
+
+  /* Demo tablita, enlarged (same pieces, bigger) */
+  .land-hero-main .demo-cap{ font-size:1.4rem; margin-bottom:10px; }
+  .land-hero-main .demo-tablita{ border-width:3px; border-radius:var(--r-card); padding:18px 20px 20px;
+    box-shadow:6px 7px 0 var(--shadow); transform:rotate(1deg); }
+  .land-hero-main .demo-title{ font-size:1.35rem; }
+  .land-hero-main .demo-grid{ grid-template-columns:76px repeat(7,1fr); gap:7px 6px; margin-top:12px; }
+  .land-hero-main .demo-dh{ font-size:.78rem; }
+  .land-hero-main .demo-rl{ font-size:.92rem; font-weight:600; }
+  .land-hero-main .demo-cell{ height:34px; border-width:2.5px; }
+  .land-hero-main .demo-note{ font-size:.8rem; margin-top:10px; }
+
+  /* Story cards: alternate a narrower reading width with full-width rows */
+  .land-card{ padding:26px 30px; }
+  .land-h2{ font-size:1.55rem; margin-bottom:12px; }
+  .land-p{ font-size:1.05rem; }
+  .land-card.tilt,
+  .land-letter{ width:100%; max-width:760px; margin:0 auto; }
+  .land-letter .land-p{ font-size:1.4rem; }
+
+  /* How it works: 3 steps across */
+  .land-steps{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:28px; margin-top:10px; }
+  .land-step{ flex-direction:column; align-items:flex-start; gap:12px; }
+  .land-step .n{ width:44px; height:44px; font-size:1.2rem; box-shadow:3px 3px 0 var(--shadow); }
+  .land-step:nth-child(2) .n{ background:var(--orange); }
+  .land-step:nth-child(3) .n{ background:var(--lavender); }
+
+  /* FAQ: two columns (each Q+A pair is one .faq-item) */
+  .land-faq{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:22px 44px; margin:4px 0 0; }
+  .land-faq dt, .land-faq .faq-item + .faq-item dt{ margin-top:0; font-size:1.08rem; }
+  .land-faq dd{ font-size:.98rem; }
+
+  /* Final CTA stays centered; footer breathes */
+  .land-hero:not(.land-hero-main) .land-cta{ font-size:1.12rem; padding:16px 28px; }
+  .land-foot{ font-size:1.2rem; margin-top:8px; }
+
+  /* ---------- App ---------- */
+  .app{ max-width:1080px; padding:0 32px env(safe-area-inset-bottom) 32px; }
+  header{ padding-top:calc(16px + env(safe-area-inset-top)); }
+  .brand h1{ font-size:1.6rem; }
+  .brand .sub{ font-size:1.2rem; }
+
+  /* Tabs: a compact bar instead of a full-width slab */
+  .tabs{ max-width:440px; margin:4px auto 10px; }
+
+  /* Week nav centered over the grid of tablitas */
+  .weeknav{ max-width:560px; margin:18px auto 8px; }
+
+  /* Tablitas: two per row. Each card keeps phone-like cell sizes. */
+  #cards{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:30px 34px; align-items:start; margin-top:18px; }
+  #cards > .card{ margin:0; }
+  #cards > .card:only-child{ grid-column:1 / -1; width:100%; max-width:600px; justify-self:center; }
+
+  /* Edit mode keeps the single comfortable column it has on phones */
+  .panel.editing #cards{ display:block; max-width:640px; margin:0 auto; }
+  .panel.editing #cards > .card{ margin:16px 0; }
+
+  /* Counters: as many across as fit, never giant */
+  .count-title{ margin-top:30px; }
+  .counters{ grid-template-columns:repeat(auto-fit,minmax(230px,280px)); justify-content:center; gap:18px 26px; }
+  .counter:last-child:nth-child(odd){ grid-column:auto; }
+
+  /* Insights: two columns. With all three cards, Constancia (the tall one)
+     holds the left column and Rachas + Conteos stack on the right, so charts
+     keep phone-like proportions instead of stretching full width. */
+  #insights{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:26px 32px; align-items:start; }
+  #insights > .ins-intro{ grid-column:1 / -1; }
+  #insights > .ins-card{ margin:0; }
+  #insights > .ins-card:first-of-type:nth-last-of-type(3){ grid-row:span 2; }
+  #insights > .ins-card:only-of-type{ grid-column:1 / -1; width:100%; max-width:600px; justify-self:center; }
+}
 </style>
 </head>
 <body>
@@ -825,10 +965,89 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
   </section>
 </div>
 
+<!-- LANDING (pre-auth marketing) -->
+<div class="landing" id="landing" hidden>
+  <div class="land-wrap">
+    <div class="land-langrow">
+      <button class="langtoggle" type="button" aria-label="Language / Idioma" title="Language / Idioma"><span data-l="es">ES</span><span class="sep">/</span><span data-l="en">EN</span></button>
+    </div>
+
+    <section class="land-hero land-hero-main">
+      <h1>DoingTheDoings</h1>
+      <p class="land-head" data-i18n="land_head">Constancia sin culpa, un día a la vez ✿</p>
+      <p class="land-sub" data-i18n="land_sub">Marca tus actividades con un tap y recupera la constancia a tu propio ritmo. Sin rachas rojas, sin notificaciones estresantes.</p>
+
+      <div class="demo" id="demoCard">
+        <p class="demo-cap" data-i18n="demo_cap">así se ve — pruébalo ✿</p>
+        <div class="demo-tablita" style="--accent:var(--teal)">
+          <span class="demo-title" data-i18n="demo_title">Estirarme</span>
+          <div class="demo-grid" id="demoGrid"></div>
+        </div>
+        <p class="demo-note" data-i18n="demo_note">nada se guarda aquí · solo para ver</p>
+      </div>
+
+      <button class="land-cta" id="landCta" type="button" data-i18n="land_cta">Crear mi primera tablita</button>
+      <button class="land-login" id="landLogin" type="button" data-i18n="land_login_link">¿Ya tienes cuenta? Inicia sesión</button>
+    </section>
+
+    <section class="land-card tilt">
+      <h2 class="land-h2" data-i18n="land_empathy_h">Las otras apps te castigan.</h2>
+      <p class="land-p" data-i18n="land_empathy_b">Rachas rojas, plantitas que se mueren, notificaciones que te hacen sentir mal. Aquí no. Los días grises existen, y está bien. Empezamos de nuevo cada mañana, sin reproches.</p>
+    </section>
+
+    <section class="land-card">
+      <h2 class="land-h2" data-i18n="land_how_h">Cómo funciona</h2>
+      <div class="land-steps">
+        <div class="land-step"><span class="n" aria-hidden="true">1</span><p class="land-p" data-i18n="land_step1">Haz tu tablita: las cositas que quieres hacer tú.</p></div>
+        <div class="land-step"><span class="n" aria-hidden="true">2</span><p class="land-p" data-i18n="land_step2">Actúa primero. Un tap para marcar el día.</p></div>
+        <div class="land-step"><span class="n" aria-hidden="true">3</span><p class="land-p" data-i18n="land_step3">El ánimo llega después. Así funciona la activación conductual.</p></div>
+      </div>
+    </section>
+
+    <section class="land-card land-letter tilt-r">
+      <h2 class="land-h2" data-i18n="land_letter_h">Por qué existe</h2>
+      <p class="land-p" data-i18n="land_letter_b">Hice esta app porque las que había me pedían ser perfecta. DoingTheDoings está basada en activación conductual, una técnica real de terapia: primero haces una cosita pequeña, y el ánimo llega después. No sustituye a tu terapia — es la tarea entre sesiones, hecha con cariño. — Roge ✿</p>
+    </section>
+
+    <section class="land-card">
+      <h2 class="land-h2" data-i18n="land_faq_h">Preguntas rápidas</h2>
+      <dl class="land-faq">
+        <div class="faq-item">
+          <dt data-i18n="land_faq_pwa_q">¿Necesito descargarla de una tienda?</dt>
+          <dd data-i18n="land_faq_pwa_a">No. Es una app web: la abres en tu navegador y, si quieres, la instalas directo desde ahí.</dd>
+        </div>
+        <div class="faq-item">
+          <dt data-i18n="land_faq_offline_q">¿Funciona sin internet?</dt>
+          <dd data-i18n="land_faq_offline_a">Una vez abierta, sigue funcionando aunque se vaya la señal.</dd>
+        </div>
+        <div class="faq-item">
+          <dt data-i18n="land_faq_privacy_q">¿Mis datos son privados?</dt>
+          <dd data-i18n="land_faq_privacy_a">Sí. Sin anuncios, sin rastreadores, sin vender tus datos. Puedes borrar tu cuenta cuando quieras.</dd>
+        </div>
+        <div class="faq-item">
+          <dt data-i18n="land_faq_free_q">¿Cuánto cuesta?</dt>
+          <dd data-i18n="land_faq_free_a">Es gratis.</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="land-hero">
+      <button class="land-cta" id="landCta2" type="button" data-i18n="land_cta">Crear mi primera tablita</button>
+      <p class="land-sub" data-i18n="land_cta2_micro">Únete a las primeras personas construyendo constancia sin culpa.</p>
+    </section>
+
+    <div class="land-foot">
+      <p data-i18n="one_day">un día a la vez ✿</p>
+      <p><a class="privacy-link" href="privacy.html" data-i18n="privacy_link">privacidad</a> · <a class="privacy-link" href="terminos.html" data-i18n="terms_link">términos</a> · <a class="privacy-link" href="mailto:rogerthatheart@gmail.com?subject=DoingTheDoings%20feedback" data-i18n="feedback_link">comentarios</a></p>
+    </div>
+  </div>
+</div>
+
 <!-- AUTH GATE -->
 <div class="gate" id="gate" hidden>
   <div class="gate-card">
     <div class="gate-langrow">
+      <button class="gate-back" id="gateBack" type="button" data-i18n="gate_back">← volver</button>
       <button class="langtoggle" type="button" aria-label="Language / Idioma" title="Language / Idioma"><span data-l="es">ES</span><span class="sep">/</span><span data-l="en">EN</span></button>
     </div>
     <div class="gate-brand">
@@ -836,15 +1055,6 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
       <span class="sub" data-i18n="brand_sub">activación conductual</span>
     </div>
     <p class="gate-tag" id="gateTag">entra para ver tu progreso</p>
-
-    <div class="demo" id="demoCard">
-      <p class="demo-cap" data-i18n="demo_cap">así se ve — pruébalo ✿</p>
-      <div class="demo-tablita" style="--accent:var(--teal)">
-        <span class="demo-title" data-i18n="demo_title">Estirarme</span>
-        <div class="demo-grid" id="demoGrid"></div>
-      </div>
-      <p class="demo-note" data-i18n="demo_note">nada se guarda aquí · solo para ver</p>
-    </div>
 
     <form id="authForm" class="gate-form" autocomplete="on">
       <label class="sr-only" for="authEmail" data-i18n="lbl_email">Correo electrónico</label>
@@ -932,6 +1142,30 @@ const I18N = {
     lbl_email: 'Correo electrónico',
     lbl_pass: 'Contraseña',
     save_failed: 'No se pudo guardar — revisa tu conexión e inténtalo otra vez.',
+    gate_back: '← volver',
+    terms_link: 'términos',
+    land_head: 'Constancia sin culpa, un día a la vez ✿',
+    land_sub: 'Marca tus actividades con un tap y recupera la constancia a tu propio ritmo. Sin rachas rojas, sin notificaciones estresantes.',
+    land_cta: 'Crear mi primera tablita',
+    land_login_link: '¿Ya tienes cuenta? Inicia sesión',
+    land_empathy_h: 'Las otras apps te castigan.',
+    land_empathy_b: 'Rachas rojas, plantitas que se mueren, notificaciones que te hacen sentir mal. Aquí no. Los días grises existen, y está bien. Empezamos de nuevo cada mañana, sin reproches.',
+    land_how_h: 'Cómo funciona',
+    land_step1: 'Haz tu tablita: las cositas que quieres hacer tú.',
+    land_step2: 'Actúa primero. Un tap para marcar el día.',
+    land_step3: 'El ánimo llega después. Así funciona la activación conductual.',
+    land_letter_h: 'Por qué existe',
+    land_letter_b: 'Hice esta app porque las que había me pedían ser perfecta. DoingTheDoings está basada en activación conductual, una técnica real de terapia: primero haces una cosita pequeña, y el ánimo llega después. No sustituye a tu terapia — es la tarea entre sesiones, hecha con cariño. — Roge ✿',
+    land_faq_h: 'Preguntas rápidas',
+    land_faq_pwa_q: '¿Necesito descargarla de una tienda?',
+    land_faq_pwa_a: 'No. Es una app web: la abres en tu navegador y, si quieres, la instalas directo desde ahí.',
+    land_faq_offline_q: '¿Funciona sin internet?',
+    land_faq_offline_a: 'Una vez abierta, sigue funcionando aunque se vaya la señal.',
+    land_faq_privacy_q: '¿Mis datos son privados?',
+    land_faq_privacy_a: 'Sí. Sin anuncios, sin rastreadores, sin vender tus datos. Puedes borrar tu cuenta cuando quieras.',
+    land_faq_free_q: '¿Cuánto cuesta?',
+    land_faq_free_a: 'Es gratis.',
+    land_cta2_micro: 'Únete a las primeras personas construyendo constancia sin culpa.',
     no_tables: 'No hay tablas todavía.<br>Toca ✎ Editar para crear una.',
     // editor
     edit_tables: 'editar tablas',
@@ -1060,6 +1294,30 @@ const I18N = {
     lbl_email: 'Email',
     lbl_pass: 'Password',
     save_failed: 'Could not save — check your connection and try again.',
+    gate_back: '← back',
+    terms_link: 'terms',
+    land_head: 'Guilt-free consistency, one day at a time ✿',
+    land_sub: 'Mark your activities with a tap and rebuild consistency at your own pace. No red streaks, no stressful notifications.',
+    land_cta: 'Create my first tablita',
+    land_login_link: 'Already have an account? Log in',
+    land_empathy_h: 'Other apps punish you.',
+    land_empathy_b: 'Red streaks, dying plants, notifications that make you feel bad. Not here. Grey days happen, and that’s okay. We start fresh every morning, no reproach.',
+    land_how_h: 'How it works',
+    land_step1: 'Make your tablita: the little things you want to do.',
+    land_step2: 'Act first. One tap to mark the day.',
+    land_step3: 'The mood comes after. That’s how behavioral activation works.',
+    land_letter_h: 'Why it exists',
+    land_letter_b: 'I made this app because the ones out there asked me to be perfect. DoingTheDoings is based on behavioral activation, a real therapy technique: first you do one small thing, and the mood follows. It doesn’t replace your therapy — it’s the homework between sessions, made with care. — Roge ✿',
+    land_faq_h: 'Quick questions',
+    land_faq_pwa_q: 'Do I need to download it from a store?',
+    land_faq_pwa_a: 'No. It’s a web app: open it in your browser and, if you want, install it right from there.',
+    land_faq_offline_q: 'Does it work offline?',
+    land_faq_offline_a: 'Once it’s open, it keeps working even if you lose signal.',
+    land_faq_privacy_q: 'Is my data private?',
+    land_faq_privacy_a: 'Yes. No ads, no trackers, no selling your data. You can delete your account anytime.',
+    land_faq_free_q: 'How much does it cost?',
+    land_faq_free_a: 'It’s free.',
+    land_cta2_micro: 'Join the first people building guilt-free consistency.',
     no_tables: 'No tables yet.<br>Tap ✎ Edit to create one.',
     edit_tables: 'edit tables',
     counters_title: 'counters',
@@ -2524,9 +2782,13 @@ const isOwner = () => (currentUserEmail || '').toLowerCase() === OWNER_EMAIL;
 const redirectTo = () => location.origin + location.pathname;
 const gateEl = () => document.getElementById('gate');
 const appEl  = () => document.querySelector('.app');
+const landingEl = () => document.getElementById('landing');
 
-function showApp(){ gateEl().hidden = true; appEl().style.display = ''; }
-function showGate(){ appEl().style.display = 'none'; gateEl().hidden = false; }
+// Three mutually-exclusive views: the pre-auth landing, the login gate, the app.
+function hideAllViews(){ landingEl().hidden = true; gateEl().hidden = true; appEl().style.display = 'none'; }
+function showApp(){ hideAllViews(); appEl().style.display = ''; }
+function showGate(mode){ hideAllViews(); if(mode){ authMode = mode; applyAuthModeTexts(); } setGateMsg(''); gateEl().hidden = false; }
+function showLanding(){ hideAllViews(); landingEl().hidden = false; }
 function setGateMsg(text, ok){
   const m = document.getElementById('gateMsg');
   m.textContent = text || ''; m.classList.toggle('ok', !!ok);
@@ -2609,7 +2871,7 @@ async function handleSession(s){
     currentUserId = null; currentUserEmail = null; appLoaded = false;
     applyOwnerUI();
     if(state.tab === 'stats') switchTab('tracker');
-    showGate();
+    showLanding();
   }
   document.getElementById('loader').classList.add('hide');
 }
@@ -2747,6 +3009,11 @@ function bindAuthUI(){
   document.getElementById('forgotBtn').addEventListener('click', onForgot);
   document.getElementById('toggleMode').addEventListener('click', toggleAuthMode);
   document.getElementById('logoutBtn').addEventListener('click', onLogout);
+  const bindClick = (id, fn) => { const el = document.getElementById(id); if(el) el.addEventListener('click', fn); };
+  bindClick('landCta',   ()=> showGate('signup'));
+  bindClick('landCta2',  ()=> showGate('signup'));
+  bindClick('landLogin', ()=> showGate('login'));
+  bindClick('gateBack',  ()=> showLanding());
 }
 
 /* =====================================================================
