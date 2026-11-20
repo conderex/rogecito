@@ -35,6 +35,36 @@ limitación: es la decisión clínicamente correcta.
 - Habitica te castiga. Notion te abruma. Nosotros: abres, marcas, cierras.
 - Sin anuncios, sin presión, sin rachas perfectas.
 
+## El principio emocional — "Insights da, nunca quita"
+
+*El insight más importante del producto, en palabras de Roge (fundadora):*
+
+> **"No puedo con los hábitos, pero sí puedo con las rachas."** El cambio de
+> mindset —de 'ser una persona de hábitos' a 'juntar días que me hacen sentir
+> bien'— es lo que hace que no me pegue tan fuerte cuando fallo, y que regrese
+> más rápido. Me doy chance de fallar.
+
+De ahí el principio que rige Insights (y toda la app):
+
+- **Insights DA, nunca quita.** Trackear te da algo *bonito que coleccionas*,
+  nunca te resta puntos por fallar. El premio es tan positivo que, cuando faltas,
+  **extrañas el sentimiento** — y por eso vuelves. El gancho es positivo, no
+  culpígeno. Lo opuesto a las apps donde uno o dos días sin marcar se vuelven
+  semanas de sentirse mal.
+- **No se trata de no fallar. Se trata de volver.** El regreso se celebra más que
+  el récord. Faltar un día es un "día suave", nunca un hueco rojo.
+- **La racha es lo que SÍ puedes tener.** No vendemos disciplina ni identidad de
+  "persona perfecta"; vendemos el sentimiento de constancia, gentil y fácil de
+  retomar (rachas amables: 1–2 días no rompen nada; los perdonados llevan ✿).
+- **El sentimiento objetivo:** una mezcla de dos orgullos — el de *verlo crecer*
+  (como la racha de Duolingo) y el de *cuidarme / demostrarme que sí puedo*.
+
+**Implicación de diseño (Insights = "el jardín de tus días"):** una sola metáfora,
+la florecita ✿ que ya usamos. Un día es un pétalo, la semana es una flor, tu
+historia es un jardín que crece. El número grande es **días activos** (cualquier
+tablita cuenta — presencia, no desempeño; nunca porcentajes tipo boleta). Abrir
+Insights debe sentirse como volver a casa, no como ver una calificación.
+
 ## North Star (métricas que sí importan)
 
 - **Tiempo-hasta-marcar**: < 10 segundos desde abrir la app.
