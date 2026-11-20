@@ -59,11 +59,20 @@ De ahí el principio que rige Insights (y toda la app):
 - **El sentimiento objetivo:** una mezcla de dos orgullos — el de *verlo crecer*
   (como la racha de Duolingo) y el de *cuidarme / demostrarme que sí puedo*.
 
-**Implicación de diseño (Insights = "el jardín de tus días"):** una sola metáfora,
-la florecita ✿ que ya usamos. Un día es un pétalo, la semana es una flor, tu
-historia es un jardín que crece. El número grande es **días activos** (cualquier
-tablita cuenta — presencia, no desempeño; nunca porcentajes tipo boleta). Abrir
-Insights debe sentirse como volver a casa, no como ver una calificación.
+**Idea a futuro (sin diseño comprometido):** medir y mostrar **días activos**
+—cualquier tablita cuenta: presencia en vez de desempeño, nunca porcentajes tipo
+boleta— como un posible número principal de Insights. Es sólo una dirección a
+explorar más adelante; NO define ninguna visual concreta todavía, y las gráficas
+actuales se quedan como están hasta que se decida una dirección nueva.
+
+## Visión a futuro — una plataforma de herramientas de CBT
+
+La intención a largo plazo es que DoingTheDoings pase de ser un tracker a un
+**conjunto de herramientas de terapia cognitivo-conductual (CBT)** reunidas en un
+mismo lugar —por ejemplo registros de pensamientos, hojas de límites y otras—, con
+un registro personal que la usuaria pueda **descargar y compartir** con quien quiera
+(incluida su terapeuta). Eso abre la puerta a una **versión premium** algún día. No
+es el foco de hoy, pero orienta las decisiones de producto y arquitectura.
 
 ## North Star (métricas que sí importan)
 
