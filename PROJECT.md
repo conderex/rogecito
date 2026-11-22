@@ -176,7 +176,11 @@ Servidas por Google Fonts. Para gráficos generados: TTFs desde el repo google/f
      monthly totals from first month with data (last 12 max), clean y-axis (1/2/5×10ⁿ),
      localized month labels, legend.
 - **Edit mode (✎):** create/rename/reorder/archive tablitas, subs, counters (archive
-  preserves history); color accents; **account deletion** (danger zone, double confirm).
+  preserves history); color accents.
+- **Settings (profile icon → `#settings` overlay):** the post-auth hub for device prefs —
+  **language**, **appearance/themes**, **week start** (any weekday; default Monday,
+  device-local `roge_weekstart_v1`), and **account** (log out + delete). Theme picker,
+  account deletion, language and logout moved here out of the header/edit mode.
 - **Landing (pre-auth):** logged-out visitors see a marketing landing (`#landing`) — hero
   with the tagline + the interactive demo tablita, empathy card, how-it-works (3 steps),
   creator letter, short FAQ, CTA. Three mutually-exclusive views now: landing → gate → app
@@ -307,7 +311,9 @@ owner's original data preserved in `bak_*` tables.
 
 ## 5. Known quirks & deliberate decisions
 
-- Week starts **Monday** (day headers `L Ma Mi J V S D` / `M Tu W Th F Sa Su`). Changed
+- Week starts **Monday by default, but user-configurable** in Settings (any weekday;
+  `weekStart()`/`computeDayHeaders()` derive from `firstDay`). Day headers rotate to match.
+  (Originally Monday-fixed; day headers `L Ma Mi J V S D` / `M Tu W Th F Sa Su`.) Changed
   from Thursday-start in Nov 2026; no data migration (checks store absolute dates, only
   the weekly grouping changed).
 - Repo/URL still "rogecito"; product is DoingTheDoings.

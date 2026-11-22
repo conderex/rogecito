@@ -682,6 +682,28 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
 .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
   clip:rect(0 0 0 0); white-space:nowrap; border:0; }
 
+/* ---------- Settings (post-auth hub) ---------- */
+.editicon svg{ display:block; margin:auto; }
+.settings{ position:fixed; inset:0; z-index:58; overflow-y:auto; -webkit-overflow-scrolling:touch; background:var(--sand); }
+.settings[hidden]{ display:none; }
+.set-wrap{ max-width:560px; margin:0 auto; padding:calc(14px + env(safe-area-inset-top)) 16px 40px; }
+.set-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+.set-top h1{ font-family:var(--font-display); font-weight:800; font-size:1.7rem; margin:0; }
+.set-done{ appearance:none; cursor:pointer; font-family:var(--font-body); font-weight:800; color:var(--paper);
+  background:var(--ink); border:2.5px solid var(--line); border-radius:12px; box-shadow:3px 3px 0 var(--shadow); padding:9px 18px; }
+.set-done:active{ transform:translate(3px,3px); box-shadow:0 0 0; }
+.set-sec{ margin-top:16px; }
+.set-q{ font-family:var(--font-hand); color:var(--ink-soft); font-size:1.05rem; margin:0 2px 10px; }
+.lang-row{ display:flex; gap:10px; }
+.lang-opt{ flex:1; appearance:none; cursor:pointer; font-family:var(--font-body); font-weight:700; color:var(--ink);
+  background:var(--sand-deep); border:2.5px solid var(--line); border-radius:12px; padding:12px; min-height:46px; }
+.lang-opt.on{ background:var(--ink); color:var(--paper); }
+.wk-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
+.wk-chip{ appearance:none; cursor:pointer; font-family:var(--font-body); font-weight:700; font-size:.9rem; color:var(--ink);
+  background:var(--sand-deep); border:2.5px solid var(--line); border-radius:11px; padding:10px 0; min-height:46px; }
+.wk-chip.on{ background:var(--teal); color:var(--paper); }
+.set-cuenta{ display:flex; flex-direction:column; gap:10px; }
+
 /* ---------- Landing (pre-auth marketing page) ---------- */
 .landing{ position:fixed; inset:0; z-index:55; overflow-y:auto; -webkit-overflow-scrolling:touch;
   background:radial-gradient(120% 90% at 50% 0%, var(--sand), var(--sand-deep)); }
@@ -924,9 +946,8 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
         <span class="sub" data-i18n="brand_sub">activación conductual</span>
       </div>
       <span class="modepill" id="modepill"><span class="led"></span><span id="modepilltxt">sync</span></span>
-      <button class="langtoggle" type="button" aria-label="Language / Idioma" title="Language / Idioma"><span data-l="es">ES</span><span class="sep">/</span><span data-l="en">EN</span></button>
       <button id="editToggle" class="editicon" data-i18n-title="edit_icon" aria-label="Editar" title="Editar">✎</button>
-      <button id="logoutBtn" class="editicon logout" data-i18n-title="logout_icon" aria-label="Cerrar sesión" title="Cerrar sesión">⏻</button>
+      <button id="settingsBtn" class="editicon" data-i18n-title="settings_icon" aria-label="Ajustes" title="Ajustes"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 19.2c0-3.3 2.9-5.7 6.5-5.7s6.5 2.4 6.5 5.7"/></svg></button>
     </div>
   </header>
 
@@ -963,6 +984,17 @@ footer p{ font-family:var(--font-hand); font-size:1.25rem; color:var(--ink-soft)
     <p class="ins-intro" data-i18n="stats_title">Métricas</p>
     <div id="stats"></div>
   </section>
+</div>
+
+<!-- SETTINGS (post-auth) -->
+<div class="settings" id="settings" hidden>
+  <div class="set-wrap">
+    <div class="set-top">
+      <h1 data-i18n="settings_title">Ajustes</h1>
+      <button id="settingsDone" class="set-done" type="button" data-i18n="settings_done">Listo</button>
+    </div>
+    <div id="settingsBody"></div>
+  </div>
 </div>
 
 <!-- LANDING (pre-auth marketing) -->
@@ -1113,7 +1145,15 @@ const LS_THEME = 'roge_theme_v1';       // device-local theme choice (oat defaul
 const I18N = {
   es: {
     months: ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'],
-    dayHeaders: ['L','Ma','Mi','J','V','S','D'],
+    dayNames: ['D','L','Ma','Mi','J','V','S'],
+    dayFull: ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'],
+    settings_title: 'Ajustes',
+    settings_icon: 'Ajustes',
+    lang_title: 'Idioma',
+    weekstart_title: 'Inicio de semana',
+    weekstart_q: '¿con qué día empieza tu semana?',
+    settings_done: 'Listo',
+    logout_btn: 'Cerrar sesión',
     loading: 'cargando…',
     brand_sub: 'activación conductual',
     today_btn: 'Hoy',
@@ -1266,7 +1306,15 @@ const I18N = {
   },
   en: {
     months: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
-    dayHeaders: ['M','Tu','W','Th','F','Sa','Su'],
+    dayNames: ['Su','M','Tu','W','Th','F','Sa'],
+    dayFull: ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
+    settings_title: 'Settings',
+    settings_icon: 'Settings',
+    lang_title: 'Language',
+    weekstart_title: 'Week starts on',
+    weekstart_q: 'which day does your week start on?',
+    settings_done: 'Done',
+    logout_btn: 'Log out',
     loading: 'loading…',
     brand_sub: 'behavioral activation',
     today_btn: 'Today',
@@ -1454,7 +1502,7 @@ function setLang(l){
 function applyLang(){
   document.documentElement.lang = LANG;
   MONTHS = I18N[LANG].months;
-  DAY_HEADERS = I18N[LANG].dayHeaders;
+  DAY_HEADERS = computeDayHeaders();
   document.querySelectorAll('[data-i18n]').forEach(e => { e.textContent = tr(e.dataset.i18n); });
   document.querySelectorAll('[data-i18n-ph]').forEach(e => { e.setAttribute('placeholder', tr(e.dataset.i18nPh)); });
   document.querySelectorAll('[data-i18n-title]').forEach(e => {
@@ -1587,7 +1635,10 @@ function seedSets(){
     : { tablitas: NEW_USER_TABLITAS,    counters: NEW_USER_COUNTERS };
 }
 
-let DAY_HEADERS = I18N[LANG].dayHeaders; // Mon → Sun
+const LS_WEEKSTART = 'roge_weekstart_v1'; // device-local first day of week (0=Sun..6=Sat; Mon default)
+let firstDay = (function(){ try{ const n = parseInt(localStorage.getItem(LS_WEEKSTART),10); if(n>=0 && n<=6) return n; }catch(e){} return 1; })();
+function computeDayHeaders(){ const n = I18N[LANG].dayNames; return Array.from({length:7}, (_,i)=> n[(firstDay+i)%7]); }
+let DAY_HEADERS = computeDayHeaders();
 let MONTHS = I18N[LANG].months;
 
 /* =====================================================================
@@ -1601,11 +1652,21 @@ function iso(d){
 function addDays(d, n){ const x = new Date(d); x.setDate(x.getDate()+n); return x; }
 function startOfToday(){ const n = new Date(); n.setHours(0,0,0,0); return n; }
 
-// Monday that begins the week containing date `d`.
+// Start of the week containing `d`, honoring the chosen first day (default Monday).
 function weekStart(d){
-  const day = d.getDay();              // Sun=0..Sat=6, Mon=1
-  const back = (day - 1 + 7) % 7;      // days since Monday
+  const back = (d.getDay() - firstDay + 7) % 7;  // days since the week's first day
   return addDays(d, -back);
+}
+// Change which weekday opens the week (0=Sun..6=Sat); device-local, re-renders.
+function setFirstDay(n){
+  n = +n; if(!(n>=0 && n<=6)) return;
+  firstDay = n;
+  try{ localStorage.setItem(LS_WEEKSTART, String(n)); }catch(e){}
+  DAY_HEADERS = computeDayHeaders();
+  if(typeof appLoaded !== 'undefined' && appLoaded){
+    renderWeekNav(); renderCards();
+    if(state.tab === 'insights') renderInsights();
+  }
 }
 // 7 Date objects Thu..Wed for the displayed week (offset in weeks from current)
 function weekDates(offset){
@@ -2379,6 +2440,8 @@ function bindUI(){
   document.getElementById('nextWeek').addEventListener('click', ()=> changeWeek(1));
   document.getElementById('todayBtn').addEventListener('click', ()=>{ if(state.weekOffset!==0){ state.weekOffset=0; renderWeekNav(); renderCards(); if(state.tab==='insights') renderInsights(); } });
   document.getElementById('editToggle').addEventListener('click', toggleEdit);
+  document.getElementById('settingsBtn').addEventListener('click', openSettings);
+  document.getElementById('settingsDone').addEventListener('click', closeSettings);
 
   // keep "today" accurate if the app is left open past midnight
   window.addEventListener('focus', ()=>{
@@ -2411,6 +2474,74 @@ function toggleEdit(){
   renderTrackerArea();
 }
 
+/* =====================================================================
+   SETTINGS  (post-auth hub: language, appearance, week start, account)
+   ===================================================================== */
+function openSettings(){ renderSettings(); const s = document.getElementById('settings'); if(s) s.hidden = false; }
+function closeSettings(){ const s = document.getElementById('settings'); if(s) s.hidden = true; }
+function renderSettings(){
+  const body = document.getElementById('settingsBody');
+  if(!body) return;
+  body.innerHTML = '';
+
+  // Idioma
+  const sLang = el('div','set-sec');
+  sLang.appendChild(el('p','count-title', tr('lang_title')));
+  const lrow = el('div','lang-row');
+  [['es','Español'],['en','English']].forEach(([code,label])=>{
+    const b = el('button','lang-opt'+(LANG===code?' on':''), label);
+    b.type='button';
+    b.addEventListener('click', ()=>{ setLang(code); renderSettings(); });
+    lrow.appendChild(b);
+  });
+  sLang.appendChild(lrow);
+  body.appendChild(sLang);
+
+  // Apariencia (themes)
+  const sTheme = el('div','set-sec');
+  sTheme.appendChild(el('p','count-title', tr('theme_title')));
+  const tcard = el('div','set-card');
+  const trow = el('div','themechips');
+  trow.innerHTML = THEMES.map(t => {
+    const [bg, dot] = THEME_SWATCH[t];
+    return `<button class="themechip${t===THEME?' on':''}" data-t="${t}">`+
+      `<span class="tc-swatch" style="background:${bg}"><span style="background:${dot}"></span></span>`+
+      `${THEME_NAMES[t]}${t==='nocturno' ? MOON_SVG('tc-moon') : ''}</button>`;
+  }).join('');
+  trow.querySelectorAll('.themechip').forEach(ch => ch.addEventListener('click', ()=> setTheme(ch.dataset.t)));
+  tcard.appendChild(trow);
+  sTheme.appendChild(tcard);
+  body.appendChild(sTheme);
+
+  // Inicio de semana
+  const sWeek = el('div','set-sec');
+  sWeek.appendChild(el('p','count-title', tr('weekstart_title')));
+  sWeek.appendChild(el('p','set-q', tr('weekstart_q')));
+  const names = I18N[LANG].dayNames;      // Sun..Sat (short)
+  const full  = I18N[LANG].dayFull;       // Sun..Sat (long)
+  const grid = el('div','wk-grid');
+  for(let i=0;i<7;i++){
+    const b = el('button','wk-chip'+(firstDay===i?' on':''), names[i]);
+    b.type='button';
+    b.setAttribute('aria-label', full[i]);
+    b.setAttribute('aria-pressed', firstDay===i ? 'true':'false');
+    b.addEventListener('click', ()=>{ setFirstDay(i); renderSettings(); });
+    grid.appendChild(b);
+  }
+  sWeek.appendChild(grid);
+  body.appendChild(sWeek);
+
+  // Cuenta
+  const sAcc = el('div','set-sec');
+  sAcc.appendChild(el('p','count-title', tr('account_title')));
+  const acard = el('div','set-card set-cuenta');
+  acard.appendChild(tbtn(tr('logout_btn'), null, ()=> onLogout()));
+  acard.appendChild(el('p','dz-note', tr('delete_note')));
+  acard.appendChild(tbtn(tr('delete_account'), 'dangerbtn', ()=> deleteAccount()));
+  sAcc.appendChild(acard);
+  body.appendChild(sAcc);
+}
+
 function ebtn(glyph, label, disabled, onClick){
   const b = document.createElement('button');
   b.className = 'ebtn'; b.textContent = glyph; b.title = label; b.setAttribute('aria-label', label);
@@ -2427,21 +2558,6 @@ function tbtn(text, cls, onClick){
 function renderEditor(){
   const cards = document.getElementById('cards');
   cards.innerHTML = '';
-
-  // ---- Appearance (theme picker; device-local) ----
-  cards.appendChild(el('p','count-title',tr('theme_title')));
-  const tcard = document.createElement('div');
-  tcard.className = 'card edit-card';
-  const trow = el('div','themechips');
-  trow.innerHTML = THEMES.map(t => {
-    const [bg, dot] = THEME_SWATCH[t];
-    return `<button class="themechip${t===THEME?' on':''}" data-t="${t}">` +
-      `<span class="tc-swatch" style="background:${bg}"><span style="background:${dot}"></span></span>` +
-      `${THEME_NAMES[t]}${t==='nocturno' ? MOON_SVG('tc-moon') : ''}</button>`;
-  }).join('');
-  trow.querySelectorAll('.themechip').forEach(ch => ch.addEventListener('click', ()=> setTheme(ch.dataset.t)));
-  tcard.appendChild(trow);
-  cards.appendChild(tcard);
 
   cards.appendChild(el('p','count-title',tr('edit_tables')));
 
@@ -2534,13 +2650,6 @@ function renderEditor(){
     });
   }
 
-  // ---- Account (danger zone; in-app deletion is an App Store / Play requirement) ----
-  cards.appendChild(el('p','count-title',tr('account_title')));
-  const dz = document.createElement('div');
-  dz.className = 'card edit-card';
-  dz.appendChild(el('p','dz-note',tr('delete_note')));
-  dz.appendChild(tbtn(tr('delete_account'), 'dangerbtn', ()=> deleteAccount()));
-  cards.appendChild(dz);
 }
 
 // Permanently delete the signed-in user's account + data (double confirm).
@@ -2785,7 +2894,7 @@ const appEl  = () => document.querySelector('.app');
 const landingEl = () => document.getElementById('landing');
 
 // Three mutually-exclusive views: the pre-auth landing, the login gate, the app.
-function hideAllViews(){ landingEl().hidden = true; gateEl().hidden = true; appEl().style.display = 'none'; }
+function hideAllViews(){ const s = document.getElementById('settings'); if(s) s.hidden = true; landingEl().hidden = true; gateEl().hidden = true; appEl().style.display = 'none'; }
 function showApp(){ hideAllViews(); appEl().style.display = ''; }
 function showGate(mode){ hideAllViews(); if(mode){ authMode = mode; applyAuthModeTexts(); } setGateMsg(''); gateEl().hidden = false; }
 function showLanding(){ hideAllViews(); landingEl().hidden = false; }
@@ -3008,7 +3117,6 @@ function bindAuthUI(){
   document.getElementById('magicBtn').addEventListener('click', onMagicLink);
   document.getElementById('forgotBtn').addEventListener('click', onForgot);
   document.getElementById('toggleMode').addEventListener('click', toggleAuthMode);
-  document.getElementById('logoutBtn').addEventListener('click', onLogout);
   const bindClick = (id, fn) => { const el = document.getElementById(id); if(el) el.addEventListener('click', fn); };
   bindClick('landCta',   ()=> showGate('signup'));
   bindClick('landCta2',  ()=> showGate('signup'));

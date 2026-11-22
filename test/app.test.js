@@ -41,15 +41,21 @@ w = makeDom({roge_theme_v1:'hackerman'});
 ok(w.__t.theme()==='oat', 'valor corrupto en LS cae a oat');
 ok(w.document.querySelectorAll('#nightsky span').length===8, 'cielo nocturno con 8 estrellas');
 
-// ---------- editor / selector ----------
+// ---------- editor ----------
 w = makeDom(); w.__t.setup(); w.__t.edit();
+ok(!w.document.querySelector('#cards .themechips'), 'el tema ya no vive en el editor');
 const titles = [...w.document.querySelectorAll('#cards .count-title')].map(e=>e.textContent);
-ok(titles[0]==='apariencia', 'apariencia es la primera sección del editor');
-const chips = w.document.querySelectorAll('.themechip');
-ok(chips.length===5 && [...chips].map(c=>c.dataset.t).join(',')==='oat,matcha,lavanda,golden,nocturno', '5 chips en orden');
-ok(w.document.querySelectorAll('.themechip svg.tc-moon').length===1 &&
-   !!w.document.querySelector('.themechip[data-t="nocturno"] svg.tc-moon'), 'lunita SVG solo en Nocturno');
-ok(!w.document.querySelector('.themechips').innerHTML.includes('🌙'), 'cero emoji de luna');
+ok(titles[0]===w.__t.i18n().es.edit_tables, 'el editor arranca en "editar tablas"');
+
+// ---------- settings hub ----------
+w.openSettings();
+const chips = w.document.querySelectorAll('#settings .themechip');
+ok(chips.length===5 && [...chips].map(c=>c.dataset.t).join(',')==='oat,matcha,lavanda,golden,nocturno', '5 chips de tema en Ajustes, en orden');
+ok(w.document.querySelectorAll('#settings .themechip svg.tc-moon').length===1 &&
+   !!w.document.querySelector('#settings .themechip[data-t="nocturno"] svg.tc-moon'), 'lunita SVG solo en Nocturno');
+ok(!w.document.querySelector('#settings .themechips').innerHTML.includes('🌙'), 'cero emoji de luna');
+ok(w.document.querySelectorAll('#settings .wk-chip').length===7, 'selector de inicio de semana: 7 días');
+ok(/Cerrar sesión|Log out/.test((w.document.querySelector('#settings .set-cuenta')||{}).textContent||''), 'cuenta (cerrar sesión + borrar) en Ajustes');
 
 // ---------- rachas amables + florecita ----------
 const iso=x=>x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');
@@ -195,8 +201,16 @@ for(const [name,hex] of Object.entries(CANVAS)){
 // ---------- fechas: semana lunes→domingo + invariantes ----------
 {
   const isoL = x => x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');
-  ok(w.__t.i18n().es.dayHeaders[0]==='L' && w.__t.i18n().es.dayHeaders[6]==='D', 'ES: semana L…D (lunes a domingo)');
-  ok(w.__t.i18n().en.dayHeaders[0]==='M' && w.__t.i18n().en.dayHeaders[6]==='Su', 'EN: semana M…Su (Monday to Sunday)');
+  ok(w.computeDayHeaders()[0]==='L' && w.computeDayHeaders()[6]==='D', 'ES por defecto: la semana corre L…D (lunes)');
+  // configurable first day of week
+  const wfd = makeDom();
+  wfd.setFirstDay(6); // sábado
+  ok(wfd.weekStart(new Date(2026,10,18)).getDay()===6, 'firstDay=sábado → weekStart cae en sábado');
+  ok(wfd.computeDayHeaders()[0]==='S' && wfd.computeDayHeaders()[6]==='V', 'firstDay=sábado → encabezados S…V');
+  wfd.setFirstDay(0); // domingo
+  ok(wfd.weekStart(new Date(2026,10,18)).getDay()===0, 'firstDay=domingo → weekStart cae en domingo');
+  wfd.setFirstDay(1); // de vuelta a lunes
+  ok(wfd.weekStart(new Date(2026,10,18)).getDay()===1, 'firstDay=lunes → weekStart cae en lunes');
   // weekStart siempre cae en lunes, 800 días seguidos (cruza meses, años y DST)
   let allMon=true, allWithin=true;
   const base=new Date(2025,0,1);
