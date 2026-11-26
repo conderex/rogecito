@@ -2500,7 +2500,7 @@ function renderSettings(){
   // Apariencia (themes)
   const sTheme = el('div','set-sec');
   sTheme.appendChild(el('p','count-title', tr('theme_title')));
-  const tcard = el('div','set-card');
+  const tcard = el('div');
   const trow = el('div','themechips');
   trow.innerHTML = THEMES.map(t => {
     const [bg, dot] = THEME_SWATCH[t];
@@ -2534,7 +2534,7 @@ function renderSettings(){
   // Cuenta
   const sAcc = el('div','set-sec');
   sAcc.appendChild(el('p','count-title', tr('account_title')));
-  const acard = el('div','set-card set-cuenta');
+  const acard = el('div','set-cuenta');
   acard.appendChild(tbtn(tr('logout_btn'), null, ()=> onLogout()));
   acard.appendChild(el('p','dz-note', tr('delete_note')));
   acard.appendChild(tbtn(tr('delete_account'), 'dangerbtn', ()=> deleteAccount()));
