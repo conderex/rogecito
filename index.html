@@ -1477,7 +1477,10 @@ const demoState = DEMO_SEED.map(r => r.map(Boolean));
 function renderDemo(){
   const g = document.getElementById('demoGrid');
   if(!g) return;
-  const days = (typeof DAY_HEADERS !== 'undefined' && DAY_HEADERS) ? DAY_HEADERS : ['L','Ma','Mi','J','V','S','D'];
+  // The demo pattern is Monday-oriented, so label it Monday-first regardless of the
+  // viewer's chosen week start (the demo is decorative and never touches real data).
+  const dn = (typeof I18N !== 'undefined' && I18N[LANG] && I18N[LANG].dayNames) ? I18N[LANG].dayNames : ['D','L','Ma','Mi','J','V','S'];
+  const days = Array.from({length:7}, (_,i)=> dn[(1+i)%7]);
   const subs = [tr('demo_m'), tr('demo_n')];
   let html = '<span></span>' + days.map(d => `<span class="demo-dh">${esc(d)}</span>`).join('');
   demoState.forEach((row, r) => {
@@ -1668,7 +1671,7 @@ function setFirstDay(n){
     if(state.tab === 'insights') renderInsights();
   }
 }
-// 7 Date objects Thu..Wed for the displayed week (offset in weeks from current)
+// 7 Date objects for the displayed week, starting at weekStart() (honors firstDay)
 function weekDates(offset){
   const start = addDays(weekStart(startOfToday()), offset*7);
   return Array.from({length:7}, (_,i)=> addDays(start, i));
