@@ -2528,7 +2528,10 @@ function renderSettings(){
     b.type='button';
     b.setAttribute('aria-label', full[i]);
     b.setAttribute('aria-pressed', firstDay===i ? 'true':'false');
-    b.addEventListener('click', ()=>{ setFirstDay(i); renderSettings(); });
+    b.addEventListener('click', ()=>{
+      setFirstDay(i);
+      grid.querySelectorAll('.wk-chip').forEach((c,ci)=>{ const on = ci===i; c.classList.toggle('on', on); c.setAttribute('aria-pressed', on?'true':'false'); });
+    });
     grid.appendChild(b);
   }
   sWeek.appendChild(grid);
